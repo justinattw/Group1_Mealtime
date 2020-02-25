@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}CSRF Error{% endblock %}
+{% block content %}
+    <h1>Access Error</h1>
+    <p>{{ reason }}</p>
+    <p>You were directed to this site by another site or your token is not valid. <a href="{{ url_for('main.index') }}">Go to our homepage.</a>.</p>
+{% endblock content %}
