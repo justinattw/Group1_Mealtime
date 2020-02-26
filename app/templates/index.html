@@ -5,4 +5,10 @@
 {# Add the content for this page #}
 {% block content %}
     <h1>Welcome {{ name }}</h1>
+
+    <form class="form-inline ml-auto" action="search" method="post">
+        <input class="form-control" type="search" placeholder="Enter student name" aria-label="Search"
+               name="search_term">
+        <button class="btn btn-primary btn-outline-light" type="submit">Search</button>
+    </form>
 {% endblock %}
