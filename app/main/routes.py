@@ -26,11 +26,11 @@ def index(name=""):
     return render_template('index.html', name=name)
 
 
-@bp_main.route('/courses', methods=['GET'])
-def courses():
+@bp_main.route('/recipes', methods=['GET'])
+def recipes():
     courses = Course.query.join(Teacher).with_entities(Course.course_code, Course.name,
                                                        Teacher.name.label('teacher_name')).all()
-    return render_template("courses.html", courses=courses)
+    return render_template("recipes.html", courses=courses)
 
 
 @bp_main.route('/search', methods=['POST', 'GET'])
