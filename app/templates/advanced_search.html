@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{# Add the title for this page #}
+{% block title %}Advanced Search{% endblock %}
+{# Add the content for this page #}
+{% block content %}
+    {% from "_formhelpers.html" import render_field %}
+    <form method=post novalidate>
+        {{ form.csrf_token }}
+        <dl>
+            {{ render_field(form.title, class='form-control') }}
+            {{ render_field(form.name, class='form-control') }}
+            {{ render_field(form.role, class='form-control') }}
+            {{ render_field(form.uni_id, class='form-control') }}
+            {{ render_field(form.email, class='form-control') }}
+            {{ render_field(form.password, class='form-control') }}
+            {{ render_field(form.confirm, class='form-control') }}
+        </dl>
+        <br>
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+{% endblock %}
