@@ -12,7 +12,8 @@ DIET_CHOICES = [('classic', 'Classic'),
                 ('pescatarian', 'Pescatarian'),
                 ('vegan', 'Vegan')]
 
-ALLERGY_CHOICES = [()]
+ALLERGY_CHOICES = [('', ''),
+                   ('')]
 
 class SearchRecipes(FlaskForm):
     search_term = StringField('Search')
