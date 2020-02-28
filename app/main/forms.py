@@ -7,6 +7,18 @@ from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 from app import db
 from app.models import Student, User, Teacher
 
+DIET_CHOICES = [('classic', 'Classic'),
+                ('vegetarian', 'Vegetarian'),
+                ('pescatarian', 'Pescatarian'),
+                ('vegan', 'Vegan')]
+
+ALLERGY_CHOICES = [()]
+
+class SearchRecipes(FlaskForm):
+    search_term = StringField('Search')
+    diet_type = SelectField('Diet type', choices=DIET_CHOICES)
+    allergies =
+
 
 class SignupForm(FlaskForm):
     title = SelectField('Title', choices=[('mr', 'Mr'), ('mrs', 'Mrs'), ('dr', 'Dr'), ('prof', 'Prof')])
@@ -25,9 +37,4 @@ class SignupForm(FlaskForm):
         # student = Student.query.filter_by(student_ref=id_value.data).first()
         if results is not None:
             raise ValidationError('An account is already registered for that university ID')
-
-
-class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
