@@ -51,6 +51,28 @@ def search():
     else:
         return redirect(url_for('main.index'))
 
+    # if request.method == 'POST':
+    #     term = request.form['search_term']
+    #     if term == "":
+    #         flash("Enter a recipe to search for")
+    #         return redirect('/')
+    #
+    #     results = Mealplans.query.join(MealplanRecipes).join(Track).with_entities(
+    #         Artist.Name.label("ArtistName"),
+    #         Album.Title,
+    #         Track.Name.label("TrackName")
+    #     ).filter(or_(Artist.Name.contains(term),  # or_ filter to search term for artist, album and track
+    #                  Album.Title.contains(term),
+    #                  Track.Name.contains(term)
+    #                  )).all()
+    #
+    #     if not results:
+    #         flash("No tracks found.")
+    #         return redirect('/')
+    #     return render_template('search_results.html', results=results)
+    # else:
+    #     return redirect(url_for('main.index'))
+
 
 @bp_main.route('/delete_cookie')
 def delete_cookie():
@@ -63,3 +85,8 @@ def delete_cookie():
 def show_student(name):
     user = Student.query.filter_by(name=name).first_or_404(description='There is no user {}'.format(name))
     return render_template('show_student.html', user=user)
+
+
+# Mealplans route, query for mealplans based on logged in user_id,
+# @bp_main.route('/mealplans')
+# def mealplans(name):

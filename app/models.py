@@ -116,20 +116,18 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 # class UserAllergies(db.Model):
 #     # Do we actually need the primary id? we could just use user_id
 #     user_allergies_id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-#     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False
-#                         )
-#     shellfish_free = db.Column(db.Boolean, nullable=False, default=False)
-#     fish_free = db.Column(db.Boolean, nullable=False, default=False)
-#     gluten_free = db.Column(db.Boolean, nullable=False, default=False)
-#     dairy_free = db.Column(db.Boolean, nullable=False, default=False)
-#     peanut_free = db.Column(db.Boolean, nullable=False, default=False)
-#     soy_free = db.Column(db.Boolean, nullable=False, default=False)
-#     egg_free = db.Column(db.Boolean, nullable=False, default=False)
-#     sesame_free = db.Column(db.Boolean, nullable=False, default=False)
-#     mustard_free = db.Column(db.Boolean, nullable=False, default=False)
+#     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+#     allergy_id = db.Column(db.Integer, db.ForeignKey(Allergies.allergy_id), nullable=False)
 #
 #     def __repr__(self):
-#         return f'<User Allergies for user {self.user_id}>'
+#         return f'<User allergy {self.allergy_id} for user {self.user_id}>'
+#
+# class Allergies(db.Model):
+#     allergy_id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+#     allergy = db.Column(db.Text, nullable=False)
+#
+#     def __repr__(self):
+#         return f'<Allergy {self.allergy_id}>'
 #
 #
 # class Mealplans(db.Model):
@@ -150,7 +148,7 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #     mealplan_id = db.Column(db.Integer, db.ForeignKey(Mealplans.mealplan_id), primary_key=True, nullable=False)
 #     recipe_id = db.Column(db.Integer, db.ForeignKey(Users.id), primary_key=True, nullable=False)
 #
-#     servings = db.Column(db.Integer, default=2)
+#     selected_servings = db.Column(db.Integer, default=2)
 #
 #     def __repr__(self):
 #         return f'<Mealplan {self.mealplan_id} recipe {self.recipe_id}>'
@@ -159,8 +157,12 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 # class Recipes(db.Model):
 #     recipe_id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
 #
-#     recipe_name = db.Column(db.Text, nullable=False)
-#     recipe_photo = db.Column(db.Text)
+#     name = db.Column(db.Text, nullable=False)
+#     photo = db.Column(db.Text)
+#     serves = db.Column(db.Integer)
+#     prep_time = db.Column(db.Integer)
+#     cooking_time = db.Column(db.Integer)
+#     total_time = db.Column(db.Integer)
 #
 #     def __repr__(self):
 #         return f'<Recipe {self.recipe_id}, name {self.recipe_name}>'

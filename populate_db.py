@@ -9,6 +9,10 @@ def populate_db():
     """
 
     if not User.query.first():
+        # Example user for mealtime
+        # u1 = User(first_name="John", last_name="Wayne", email="johnwayne@googlemail.com", password="")
+        # u2 = User(first_name="Thomas", last_name="The Tank Engine", email="thomas@bbc.co.uk", password="")
+
         s1 = Student(email="cs1234567@ucl.ac.uk", password="cs1234567", student_ref="CS1234567", name="Ahmet Roth")
         s2 = Student(email="cs1234568@ucl.ac.uk", password="cs1234568", user_type="student", student_ref="CS1234568", name="Elsie-Rose Kent")
         s3 = Student(email="cs1234569@ucl.ac.uk", password="cs1234569", user_type="student", student_ref="CS1234569", name="Willem Bull")
