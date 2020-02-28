@@ -12,10 +12,18 @@ DIET_CHOICES = [('classic', 'Classic'),
                 ('pescatarian', 'Pescatarian'),
                 ('vegan', 'Vegan')]
 
-ALLERGY_CHOICES = [('', ''),
-                   ('')]
 
-class SearchRecipes(FlaskForm):
+class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
-    allergies =
+    celery = BooleanField('Celery')
+    gluten = BooleanField('Gluten')
+    seafood = BooleanField('Seafood')
+    eggs = BooleanField('Eggs')
+    lupin = BooleanField('Lupin')
+    mustard = BooleanField('Mustard')
+    tree_nuts = BooleanField('Tree nuts')
+    peanuts = BooleanField('Peanuts')
+    sesame_seeds = BooleanField('Sesame seeds')
+    soybeans = BooleanField('Soybeans')
+    sulphur = BooleanField('Sulphur and sulphites')

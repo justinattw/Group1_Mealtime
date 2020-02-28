@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import with_polymorphic
 
 from app import db
+from app.main.forms import AdvSearchRecipes
 from app.models import Course, Student, Teacher, User
 
 bp_main = Blueprint('main', __name__)
@@ -22,7 +23,7 @@ def index(name=""):
     if 'name' in request.cookies:
         name = request.cookies.get('name')
     if 'name' in session:
-        name= escape(session['name'])
+        name = escape(session['name'])
     return render_template('index.html', name=name)
 
 
@@ -53,6 +54,30 @@ def search():
         return redirect(url_for('main.index'))
 
 
+@bp_main.route('/advanced_search', methods=['POST', 'GET'])
+def adv_search():
+    form = AdvSearchRecipes()
+
+    if request.method == 'POST':
+        term = request.form['search_term']
+        if term == "":
+            flash("Enter a recipe to search for")
+            return redirect('/')
+        # results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term))
+        users = with_polymorphic(User, [Student, Teacher])
+        results = db.session.query(users).filter(
+            or_(users.Student.name.contains(term), users.Teacher.name.contains(term))).all()
+        # results = Student.query.filter(Student.email.contains(term)).all()
+        if not results:
+            flash("No recipes found.")
+            return redirect('/')
+        return render_template('search_results.html', results=results)
+    else:
+        return redirect(url_for('main.index'))
+
+    return render_template('advanced_search.html', form=form)
+
+
 @bp_main.route('/delete_cookie')
 def delete_cookie():
     response = make_response(redirect(url_for('main.index')))
@@ -64,7 +89,6 @@ def delete_cookie():
 def show_student(name):
     user = Student.query.filter_by(name=name).first_or_404(description='There is no user {}'.format(name))
     return render_template('show_student.html', user=user)
-
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
