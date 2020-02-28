@@ -38,40 +38,19 @@ def search():
     if request.method == 'POST':
         term = request.form['search_term']
         if term == "":
-            flash("Enter a name to search for")
+            flash("Enter a recipe to search for")
             return redirect('/')
+        # results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term))
         users = with_polymorphic(User, [Student, Teacher])
         results = db.session.query(users).filter(
             or_(users.Student.name.contains(term), users.Teacher.name.contains(term))).all()
         # results = Student.query.filter(Student.email.contains(term)).all()
         if not results:
-            flash("No students found with that name.")
+            flash("No recipes found.")
             return redirect('/')
         return render_template('search_results.html', results=results)
     else:
         return redirect(url_for('main.index'))
-
-    # if request.method == 'POST':
-    #     term = request.form['search_term']
-    #     if term == "":
-    #         flash("Enter a recipe to search for")
-    #         return redirect('/')
-    #
-    #     results = Mealplans.query.join(MealplanRecipes).join(Track).with_entities(
-    #         Artist.Name.label("ArtistName"),
-    #         Album.Title,
-    #         Track.Name.label("TrackName")
-    #     ).filter(or_(Artist.Name.contains(term),  # or_ filter to search term for artist, album and track
-    #                  Album.Title.contains(term),
-    #                  Track.Name.contains(term)
-    #                  )).all()
-    #
-    #     if not results:
-    #         flash("No tracks found.")
-    #         return redirect('/')
-    #     return render_template('search_results.html', results=results)
-    # else:
-    #     return redirect(url_for('main.index'))
 
 
 @bp_main.route('/delete_cookie')

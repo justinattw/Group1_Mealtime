@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% from "_formhelpers.html" import render_field %}
 {% block title %}Login{% endblock %}
+{% from "_formhelpers.html" import render_field %}
 {% block content %}
 <form method="post" novalidate>
     {{ form.csrf_token }}
