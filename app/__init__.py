@@ -32,7 +32,7 @@ def create_app(config_class=DevConfig):
     from app.models import Users, DietTypes, UserDietPreferences, Allergies, UserAllergies, MealPlans, MealPlanRecipes, Recipes, RecipeIngredients, NutritionValues, RecipeInstructions, RecipeAllergies, RecipeDietTypes
     with app.app_context():
         db.create_all()
-        populate_db()
+        # populate_db()
 
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, internal_server_error)
