@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 
 from app import db
 from app.models import Student, User, Teacher
+# from app.models import User
 
 
 class SignupForm(FlaskForm):
@@ -38,8 +39,7 @@ class SignupForm(FlaskForm):
 #     confirm = PasswordField('Repeat Password')
 #
 #     def validate_email(self, email):
-#         users = with_polymorphic(User)
-#         results = db.session.query(users)
+#         results = db.session.query(User).filter(User.email=email.data).first()
 #         if results is not None:
 #             raise ValidationError('An account is already registered with this email.')
 

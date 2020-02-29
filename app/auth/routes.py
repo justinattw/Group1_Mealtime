@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
 from app.models import Course, Student, Teacher, User
+# from app.models import User
 from app.auth.forms import SignupForm, LoginForm
 
 bp_auth = Blueprint('auth', __name__)
