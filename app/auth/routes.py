@@ -17,14 +17,19 @@ def login():
 
     if request.method == 'POST' and form.validate():
         user = User.query.filter_by(email=form.email.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+        if user is None:
+            flash('No account has been registered with this email.')
+            return redirect(url_for('auth.login'))
+
+        if not user.check_password(form.password.data):
+            flash('Incorrect password')
             return redirect(url_for('auth.login'))
 
         from datetime import timedelta
         login_user(user, remember=form.remember_me.data, duration=timedelta(minutes=5))
 
-        flash('Logged in successfully: {}'.format(user.name))
+        flash('Logged in successfully. Welcome, {}'.format(user.name))
+        # flash('Logged in successfully. Welcome, {}'.format(user.first_name))
         next = request.args.get('next')
         if not is_safe_url(next):
             return abort(400)

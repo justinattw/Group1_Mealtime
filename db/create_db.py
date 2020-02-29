@@ -10,25 +10,27 @@ db = sqlite3.connect("mealtime.sqlite", isolation_level=None)
 c = db.cursor()
 
 c.execute("""CREATE TABLE IF NOT EXISTS Recipes (
-                                        recipe_id integer unique NOT NULL PRIMARY KEY,
+                                        recipe_id integer unique NOT NULL,
                                         recipe_name varchar(40) NOT NULL,
-                                        photo varchar(40)
+                                        photo varchar(40),
                                         serves integer,
                                         cook_time integer,
                                         prep_time integer,
-                                        total_time integer
+                                        total_time integer,
+                                        PRIMARY KEY (recipe_id)
                                         );""")
 
 # TODO: Add amount and unit to recipe ingredients
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeIngredients (
-                                        recipe_ingredient_id integer unique NOT NULL PRIMARY KEY,
+                                        recipe_ingredient_id integer unique NOT NULL,
                                         recipe_id integer NOT NULL,
                                         ingredient varchar(40),
-                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id)
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        PRIMARY KEY (recipe_ingredient_id)
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS NutritionValues (
-                                        nutrition_value_id integer PRIMARY KEY,
+                                        nutrition_value_id integer,
                                         recipe_id integer NOT NULL,
                                         calories float, 
                                         fats float,
@@ -38,15 +40,17 @@ c.execute("""CREATE TABLE IF NOT EXISTS NutritionValues (
                                         fibres float,
                                         proteins float,
                                         salts float,
-                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id)
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        PRIMARY KEY (nutrition_value_id)
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeInstructions (
-                                        recipe_instruction_id integer unique NOT NULL PRIMARY KEY,
+                                        recipe_instruction_id integer NOT NULL,
                                         recipe_id integer NOT NULL,
-                                        step_num int NOT NULL,
+                                        step_num integer NOT NULL,
                                         step_description varchar(40) NOT NULL,
-                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id)
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        PRIMARY KEY (recipe_instruction_id, step_num)
                                         );""")
 
 URL = "https://www.bbcgoodfood.com/recipes/category/healthy"
@@ -133,6 +137,7 @@ for url in second_urls:
         if len(three) > 2:
             print('THREE!')
             final = ''
+        # c.execute(queryinstructions, (int(recipestepsindex), int(recipeidindex), int(stepnum), str(final)))
         c.execute(queryinstructions, (int(recipestepsindex), int(recipeidindex), int(stepnum), str(final)))
         recipestepsindex = recipestepsindex + 1
         stepnum = stepnum + 1
@@ -350,18 +355,19 @@ print(nutritionalinfo)
 
 # method is mostly working (except for multiple links in methods)
 
-
 c.execute("""CREATE TABLE IF NOT EXISTS Users (
-                                        id integer unique NOT NULL PRIMARY KEY,
+                                        id integer unique NOT NULL,
                                         first_name varchar(40) NOT NULL,
                                         last_name varchar(40) NOT NULL,
                                         email varchar(40) NOT NULL,
                                         password varchar(40) NOT NULL,
+                                        PRIMARY KEY (id)
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS DietTypes (
-                                        diet_type_id integer unique NOT NULL PRIMARY KEY,
-                                        diet_name varchar(40), 
+                                        diet_type_id integer unique NOT NULL,
+                                        diet_name varchar(40),
+                                        PRIMARY KEY (diet_type_id)
                                         );""")
 
 sql = "INSERT INTO DietTypes (diet_type_id, diet_name) VALUES (?, ?)"
@@ -372,16 +378,18 @@ values = [(1, 'classic'),
 c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS UserDietPreferences (
-                                        user_id integer NOT NULL PRIMARY KEY,
-                                        diet_type_id integer NOT NULL PRIMARY KEY default=1,
+                                        user_id integer NOT NULL,
+                                        diet_type_id integer NOT NULL default 1,
                                         FOREIGN KEY (user_id) References Users (id),
-                                        FOREIGN KEY (diet_type_id) References DietTypes (diet_type_id)
+                                        FOREIGN KEY (diet_type_id) References DietTypes (diet_type_id),
+                                        PRIMARY KEY (user_id, diet_type_id)
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS Allergies (
-                                        allergy_id integer unique NOT NULL PRIMARY KEY,
-                                        allergy_name varchar(40) NOT NULL 
-                                        );"""
+                                        allergy_id integer unique NOT NULL,
+                                        allergy_name varchar(40) NOT NULL,
+                                        PRIMARY KEY (allergy_id)
+                                        );""")
 
 sql = "INSERT INTO Allergies (allergy_id, allergy_name) VALUES (?, ?)"
 values = [(1, 'celery_free'),
@@ -398,39 +406,44 @@ values = [(1, 'celery_free'),
 c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS UserAllergies (
-                                        user_id integer NOT NULL PRIMARY KEY,
-                                        allergy_id integer NOT NULL PRIMARY KEY,
-                                        FOREIGN KEY user_id References Users (id),
-                                        FOREIGN KEY allergy_id References Allergies (allergy_id) 
+                                        user_id integer NOT NULL,
+                                        allergy_id integer NOT NULL,
+                                        FOREIGN KEY (user_id) References Users (id),
+                                        FOREIGN KEY (allergy_id) References Allergies (allergy_id), 
+                                        PRIMARY KEY (user_id, allergy_id)
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS MealPlans (
-                                        mealplan_id integer unique NOT NULL PRIMARY KEY,
+                                        mealplan_id integer unique NOT NULL,
                                         user_id integer NOT NULL,
                                         created_at varchar(40),
-                                        FOREIGN KEY (user_id) References Users (id) 
+                                        FOREIGN KEY (user_id) References Users (id),
+                                        PRIMARY KEY (mealplan_id) 
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS MealPlanRecipes (
-                                        mealplan_id integer NOT NULL PRIMARY KEY,
-                                        recipe_id integer NOT NULL PRIMARY KEY,
-                                        selected_servings integer default=2,
-                                        FOREIGN KEY mealplan_id References MealPlans (mealplan_id),
-                                        FOREIGN KEY recipe_id References Recipes (recipe_id) 
+                                        mealplan_id integer NOT NULL,
+                                        recipe_id integer NOT NULL,
+                                        selected_servings integer default 2,
+                                        FOREIGN KEY (mealplan_id) References MealPlans (mealplan_id),
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        PRIMARY KEY (mealplan_id, recipe_id) 
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeDietTypes (
-                                        recipe_id integer NOT NULL PRIMARY KEY UNIQUE,
-                                        diet_type_id integer NOT NULL PRIMARY KEY,
-                                        FOREIGN KEY recipe_id References Recipes (recipe_id),
-                                        FOREIGN KEY diet_type_id References DietTypes (diet_type_id) 
+                                        recipe_id integer NOT NULL UNIQUE,
+                                        diet_type_id integer NOT NULL,
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        FOREIGN KEY (diet_type_id) References DietTypes (diet_type_id),
+                                        PRIMARY KEY (recipe_id, diet_type_id) 
                                         );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeAllergies (
-                                        recipe_id integer NOT NULL PRIMARY KEY,
-                                        allergy_id integer NOT NULL PRIMARY KEY,
-                                        FOREIGN KEY recipe_id References Recipes (recipe_id),
-                                        FOREIGN KEY allergy_id References Allergies (allergy_id) 
+                                        recipe_id integer NOT NULL,
+                                        allergy_id integer NOT NULL,
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        FOREIGN KEY (allergy_id) References Allergies (allergy_id),
+                                        PRIMARY KEY (recipe_id, allergy_id) 
                                         );""")
 
 # c.execute("""CREATE TABLE IF NOT EXISTS Nutrition (
@@ -447,5 +460,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS RecipeAllergies (
 #                                         FOREIGN KEY allergy_id References Allergies (allergy_id)
 #                                         );""")
 
-c.close()
+db.commit
+
+db.close()
 

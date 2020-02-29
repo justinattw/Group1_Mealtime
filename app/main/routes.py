@@ -54,28 +54,21 @@ def search():
         return redirect(url_for('main.index'))
 
 
-@bp_main.route('/advanced_search', methods=['POST', 'GET'])
-def adv_search():
-    form = AdvSearchRecipes()
-
-    if request.method == 'POST':
-        term = request.form['search_term']
-        if term == "":
-            flash("Enter a recipe to search for")
-            return redirect('/')
-        # results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term))
-        users = with_polymorphic(User, [Student, Teacher])
-        results = db.session.query(users).filter(
-            or_(users.Student.name.contains(term), users.Teacher.name.contains(term))).all()
-        # results = Student.query.filter(Student.email.contains(term)).all()
-        if not results:
-            flash("No recipes found.")
-            return redirect('/')
-        return render_template('search_results.html', results=results)
-    else:
-        return redirect(url_for('main.index'))
-
-    return render_template('advanced_search.html', form=form)
+# @bp_main.route('/advanced_search', methods=['POST', 'GET'])
+# def adv_search():
+#     form = AdvSearchRecipes()
+#
+#     search_term = form.search_term.data
+#
+#     results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(search_term))
+#         if not results:
+#             flash("No recipes found.")
+#             return redirect('/')
+#         return render_template('search_results.html', results=results)
+#     else:
+#         return redirect(url_for('main.index'))
+#
+#     return render_template('advanced_search.html', form=form)
 
 
 @bp_main.route('/delete_cookie')
@@ -88,7 +81,7 @@ def delete_cookie():
 @bp_main.route('/student/<name>')
 def show_student(name):
     user = Student.query.filter_by(name=name).first_or_404(description='There is no user {}'.format(name))
-    return render_template('show_student.html', user=user)
+    return render_template('show_user.html', user=user)
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
