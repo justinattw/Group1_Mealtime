@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 
 from app import db
 # from app.models import Student, User, Teacher
-from app.models import User
+from app.models import Users
 
 
 # class SignupForm(FlaskForm):

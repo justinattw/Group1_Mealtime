@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
 # from app.models import Course, Student, Teacher, User
-from app.models import User
+from app.models import Users
 from app.auth.forms import SignupForm, LoginForm
 
 bp_auth = Blueprint('auth', __name__)
@@ -16,7 +16,7 @@ def login():
     form = LoginForm()
 
     if request.method == 'POST' and form.validate():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
             flash('No account has been registered with this email.')
             return redirect(url_for('auth.login'))
@@ -113,7 +113,7 @@ def get_safe_redirect():
 def load_user(user_id):
     """Check if user is logged-in on every page load."""
     if user_id is not None:
-        return User.query.get(user_id)
+        return Users.query.get(user_id)
     return None
 
 

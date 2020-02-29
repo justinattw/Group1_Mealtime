@@ -29,7 +29,7 @@ def create_app(config_class=DevConfig):
 
     from populate_db import populate_db
     # from app.models import Teacher, Student, Course, Grade
-    from app.models import User, DietTypes, UserDietPreferences, Allergies, UserAllergies, MealPlans, MealPlanRecipes, Recipes, RecipeIngredients, NutritionValues, RecipeInstructions, RecipeAllergies, RecipeDietTypes
+    from app.models import Users, DietTypes, UserDietPreferences, Allergies, UserAllergies, MealPlans, MealPlanRecipes, Recipes, RecipeIngredients, NutritionValues, RecipeInstructions, RecipeAllergies, RecipeDietTypes
     with app.app_context():
         db.create_all()
         populate_db()

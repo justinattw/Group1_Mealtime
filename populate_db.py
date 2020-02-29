@@ -1,7 +1,7 @@
 from app import db
 # from app.models import Student, Teacher, Course, Grade, User
 
-from app.models import User
+from app.models import Users
 
 def populate_db():
     """Populates the cscourses.db database if it is empty. The Flask app needs to be running before you execute this code.
@@ -9,7 +9,7 @@ def populate_db():
     :return: None
     """
 
-    if not User.query.first():
+    if not Users.query.first():
         pass
         # Example user for mealtime
         # u1 = User(first_name="John", last_name="Wayne", email="johnwayne@googlemail.com", password="")

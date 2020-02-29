@@ -8,7 +8,7 @@ from sqlalchemy.orm import with_polymorphic
 from app import db
 from app.main.forms import AdvSearchRecipes
 # from app.models import Course, Student, Teacher, User
-from app.models import User, Recipes
+from app.models import Users, Recipes
 
 bp_main = Blueprint('main', __name__)
 
