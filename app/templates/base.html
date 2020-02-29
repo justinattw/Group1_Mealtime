@@ -10,21 +10,16 @@
 <body>
 <nav class="navbar navbar-expand bg-primary navbar-dark">
 
-    <a class="navbar-brand" href="{{ url_for('main.index') }}">MealTime</a>
+    {#    <a class="navbar-brand" href="{{ url_for('main.index') }}">MealTime</a>#}
+
+    <a class="navbar-brand" href="{{ url_for('main.index') }}">
+        <img src="{{ url_for('static', filename='img/logos/mealtime_logo.png') }}" width="35" height="35"
+             alt="Mealtime Logo">
+    </a>
 
     <ul class="navbar-nav">
-{#      We don't need a home button, the logo (navbar-brand) can do this#}
-{#        <li class="nav-item">#}
-{#            <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>#}
-{#        </li>#}
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('main.recipes') }}">Recipes</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Meal Plans</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Auto Chef</a>
         </li>
         {# toolbar, If user not logged in then log in, else log out       #}
         {% if current_user.is_anonymous %}
@@ -36,7 +31,14 @@
             </li>
         {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a></li>
+                <a class="nav-link" href="#">Meal Plans</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Auto Chef</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a>
+            </li>
         {% endif %}
     </ul>
 </nav>

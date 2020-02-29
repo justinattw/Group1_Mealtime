@@ -6,24 +6,24 @@ from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 
 from app import db
 from app.models import Student, User, Teacher
+# from app.models import Recipes, RecipeDietTypes, RecipeAllergies
 
 DIET_CHOICES = [('classic', 'Classic'),
-                ('vegetarian', 'Vegetarian'),
                 ('pescatarian', 'Pescatarian'),
+                ('vegetarian', 'Vegetarian'),
                 ('vegan', 'Vegan')]
-
 
 class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
-    celery = BooleanField('Celery')
-    gluten = BooleanField('Gluten')
-    seafood = BooleanField('Seafood')
-    eggs = BooleanField('Eggs')
-    lupin = BooleanField('Lupin')
-    mustard = BooleanField('Mustard')
-    tree_nuts = BooleanField('Tree nuts')
-    peanuts = BooleanField('Peanuts')
-    sesame_seeds = BooleanField('Sesame seeds')
-    soybeans = BooleanField('Soybeans')
-    sulphur = BooleanField('Sulphur and sulphites')
+    celery = BooleanField('Celery-free')
+    gluten = BooleanField('Gluten-free')
+    seafood = BooleanField('Seafood-free')
+    eggs = BooleanField('Eggs-free')
+    lupin = BooleanField('Lupin-free')
+    mustard = BooleanField('Mustard-free')
+    tree_nuts = BooleanField('Tree nuts-free')
+    peanuts = BooleanField('Peanuts-free')
+    sesame_seeds = BooleanField('Sesame seeds-free')
+    soybeans = BooleanField('Soybeans-free')
+    sulphur = BooleanField('Sulphur and sulphites-free')
