@@ -8,7 +8,7 @@ from sqlalchemy.orm import with_polymorphic
 from app import db
 from app.main.forms import AdvSearchRecipes
 # from app.models import Course, Student, Teacher, User
-from app.models import Users, Recipes
+from app.models import Users, Recipes, RecipeIngredients
 
 bp_main = Blueprint('main', __name__)
 
@@ -61,9 +61,6 @@ def search():
             flash("Enter a recipe to search for")
             return redirect('/')
         results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term)).all()
-        # users = with_polymorphic(User, [Student, Teacher])
-        # results = db.session.query(users).filter(
-        #     or_(users.Student.name.contains(term), users.Teacher.name.contains(term))).all()
         if not results:
             flash("No recipes found.")
             return redirect('/')
