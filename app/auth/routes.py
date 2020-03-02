@@ -28,7 +28,6 @@ def login():
         from datetime import timedelta
         login_user(user, remember=form.remember_me.data, duration=timedelta(minutes=5))
 
-        # flash('Logged in successfully. Welcome, {}'.format(user.name))
         flash('Logged in successfully. Welcome, {}'.format(user.first_name))
         next = request.args.get('next')
         if not is_safe_url(next):
@@ -58,6 +57,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
             flash('You are now a registered user!')
+
             # Set cookie and return to main, if successful
             response = make_response(redirect(url_for('main.index')))
             response.set_cookie("name", form.first_name.data)
