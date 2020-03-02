@@ -47,8 +47,9 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            coverage -m unittest discover
-            coverage report
+            python -m unittest discover
+#            coverage -m unittest discover
+#            coverage report
       - store_artifacts:
           path: test-reports
           destination: test-reports
