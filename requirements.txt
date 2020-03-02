@@ -22,4 +22,3 @@ WTForms-Alchemy==0.16.9
 WTForms-Components==0.10.4
 dnspython==1.16.0
 protobuf==3.11.2
-
