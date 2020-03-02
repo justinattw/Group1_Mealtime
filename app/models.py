@@ -8,26 +8,23 @@ MEALTIME DB MODELS.PY
 For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
 """
 
-class Allergies(db.Model):
-    __table__ = db.Model.metadata.tables['Allergies']
+class Users(db.Model):
+    __table__ = db.Model.metadata.tables['Users']
 
 class DietTypes(db.Model):
     __table__ = db.Model.metadata.tables['DietTypes']
 
-class MealPlanRecipes(db.Model):
-    __table__ = db.Model.metadata.tables['MealPlanRecipe']
+class UserDietPreferences(db.Model):
+    __table__ = db.Model.metadata.tables['UserDietPreferences']
 
-class MealPlans(db.Model):
-    __table__ = db.Model.metadata.tables['MealPlans']
+class Allergies(db.Model):
+    __table__ = db.Model.metadata.tables['Allergies']
 
-class NutritionValues(db.Model):
-    __table__ = db.Model.metadata.tables['NutritionValues']
+class UserAllergies(db.Model):
+    __table__ = db.Model.metadata.tables['UserAllergies']
 
-class RecipeAllergies(db.Model):
-    __table__ = db.Model.metadata.tables['RecipeAllergies']
-
-class RecipeDietTypes(db.Model):
-    __table__ = db.Model.metadata.tables['RecipeDietTypes']
+class Recipes(db.Model):
+    __table__ = db.Model.metadata.tables['Recipes']
 
 class RecipeIngredients(db.Model):
     __table__ = db.Model.metadata.tables['RecipeIngredients']
@@ -35,17 +32,32 @@ class RecipeIngredients(db.Model):
 class RecipeInstructions(db.Model):
     __table__ = db.Model.metadata.tables['RecipeInstructions']
 
-class Recipes(db.Model):
-    __table__ = db.Model.metadata.tables['Recipes']
+class NutritionValues(db.Model):
+    __table__ = db.Model.metadata.tables['NutritionValues']
 
-class UserAllergies(db.Model):
-    __table__ = db.Model.metadata.tables['UserAllergies']
+class MealPlans(db.Model):
+    __table__ = db.Model.metadata.tables['MealPlans']
 
-class UserDietPreferences(db.Model):
-    __table__ = db.Model.metadata.tables['UserDietPreferences']
+class MealPlanRecipes(db.Model):
+    __table__ = db.Model.metadata.tables['MealPlanRecipe']
 
-class Users(db.Model):
-    __table__ = db.Model.metadata.tables['Users']
+class RecipeAllergies(db.Model):
+    __table__ = db.Model.metadata.tables['RecipeAllergies']
+
+class RecipeDietTypes(db.Model):
+    __table__ = db.Model.metadata.tables['RecipeDietTypes']
+
+
+
+
+
+
+
+
+
+
+
+
 
 # class Users(UserMixin, db.Model):
 #     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
