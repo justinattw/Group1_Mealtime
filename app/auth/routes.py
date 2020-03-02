@@ -4,8 +4,8 @@ from flask_login import login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
-from app.models import Course, Student, Teacher, User
-# from app.models import User
+# from app.models import Course, Student, Teacher, User
+from app.models import Users
 from app.auth.forms import SignupForm, LoginForm
 
 bp_auth = Blueprint('auth', __name__)
@@ -16,7 +16,7 @@ def login():
     form = LoginForm()
 
     if request.method == 'POST' and form.validate():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
             flash('No account has been registered with this email.')
             return redirect(url_for('auth.login'))
@@ -28,8 +28,8 @@ def login():
         from datetime import timedelta
         login_user(user, remember=form.remember_me.data, duration=timedelta(minutes=5))
 
-        flash('Logged in successfully. Welcome, {}'.format(user.name))
-        # flash('Logged in successfully. Welcome, {}'.format(user.first_name))
+        # flash('Logged in successfully. Welcome, {}'.format(user.name))
+        flash('Logged in successfully. Welcome, {}'.format(user.first_name))
         next = request.args.get('next')
         if not is_safe_url(next):
             return abort(400)
@@ -49,25 +49,25 @@ def logout():
 def signup():
     form = SignupForm(request.form)
     if request.method == 'POST' and form.validate():
-        if form.role.data == "student":
-            user = Student(name=form.name.data, email=form.email.data, student_ref=form.uni_id.data)
-        else:
-            user = Teacher(name=form.name.data, title=form.title.data, teacher_ref=form.uni_id.data,
-                           email=form.email.data)
+        user = User(first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    email=form.email.data)
         user.set_password(form.password.data)
+
         try:
             db.session.add(user)
             db.session.commit()
             flash('You are now a registered user!')
             # Set cookie and return to main, if successful
             response = make_response(redirect(url_for('main.index')))
-            response.set_cookie("name", form.name.data)
+            response.set_cookie("name", form.first_name.data)
             return response
         except IntegrityError:
             db.session.rollback()
             flash('ERROR! Unable to register {}. Please check your details are correct and resubmit'.format(
                 form.email.data), 'error')
     return render_template('signup.html', form=form)
+
 
 def is_safe_url(target):
     host_url = urlparse(request.host_url)
@@ -88,7 +88,7 @@ def get_safe_redirect():
 def load_user(user_id):
     """Check if user is logged-in on every page load."""
     if user_id is not None:
-        return User.query.get(user_id)
+        return Users.query.get(user_id)
     return None
 
 

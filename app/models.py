@@ -3,83 +3,59 @@ from flask_login import UserMixin
 
 from app import db
 
-
-class User(UserMixin, db.Model):
-    __tablename__ = "user"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text)
-    email = db.Column(db.Text, unique=True)
-    password = db.Column(db.Text)
-    user_type = db.Column(db.String(10), nullable=False)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "user",
-        "polymorphic_on": user_type
-    }
-
-    def __repr__(self):
-        return "User email %s" % self.email
-
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
-
-
-class Student(User):
-    __tablename__ = 'student'
-    id = db.Column(None, db.ForeignKey('user.id'), primary_key=True)
-    student_ref = db.Column(db.Integer)
-    grades = db.relationship('Grade', backref='students')
-
-    __mapper_args__ = {"polymorphic_identity": "student"}
-
-    def __repr__(self):
-        return '<Student ID: {}, name: {}>'.format(self.student_ref, self.name)
-
-
-class Teacher(User):
-    __tablename__ = 'teacher'
-    id = db.Column(None, db.ForeignKey('user.id'), primary_key=True)
-    teacher_ref = db.Column(db.Text, nullable=False)
-    title = db.Column(db.Text)
-    courses = db.relationship('Course', backref='teachers')
-
-    __mapper_args__ = {"polymorphic_identity": "teacher"}
-
-    def __repr__(self):
-        return '<Teacher {} {}>'.format(self.teacher_ref, self.title, self.name)
-
-
-class Course(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    course_code = db.Column(db.Integer, nullable=False)
-    name = db.Column(db.Text, nullable=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey(Teacher.id), nullable=False)
-    grades = db.relationship('Grade', backref='courses')
-
-    def __repr__(self):
-        return '<Course {}>'.format(self.code, self.name)
-
-
-class Grade(db.Model):
-    student_id = db.Column(db.Integer, db.ForeignKey(Student.id), nullable=False, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey(Course.id), nullable=False, primary_key=True)
-    grade = db.Column(db.Text)
-
-    def __repr__(self):
-        return '<Grade {}>'.format(self.grade)
-
-
-###################################################################################################
 """
-MEALTIME DB MODELS.PY
+Create SQLAlchemy models by referencing the already created mealtime.sqlite database.
 For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
 """
-#
-# class User(UserMixin, db.Model):
-#     __tablename__ = "user"
+
+class Users(db.Model):
+    __table__ = db.Model.metadata.tables['Users']
+
+class DietTypes(db.Model):
+    __table__ = db.Model.metadata.tables['DietTypes']
+
+class UserDietPreferences(db.Model):
+    __table__ = db.Model.metadata.tables['UserDietPreferences']
+
+class Allergies(db.Model):
+    __table__ = db.Model.metadata.tables['Allergies']
+
+class UserAllergies(db.Model):
+    __table__ = db.Model.metadata.tables['UserAllergies']
+
+class Recipes(db.Model):
+    __table__ = db.Model.metadata.tables['Recipes']
+
+class RecipeIngredients(db.Model):
+    __table__ = db.Model.metadata.tables['RecipeIngredients']
+
+class RecipeInstructions(db.Model):
+    __table__ = db.Model.metadata.tables['RecipeInstructions']
+
+class NutritionValues(db.Model):
+    __table__ = db.Model.metadata.tables['NutritionValues']
+
+class MealPlans(db.Model):
+    __table__ = db.Model.metadata.tables['MealPlans']
+
+class MealPlanRecipes(db.Model):
+    __table__ = db.Model.metadata.tables['MealPlanRecipes']
+
+class RecipeAllergies(db.Model):
+    __table__ = db.Model.metadata.tables['RecipeAllergies']
+
+class RecipeDietTypes(db.Model):
+    __table__ = db.Model.metadata.tables['RecipeDietTypes']
+
+
+
+
+"""
+The code beneath is deprecated code that would create an SQLite database using the SQLAlchemy method. We don't do this,
+as we create the db separately.
+"""
+
+# class Users(UserMixin, db.Model):
 #     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
 #
 #     first_name = db.Column(db.Text)
@@ -87,15 +63,9 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #     email = db.Column(db.Text, unique=True, nullable=False)
 #     password = db.Column(db.Text)
 #
-#     diet_preference = db.relationship('UserDietPreferences', backref='users')
-#     allergies = db.relationship('UserAllergies', backref='users')
-#     mealplans = db.relationship('MealPlans', backref='users')
-#
-#     # Don't think we need this
-#     # __mapper_args__ = {
-#     #     "polymorphic_identity": "user",
-#     #     "polymorphic_on": user_type
-#     # }
+#     # diet_preference = db.relationship('UserDietPreferences', backref='users')
+#     # allergies = db.relationship('UserAllergies', backref='users')
+#     # mealplans = db.relationship('MealPlans', backref='users')
 #
 #     def __repr__(self):
 #         return f'<User id {self.id} email {self.email}>'
@@ -111,14 +81,14 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #     diet_type_id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
 #     diet_name = db.Column(db.Text)
 #
-#     user_diet_preferences = db.relationship('UserDietPreferences', backref='diet_types')
+#     # user_diet_preferences = db.relationship('UserDietPreferences', backref='diet_types')
 #
 #     def __repr__(self):
 #         return f'<Diet type {self.diet_type_id}>'
 #
 #
 # class UserDietPreferences(db.Model):
-#     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True, unique=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey(Users.id), primary_key=True, unique=True)
 #     diet_type_id = db.Column(db.Integer, db.ForeignKey(DietTypes.diet_type_id), primary_key=True)
 #
 #     def __repr__(self):
@@ -129,8 +99,8 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #     allergy_id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
 #     allergy_name = db.Column(db.Text, nullable=False)
 #
-#     user_allergies = db.relationship('UserAllergies', backref='allergies')
-#     recipe_allergies = db.relationship('RecipeAllergies', backref='allergies')
+#     # user_allergies = db.relationship('UserAllergies', backref='allergies')
+#     # recipe_allergies = db.relationship('RecipeAllergies', backref='allergies')
 #
 #     def __repr__(self):
 #         return f'<Allergy {self.allergy_id}>'
@@ -138,7 +108,7 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #
 # class UserAllergies(db.Model):
 #     # Do we actually need the primary id? we could just use user_id
-#     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey(Users.id), primary_key=True)
 #     allergy_id = db.Column(db.Integer, db.ForeignKey(Allergies.allergy_id), primary_key=True)
 #
 #     def __repr__(self):
@@ -147,27 +117,17 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #
 # class MealPlans(db.Model):
 #     mealplan_id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-#     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+#     user_id = db.Column(db.Integer, db.ForeignKey(Users.id), nullable=False)
 #
 #     # what time was the mealplan created at?
 #     # the most recent mealplan is set as active, until user creates another mealplan
 #     # format in yyyy-MM-dd HH:mm:ss. use parameterised query.
 #     created_at = db.Column(db.Text, nullable=False)
 #
-#     mealplan_recipes = db.relationship('MealPlanRecipes', backref='mealplans')
+#     # mealplan_recipes = db.relationship('MealPlanRecipes', backref='mealplans')
 #
 #     def __repr__(self):
 #         return f'<Meal plan {self.mealplan_id}, created by user {self.user_id} at {self.created_at}>'
-#
-#
-# class MealPlanRecipes(db.Model):
-#     mealplan_id = db.Column(db.Integer, db.ForeignKey(MealPlans.mealplan_id), primary_key=True, nullable=False)
-#     recipe_id = db.Column(db.Integer, db.ForeignKey(Users.id), primary_key=True, nullable=False)
-#
-#     selected_servings = db.Column(db.Integer, default=2)
-#
-#     def __repr__(self):
-#         return f'<Mealplan {self.mealplan_id} recipe {self.recipe_id}>'
 #
 #
 # class Recipes(db.Model):
@@ -180,16 +140,26 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 #     prep_time = db.Column(db.Integer)
 #     total_time = db.Column(db.Integer)
 #
-#     recipe_mealplans = db.relationship('MealPlanRecipes', backref='recipes')
-#     ingredients = db.relationship('RecipeIngredients', backref='recipes')
-#     nutrition_values = db.relationship('NutritionValues', backref='recipes')
-#     instructions = db.relationship('RecipeInstructions', backref='recipes')
-#     allergies = db.relationship('RecipeAllergies', backref='recipes')
-#     diet_type = db.relationship('RecipeDietTypes', backref='recipes')
+#     # recipe_mealplans = db.relationship('MealPlanRecipes', backref='recipes')
+#     # ingredients = db.relationship('RecipeIngredients', backref='recipes')
+#     # nutrition_values = db.relationship('NutritionValues', backref='recipes')
+#     # instructions = db.relationship('RecipeInstructions', backref='recipes')
+#     # allergies = db.relationship('RecipeAllergies', backref='recipes')
+#     # diet_type = db.relationship('RecipeDietTypes', backref='recipes')
 #
 #
 #     def __repr__(self):
 #         return f'<Recipe {self.recipe_id}, name {self.recipe_name}>'
+#
+#
+# class MealPlanRecipes(db.Model):
+#     mealplan_id = db.Column(db.Integer, db.ForeignKey(MealPlans.mealplan_id), primary_key=True, nullable=False)
+#     recipe_id = db.Column(db.Integer, db.ForeignKey(Recipes.recipe_id), primary_key=True, nullable=False)
+#
+#     selected_servings = db.Column(db.Integer, default=2)
+#
+#     def __repr__(self):
+#         return f'<Mealplan {self.mealplan_id} recipe {self.recipe_id}>'
 #
 #
 # class RecipeIngredients(db.Model):

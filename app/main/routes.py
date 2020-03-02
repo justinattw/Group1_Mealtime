@@ -7,7 +7,8 @@ from sqlalchemy.orm import with_polymorphic
 
 from app import db
 from app.main.forms import AdvSearchRecipes
-from app.models import Course, Student, Teacher, User
+# from app.models import Course, Student, Teacher, User
+from app.models import Users, Recipes, RecipeIngredients
 
 bp_main = Blueprint('main', __name__)
 
@@ -29,10 +30,8 @@ def index(name=""):
 
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
-    courses = Course.query.join(Teacher).with_entities(Course.course_code, Course.name,
-                                                       Teacher.name.label('teacher_name')).all()
-    return render_template("recipes.html", courses=courses)
-
+    recipes = db.session.query(Recipes).all()
+    return render_template("recipes.html", recipes=recipes)
 
 @bp_main.route('/search', methods=['POST', 'GET'])
 def search():
@@ -41,11 +40,7 @@ def search():
         if term == "":
             flash("Enter a recipe to search for")
             return redirect('/')
-        # results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term))
-        users = with_polymorphic(User, [Student, Teacher])
-        results = db.session.query(users).filter(
-            or_(users.Student.name.contains(term), users.Teacher.name.contains(term))).all()
-        # results = Student.query.filter(Student.email.contains(term)).all()
+        results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term)).all()
         if not results:
             flash("No recipes found.")
             return redirect('/')
@@ -78,9 +73,9 @@ def delete_cookie():
     return response
 
 
-@bp_main.route('/student/<name>')
-def show_student(name):
-    user = Student.query.filter_by(name=name).first_or_404(description='There is no user {}'.format(name))
+@bp_main.route('/user/<name>')
+def show_user(name):
+    user = User.query.filter_by(first_name=name).first_or_404(description='There is no user {}'.format(name))
     return render_template('show_user.html', user=user)
 
 # Mealplans route, query for mealplans based on logged in user_id,

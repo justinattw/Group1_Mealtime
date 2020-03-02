@@ -15,8 +15,7 @@ class Config(object):
 
     # Database config
     CWD = dirname(abspath(__file__))
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'cscourses.sqlite')
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'mealtime.sqlite')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'db/mealtime.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

@@ -1,9 +1,6 @@
-This codebook contains information on what the IDs refer to for DietTypes, Allergies, and Nutritions
+About: This codebook contains information on what the IDs refer to for DietTypes, Allergies, and Nutritions
 
-
-
-
-
+------------------------------------------------------------------------------------------------------------------------
 TABLE DietTypes
 
 diet_type_id    name
@@ -12,25 +9,28 @@ diet_type_id    name
 3               vegetarian
 4               vegan
 
-
-
+------------------------------------------------------------------------------------------------------------------------
 TABLE Allergies
 
 allergy_id      name
-1               peanut_free
-2               fish_free
-3               _free
-4               _free
-5               _free
-6               _free
-7               _free
-8               _free
+1               celery_free
+2               gluten_free
+3               seafood_free
+4               eggs_free
+5               lupin_free
+6               mustard_free
+7               tree_nuts_free
+8               peanuts_free
+9               sesame_seeds_free
+10              soybeans_free
+11              sulphur_sulphites_free
 
-
-
+------------------------------------------------------------------------------------------------------------------------
 # Currently we store all nutrition tags in NutritionValues table. Problem is that this is bad practice,
 # if we ever want to add more nutrition types, we would have to add a new column, meaning the entire
 # database structure changes and can compromise data integrity.
+# The following is the Nutritions table for reference, if we ever want to link Nutrition values to recipes through
+# a composite table.
 
 TABLE Nutritions
 

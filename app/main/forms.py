@@ -5,8 +5,8 @@ from wtforms import StringField, PasswordField, SelectField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 
 from app import db
-from app.models import Student, User, Teacher
-# from app.models import Recipes, RecipeDietTypes, RecipeAllergies
+# from app.models import Student, User, Teacher
+from app.models import Recipes, RecipeDietTypes, RecipeAllergies
 
 DIET_CHOICES = [('classic', 'Classic'),
                 ('pescatarian', 'Pescatarian'),
