@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from app import db
 
 """
-MEALTIME DB MODELS.PY
+Create SQLAlchemy models by referencing the already created mealtime.sqlite database.
 For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
 """
 
@@ -39,7 +39,7 @@ class MealPlans(db.Model):
     __table__ = db.Model.metadata.tables['MealPlans']
 
 class MealPlanRecipes(db.Model):
-    __table__ = db.Model.metadata.tables['MealPlanRecipe']
+    __table__ = db.Model.metadata.tables['MealPlanRecipes']
 
 class RecipeAllergies(db.Model):
     __table__ = db.Model.metadata.tables['RecipeAllergies']
@@ -50,14 +50,10 @@ class RecipeDietTypes(db.Model):
 
 
 
-
-
-
-
-
-
-
-
+"""
+The code beneath is deprecated code that would create an SQLite database using the SQLAlchemy method. We don't do this,
+as we create the db separately.
+"""
 
 # class Users(UserMixin, db.Model):
 #     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)

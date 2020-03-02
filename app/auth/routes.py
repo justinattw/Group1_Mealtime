@@ -45,30 +45,6 @@ def logout():
     return redirect(url_for('main.index'))
 
 
-# @bp_auth.route('/signup/', methods=['POST', 'GET'])
-# def signup():
-#     form = SignupForm(request.form)
-#     if request.method == 'POST' and form.validate():
-#         if form.role.data == "student":
-#             user = Student(name=form.name.data, email=form.email.data, student_ref=form.uni_id.data)
-#         else:
-#             user = Teacher(name=form.name.data, title=form.title.data, teacher_ref=form.uni_id.data,
-#                            email=form.email.data)
-#         user.set_password(form.password.data)
-#         try:
-#             db.session.add(user)
-#             db.session.commit()
-#             flash('You are now a registered user!')
-#             # Set cookie and return to main, if successful
-#             response = make_response(redirect(url_for('main.index')))
-#             response.set_cookie("name", form.name.data)
-#             return response
-#         except IntegrityError:
-#             db.session.rollback()
-#             flash('ERROR! Unable to register {}. Please check your details are correct and resubmit'.format(
-#                 form.email.data), 'error')
-#     return render_template('signup.html', form=form)
-
 @bp_auth.route('/signup/', methods=['POST', 'GET'])
 def signup():
     form = SignupForm(request.form)
@@ -91,7 +67,6 @@ def signup():
             flash('ERROR! Unable to register {}. Please check your details are correct and resubmit'.format(
                 form.email.data), 'error')
     return render_template('signup.html', form=form)
-
 
 
 def is_safe_url(target):

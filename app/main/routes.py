@@ -31,27 +31,7 @@ def index(name=""):
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
     recipes = db.session.query(Recipes).all()
-    # courses = Course.query.join(Teacher).with_entities(Course.course_code, Course.name, Teacher.name.label('teacher_name')).all()
     return render_template("recipes.html", recipes=recipes)
-
-# @bp_main.route('/search', methods=['POST', 'GET'])
-# def search():
-#     if request.method == 'POST':
-#         term = request.form['search_term']
-#         if term == "":
-#             flash("Enter a recipe to search for")
-#             return redirect('/')
-#         # results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term))
-#         users = with_polymorphic(User, [Student, Teacher])
-#         results = db.session.query(users).filter(
-#             or_(users.Student.name.contains(term), users.Teacher.name.contains(term))).all()
-#         # results = Student.query.filter(Student.email.contains(term)).all()
-#         if not results:
-#             flash("No recipes found.")
-#             return redirect('/')
-#         return render_template('search_results.html', results=results)
-#     else:
-#         return redirect(url_for('main.index'))
 
 @bp_main.route('/search', methods=['POST', 'GET'])
 def search():
