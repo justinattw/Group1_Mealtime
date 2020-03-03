@@ -1,20 +1,27 @@
 {% extends "base.html" %}
 {% block title %}{{ recipe.recipe_name }}{% endblock %}
 {% block content %}
+<h1>{{ recipe.recipe_name }}</h1>
 <table class="table">
     <thead class="thead-dark">
     <tr>
-        <th scope="col">Recipes</th>
+        <th scope="col">Serves</th>
         <th scope="col">Cook time</th>
         <th scope="col">Prep time</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-        <td>{{ recipe.recipe_name }}</td>
+        <td>{{ recipe.serves }}</td>
         <td>{{ recipe.cook_time }}</td>
         <td>{{ recipe.prep_time }}</td>
     </tr>
     </tbody>
 </table>
+<h2>Ingredients</h2>
+<ul>
+    {% for i in ingredients %}
+    <li>{{ i.recipe_ingredient_id }}</li>
+    {% endfor %}
+</ul>
 {% endblock %}

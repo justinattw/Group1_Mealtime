@@ -31,7 +31,11 @@ def index(name=""):
 @bp_main.route('/recipes/<id_num>', methods=['GET'])
 def view_recipe(id_num):
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == id_num).one()
-    return render_template("view_recipe.html", recipe=recipe)
+    ingredients = db.session.query(Recipes, RecipeIngredients)\
+                    .join(RecipeIngredients)\
+                    .filter(RecipeIngredients.recipe_id == id_num)\
+                    .all()
+    return render_template("view_recipe.html", recipe=recipe, ingredients=ingredients)
 
 
 @bp_main.route('/recipes', methods=['GET'])
@@ -76,7 +80,7 @@ def delete_cookie():
 
 @bp_main.route('/user/<name>')
 def show_user(name):
-    user = User.query.filter_by(first_name=name).first_or_404(description='There is no user {}'.format(name))
+    user = Users.query.filter_by(first_name=name).first_or_404(description='There is no user {}'.format(name))
     return render_template('show_user.html', user=user)
 
 # Mealplans route, query for mealplans based on logged in user_id,

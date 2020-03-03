@@ -6,7 +6,7 @@
                name="search_term">
         <button class="btn btn-primary btn-outline-light" type="submit">Search</button>
 </form>
-<a href="#" class="simple_search">Advanced Search</a>
+<a href="{{ url_for("main.advanced_search") }}" class="simple_search">Advanced Search</a>
 
 {% if results|length %}
 {# Variable is not empty #}
@@ -20,7 +20,7 @@
     </thead>
     <tbody> {% for result in results %}
     <tr>
-        <td>{{ result.recipe_name }}</td>
+        <td><a href="{{ url_for('main.view_recipe', id_num = result.recipe_id) }}">{{ result.recipe_name }}</a></td>
         <td>{{ result.total_time }}</td>
         <td>{{ result.serves }}</td>
     </tr>
