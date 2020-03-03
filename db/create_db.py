@@ -6,7 +6,7 @@ import urllib3
 import sqlite3
 from sqlite3 import Error
 
-db = sqlite3.connect("mealtime.sqlite", isolation_level=None)
+db = sqlite3.connect("db/mealtime.sqlite", isolation_level=None)
 c = db.cursor()
 
 c.execute("""CREATE TABLE IF NOT EXISTS Recipes (
@@ -401,8 +401,7 @@ values = [(1, 'celery_free'),
           (7, 'tree_nuts_free'),
           (8, 'peanuts_free'),
           (9, 'sesame_seeds_free'),
-          (10, 'soybeans_free'),
-          (11, 'sulphur_sulphites_free')]
+          (10, 'soybeans_free')
 c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS UserAllergies (
