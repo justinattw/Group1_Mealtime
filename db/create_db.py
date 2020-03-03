@@ -238,8 +238,9 @@ for url in second_urls:
 
         # seafood_free: id=3
         seafoods = ["squid", "octopus", "fish", "snail", "mussel", "clam", "oyster", "scallop", "whelk",
-                     "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
-                     "tuna", "haddock", "sea", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce"]
+                    "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
+                    "tuna", "haddock", "sea", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
+                    "calamari", "miso", "dashi", "takoyaki", "mackarel", "sea bass", "shark", "caviar"]
         for seafood in seafoods:
             if seafood_allergy_added:
                 break
@@ -283,24 +284,28 @@ for url in second_urls:
             soybeans_allergy_added = True
 
         banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
-                                   "sausage", "bone", "liver", "wing", "mutton", "leg", "thigh", "belly", "quail",
-                                   "ostrich", "ham"]
+                                   "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
+                                   "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
+                                   "deer", "venison", "boar", "veal", "bovrin"]
+        false_negatives_pescatarians = ["stock cube"]
         banned_for_vegetarians = seafoods
-        banned_for_vegans = ["egg", "milk", "cheese", "butter", "cream", "dairy", "mayonnaise", "honey",
-                             "beeswax", "gelatin", "whey", "yogurt", "yoghurt", "tapenade", "pesto"]
+        banned_for_vegans = ["egg", "milk", "cheese", "butter", "cream", "dairy", "mayonnaise", "honey", "beeswax",
+                             "gelatin", "whey", "yogurt", "yoghurt", "tapenade", "pesto", "carmine", "isinglass"]
 
         # Classic=1, pesc=2, vege=3, vegan=4
         if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
             for item in banned_for_pescatarians:
-                if item in str(ingred):
+                print(item, " compared to ", str(ingred.lower()))
+                if item in ingred.lower():
                     c.execute(queryrecipediettypes, (int(recipeidindex), 1))
+                    print("successful match")
                     is_classic = True
                 if is_classic:
-                    break
+                    break # break for loop if diet type is decided
 
         if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
             for item in banned_for_vegetarians:
-                if item in str(ingred):
+                if item in ingred.lower():
                     c.execute(queryrecipediettypes, (int(recipeidindex), 2))
                     is_pescatarian = True
                 if is_pescatarian:
@@ -308,17 +313,18 @@ for url in second_urls:
 
         if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
             for item in banned_for_vegans:
-                if (item in str(ingred)) and (is_vegetarian == False):
+                if item in ingred.lower():
                     c.execute(queryrecipediettypes, (int(recipeidindex), 3))
                     is_vegetarian = True
                 if is_vegetarian:
                     break
 
-        if (is_classic == False) and (is_pescatarian == False) and (is_vegetarian == False) and (is_vegan == False):
-            c.execute(queryrecipediettypes, (int(recipeidindex), 4))
-            is_vegan = True
-
         ingredientindex = ingredientindex + 1
+
+    # If after all ingredients are checked and no diet type is assigned, then recipe is vegan
+    if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+        c.execute(queryrecipediettypes, (int(recipeidindex), 4))
+        is_vegan = True
 
     preptimes = []
     cooktimes = []

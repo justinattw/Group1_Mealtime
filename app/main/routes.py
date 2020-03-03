@@ -53,13 +53,12 @@ def search():
 @bp_main.route('/advanced_search', methods=['POST', 'GET'])
 def advanced_search():
     form = AdvSearchRecipes()
-    term = form.search_term.data
-    #results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term)).all()
-    #if not results:
-    #    flash("No recipes found.")
-    #    return redirect('/')
-    return render_template('search_results.html', results=results)
-    
+    search_term = form.search_term.data
+
+    if request.method == 'POST' and form.validate():
+        results = Recipes.query.filter(Recipes.recipe_name.contains(search_term)).all()
+        return render_template('search_results.html', results=results)
+
     return render_template('advanced_search.html', form=form)
 
 
