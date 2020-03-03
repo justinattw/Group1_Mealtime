@@ -53,6 +53,56 @@ c.execute("""CREATE TABLE IF NOT EXISTS RecipeInstructions (
                                         PRIMARY KEY (recipe_instruction_id, step_num)
                                         );""")
 
+c.execute("""CREATE TABLE IF NOT EXISTS DietTypes (
+                                        diet_type_id integer unique NOT NULL,
+                                        diet_name varchar(40),
+                                        PRIMARY KEY (diet_type_id)
+                                        );""")
+
+sql = "INSERT INTO DietTypes (diet_type_id, diet_name) VALUES (?, ?)"
+values = [(1, 'classic'),
+          (2, 'pescatarian'),
+          (3, 'vegetarian'),
+          (4, 'vegan')]
+c.executemany(sql, values)
+
+c.execute("""CREATE TABLE IF NOT EXISTS Allergies (
+                                        allergy_id integer unique NOT NULL,
+                                        allergy_name varchar(40) NOT NULL,
+                                        PRIMARY KEY (allergy_id)
+                                        );""")
+
+sql = "INSERT INTO Allergies (allergy_id, allergy_name) VALUES (?, ?)"
+values = [(1, 'celery_free'),
+          (2, 'gluten_free'),
+          (3, 'seafood_free'),
+          (4, 'eggs_free'),
+          (5, 'lupin_free'),
+          (6, 'mustard_free'),
+          (7, 'tree_nuts_free'),
+          (8, 'peanuts_free'),
+          (9, 'sesame_seeds_free'),
+          (10, 'soybeans_free')]
+c.executemany(sql, values)
+
+c.execute("""CREATE TABLE IF NOT EXISTS RecipeDietTypes (
+                                        recipe_id integer NOT NULL UNIQUE,
+                                        diet_type_id integer NOT NULL,
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        FOREIGN KEY (diet_type_id) References DietTypes (diet_type_id),
+                                        PRIMARY KEY (recipe_id, diet_type_id) 
+                                        );""")
+
+c.execute("""CREATE TABLE IF NOT EXISTS RecipeAllergies (
+                                        recipe_id integer NOT NULL,
+                                        allergy_id integer NOT NULL,
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        FOREIGN KEY (allergy_id) References Allergies (allergy_id),
+                                        PRIMARY KEY (recipe_id, allergy_id) 
+                                        );""")
+
+
+
 URL = "https://www.bbcgoodfood.com/recipes/category/healthy"
 page = requests.get(URL, headers={'User-Agent': 'Mozilla/5.0'})
 print(page)
@@ -104,6 +154,8 @@ for url in second_urls:
     queryingredients = "insert into RecipeIngredients values (?, ?, ?)"
     querynutrition = "insert into NutritionValues values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     queryinstructions = "insert into RecipeInstructions values (?, ?, ?, ?)"
+    queryrecipeallergies = "insert into RecipeAllergies values (?, ?)"
+    queryrecipediettypes = "insert into RecipeDietTypes values (?, ?)"
 
     ingredient_list = []
     URL = url
@@ -142,12 +194,130 @@ for url in second_urls:
         recipestepsindex = recipestepsindex + 1
         stepnum = stepnum + 1
 
+    celery_allergy_added = False
+    gluten_allergy_added = False
+    seafood_allergy_added = False
+    egg_allergy_added = False
+    lupin_allergy_added = False
+    mustard_allergy_added = False
+    tree_nuts_allergy_added = False
+    peanuts_allergy_added = False
+    sesame_seeds_allergy_added = False
+    soybeans_allergy_added = False
+
+    is_classic = False
+    is_vegan = False
+    is_vegetarian = False
+    is_pescatarian = False
+
     for ingredient in ingredients:
         ing = str(ingredient).split('"')
         ingredient_list.append(ing[3])
         ingred = str(ing[3])
         print(ingred)
         c.execute(queryingredients, (int(ingredientindex), int(recipeidindex), str(ingred)))
+
+        # celery_free: id=1
+        if ("celery" in ingred.lower()) and (celery_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 1))
+            celery_allergy_added = True
+
+        # gluten_free: id=2
+        glutens = ["pasta", "ravioli", "dumpling", "couscous", "gnocchi",
+                   "ramen", "udon", "soba", "chow mein",
+                   "croissant", "pita", "naan", "bagel", "flatbread", "cornbread", "bread",
+                   "granola", "pancake", "panko breadcrumb", "soy sauce", "barley", "malt",
+                   "bulger", "graham flour", "oatmeal", "flour", "rye", "semolina", "spelt",
+                   "wheat"]
+        for gluten in glutens:
+            if gluten_allergy_added:
+                break
+            if str(gluten) in ingred.lower():
+                c.execute(queryrecipeallergies, (int(recipeidindex), 2))
+                gluten_allergy_added = True
+
+        # seafood_free: id=3
+        seafoods = ["squid", "octopus", "fish", "snail", "mussel", "clam", "oyster", "scallop", "whelk",
+                     "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
+                     "tuna", "haddock", "sea", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce"]
+        for seafood in seafoods:
+            if seafood_allergy_added:
+                break
+            if str(seafood) in ingred.lower():
+                c.execute(queryrecipeallergies, (int(recipeidindex), 3))
+                seafood_allergy_added = True
+
+        # egg_free: id=4
+        if ("egg" in ingred.lower()) and (egg_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 4))
+            egg_allergy_added = True
+        # lupin_free: id=5
+        if ("lupin" in ingred) and (lupin_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 5))
+            lupin_allergy_added = True
+        # mustard_free: id=6
+        if ("mustard" in ingred) and (mustard_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 6))
+            mustard_allergy_added = True
+
+        # tree_nuts_free: id=7
+        tree_nuts = ["almond", "brazil", "cashew", "chestnut", "filbert", "hazelnut", "hickory", "macadamia", "pecan", "pine", "pistachio", "walnut"]
+        for nut in tree_nuts:
+            if tree_nuts_allergy_added:
+                break
+            if str(nut) in ingred.lower():
+                c.execute(queryrecipeallergies, (int(recipeidindex), 7))
+                tree_nuts_allergy_added = True
+
+        # peanuts_free: id=8
+        if ("peanut" in ingred.lower()) and (peanuts_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 8))
+            peanuts_allergy_added = True
+        # sesame_seed_free: id=9
+        if ("sesame" in ingred.lower()) and (sesame_seeds_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 9))
+            sesame_seeds_allergy_added = True
+        # soybeans_free: id=10
+        if ("soy" in ingred.lower()) and (soybeans_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 10))
+            soybeans_allergy_added = True
+
+        banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
+                                   "sausage", "bone", "liver", "wing", "mutton", "leg", "thigh", "belly", "quail",
+                                   "ostrich", "ham"]
+        banned_for_vegetarians = seafoods
+        banned_for_vegans = ["egg", "milk", "cheese", "butter", "cream", "dairy", "mayonnaise", "honey",
+                             "beeswax", "gelatin", "whey", "yogurt", "yoghurt", "tapenade", "pesto"]
+
+        # Classic=1, pesc=2, vege=3, vegan=4
+        if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+            for item in banned_for_pescatarians:
+                if item in str(ingred):
+                    c.execute(queryrecipediettypes, (int(recipeidindex), 1))
+                    is_classic = True
+                if is_classic:
+                    break
+
+        if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+            for item in banned_for_vegetarians:
+                if item in str(ingred):
+                    c.execute(queryrecipediettypes, (int(recipeidindex), 2))
+                    is_pescatarian = True
+                if is_pescatarian:
+                    break
+
+        if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+            for item in banned_for_vegans:
+                if (item in str(ingred)) and (is_vegetarian == False):
+                    c.execute(queryrecipediettypes, (int(recipeidindex), 3))
+                    is_vegetarian = True
+                if is_vegetarian:
+                    break
+
+        if (is_classic == False) and (is_pescatarian == False) and (is_vegetarian == False) and (is_vegan == False):
+            c.execute(queryrecipediettypes, (int(recipeidindex), 4))
+            is_vegan = True
+
         ingredientindex = ingredientindex + 1
 
     preptimes = []
@@ -254,6 +424,7 @@ for url in second_urls:
         z = z + x
     total = y + z
     plz = serves.text.split()
+    why = 0.0
     for item in plz:
         if item.isdigit():
             why = float(item)
@@ -348,6 +519,8 @@ for url in second_urls:
     recipestepsindex = recipestepsindex + 1
     nutritionindex = nutritionindex + 1
 
+    print(f"{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
+
 print(nutritionalinfo)
 
 # Ingredients is working
@@ -364,19 +537,6 @@ c.execute("""CREATE TABLE IF NOT EXISTS Users (
                                         PRIMARY KEY (id)
                                         );""")
 
-c.execute("""CREATE TABLE IF NOT EXISTS DietTypes (
-                                        diet_type_id integer unique NOT NULL,
-                                        diet_name varchar(40),
-                                        PRIMARY KEY (diet_type_id)
-                                        );""")
-
-sql = "INSERT INTO DietTypes (diet_type_id, diet_name) VALUES (?, ?)"
-values = [(1, 'classic'),
-          (2, 'pescatarian'),
-          (3, 'vegetarian'),
-          (4, 'vegan')]
-c.executemany(sql, values)
-
 c.execute("""CREATE TABLE IF NOT EXISTS UserDietPreferences (
                                         user_id integer NOT NULL,
                                         diet_type_id integer NOT NULL default 1,
@@ -384,25 +544,6 @@ c.execute("""CREATE TABLE IF NOT EXISTS UserDietPreferences (
                                         FOREIGN KEY (diet_type_id) References DietTypes (diet_type_id),
                                         PRIMARY KEY (user_id, diet_type_id)
                                         );""")
-
-c.execute("""CREATE TABLE IF NOT EXISTS Allergies (
-                                        allergy_id integer unique NOT NULL,
-                                        allergy_name varchar(40) NOT NULL,
-                                        PRIMARY KEY (allergy_id)
-                                        );""")
-
-sql = "INSERT INTO Allergies (allergy_id, allergy_name) VALUES (?, ?)"
-values = [(1, 'celery_free'),
-          (2, 'gluten_free'),
-          (3, 'seafood_free'),
-          (4, 'eggs_free'),
-          (5, 'lupin_free'),
-          (6, 'mustard_free'),
-          (7, 'tree_nuts_free'),
-          (8, 'peanuts_free'),
-          (9, 'sesame_seeds_free'),
-          (10, 'soybeans_free')
-c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS UserAllergies (
                                         user_id integer NOT NULL,
@@ -427,22 +568,6 @@ c.execute("""CREATE TABLE IF NOT EXISTS MealPlanRecipes (
                                         FOREIGN KEY (mealplan_id) References MealPlans (mealplan_id),
                                         FOREIGN KEY (recipe_id) References Recipes (recipe_id),
                                         PRIMARY KEY (mealplan_id, recipe_id) 
-                                        );""")
-
-c.execute("""CREATE TABLE IF NOT EXISTS RecipeDietTypes (
-                                        recipe_id integer NOT NULL UNIQUE,
-                                        diet_type_id integer NOT NULL,
-                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
-                                        FOREIGN KEY (diet_type_id) References DietTypes (diet_type_id),
-                                        PRIMARY KEY (recipe_id, diet_type_id) 
-                                        );""")
-
-c.execute("""CREATE TABLE IF NOT EXISTS RecipeAllergies (
-                                        recipe_id integer NOT NULL,
-                                        allergy_id integer NOT NULL,
-                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
-                                        FOREIGN KEY (allergy_id) References Allergies (allergy_id),
-                                        PRIMARY KEY (recipe_id, allergy_id) 
                                         );""")
 
 # c.execute("""CREATE TABLE IF NOT EXISTS Nutrition (
