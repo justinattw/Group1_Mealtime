@@ -33,13 +33,14 @@ def recipes():
     recipes = db.session.query(Recipes).all()
     return render_template("recipes.html", recipes=recipes)
 
+
 @bp_main.route('/search', methods=['POST', 'GET'])
 def search():
     if request.method == 'POST':
         term = request.form['search_term']
-        if term == "":
-            flash("Enter a recipe to search for")
-            return redirect('/')
+        #if term == "":
+         #   flash("Enter a recipe to search for")
+        #    return redirect('/')
         results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term)).all()
         if not results:
             flash("No recipes found.")
@@ -49,21 +50,17 @@ def search():
         return redirect(url_for('main.index'))
 
 
-# @bp_main.route('/advanced_search', methods=['POST', 'GET'])
-# def adv_search():
-#     form = AdvSearchRecipes()
-#
-#     search_term = form.search_term.data
-#
-#     results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(search_term))
-#         if not results:
-#             flash("No recipes found.")
-#             return redirect('/')
-#         return render_template('search_results.html', results=results)
-#     else:
-#         return redirect(url_for('main.index'))
-#
-#     return render_template('advanced_search.html', form=form)
+@bp_main.route('/advanced_search', methods=['POST', 'GET'])
+def advanced_search():
+    form = AdvSearchRecipes()
+    term = form.search_term.data
+    #results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term)).all()
+    #if not results:
+    #    flash("No recipes found.")
+    #    return redirect('/')
+    return render_template('search_results.html', results=results)
+    
+    return render_template('advanced_search.html', form=form)
 
 
 @bp_main.route('/delete_cookie')

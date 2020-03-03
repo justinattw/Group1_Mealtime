@@ -24,6 +24,5 @@ class AdvSearchRecipes(FlaskForm):
     mustard = BooleanField('Mustard-free')
     tree_nuts = BooleanField('Tree nuts-free')
     peanuts = BooleanField('Peanuts-free')
-    sesame_seeds = BooleanField('Sesame seeds-free')
+    sesame = BooleanField('Sesame seeds-free')
     soybeans = BooleanField('Soybeans-free')
-    sulphur = BooleanField('Sulphur and sulphites-free')
