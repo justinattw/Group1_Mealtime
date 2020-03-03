@@ -28,6 +28,12 @@ def index(name=""):
     return render_template('index.html', name=name)
 
 
+@bp_main.route('/recipes/<id_num>', methods=['GET'])
+def view_recipe(id_num):
+    recipe = db.session.query(Recipes).filter(Recipes.recipe_id == id_num).one()
+    return render_template("view_recipe.html", recipe=recipe)
+
+
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
     recipes = db.session.query(Recipes).all()
@@ -57,8 +63,7 @@ def advanced_search():
 
     if request.method == 'POST' and form.validate():
         results = Recipes.query.filter(Recipes.recipe_name.contains(search_term)).all()
-        return render_template('search_results.html', results=results)
-
+        #return render_template('search_results.html', results=results)
     return render_template('advanced_search.html', form=form)
 
 

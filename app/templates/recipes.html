@@ -14,7 +14,7 @@
     <tbody>
     {% for recipe in recipes %}
     <tr>
-        <td>{{ recipe.recipe_name }}</td>
+        <td><a class="nav-link" href="{{ url_for('main.view_recipe', id_num = recipe.recipe_id) }}">{{ recipe.recipe_name }}</a></td>
         <td>{{ recipe.cook_time }}</td>
         <td>{{ recipe.prep_time }}</td>
         <td>{{ recipe.serves }}</td>
