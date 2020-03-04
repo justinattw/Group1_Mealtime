@@ -67,7 +67,8 @@ def advanced_search():
 
     if request.method == 'POST' and form.validate():
         results = Recipes.query.filter(Recipes.recipe_name.contains(search_term)).all()
-        #return render_template('search_results.html', results=results)
+        return render_template('search_results.html', results=results)
+
     return render_template('advanced_search.html', form=form)
 
 
