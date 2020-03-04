@@ -48,8 +48,8 @@ def recipes():
 def search():
     if request.method == 'POST':
         term = request.form['search_term']
-        #if term == "":
-         #   flash("Enter a recipe to search for")
+        # if term == "":
+        #    flash("Enter a recipe to search for")
         #    return redirect('/')
         results = db.session.query(Recipes).filter(Recipes.recipe_name.contains(term)).all()
         if not results:
