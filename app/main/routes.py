@@ -31,8 +31,7 @@ def index(name=""):
 @bp_main.route('/recipes/<id_num>', methods=['GET'])
 def view_recipe(id_num):
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == id_num).one()
-    ingredients = db.session.query(Recipes, RecipeIngredients)\
-                    .join(RecipeIngredients)\
+    ingredients = db.session.query(RecipeIngredients)\
                     .filter(RecipeIngredients.recipe_id == id_num)\
                     .all()
     return render_template("view_recipe.html", recipe=recipe, ingredients=ingredients)
