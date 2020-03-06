@@ -7,8 +7,9 @@ from app import db
 Create SQLAlchemy models by referencing the already created mealtime.sqlite database.
 For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
 """
+from app import login_manager
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __table__ = db.Model.metadata.tables['Users']
 
     def __repr__(self):
