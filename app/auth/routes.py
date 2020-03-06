@@ -4,7 +4,6 @@ from flask_login import login_required, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
-# from app.models import Course, Student, Teacher, User
 from app.models import Users
 from app.auth.forms import SignupForm, LoginForm
 
@@ -48,7 +47,7 @@ def logout():
 def signup():
     form = SignupForm(request.form)
     if request.method == 'POST' and form.validate():
-        user = User(first_name=form.first_name.data,
+        user = Users(first_name=form.first_name.data,
                     last_name=form.last_name.data,
                     email=form.email.data)
         user.set_password(form.password.data)

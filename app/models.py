@@ -11,6 +11,15 @@ For entity relationship diagram, see: https://www.lucidchart.com/invitations/acc
 class Users(db.Model):
     __table__ = db.Model.metadata.tables['Users']
 
+    def __repr__(self):
+        return f'<User id {self.id} email {self.email}>'
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
 class DietTypes(db.Model):
     __table__ = db.Model.metadata.tables['DietTypes']
 

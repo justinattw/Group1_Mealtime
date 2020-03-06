@@ -39,7 +39,7 @@ class SignupForm(FlaskForm):
     confirm = PasswordField('Confirm Password')
 
     def validate_email(self, email):
-        results = db.session.query(User).filter(User.email == email.data).first()
+        results = db.session.query(Users).filter(Users.email == email.data).first()
         if results is not None:
             raise ValidationError('An account is already registered with this email.')
 
