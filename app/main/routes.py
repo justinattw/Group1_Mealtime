@@ -8,7 +8,7 @@ from sqlalchemy.orm import with_polymorphic
 from app import db
 from app.main.forms import AdvSearchRecipes
 # from app.models import Course, Student, Teacher, User
-from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions
+from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues
 
 bp_main = Blueprint('main', __name__)
 
@@ -37,7 +37,10 @@ def view_recipe(id_num):
     steps = db.session.query(RecipeInstructions)\
                 .filter(RecipeInstructions.recipe_id == id_num)\
                 .all()
-    return render_template("view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps)
+    nutrition = db.session.query(NutritionValues)\
+                    .filter(NutritionValues.recipe_id == id_num)\
+                    .one()
+    return render_template("view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps, nutrition=nutrition)
 
 
 @bp_main.route('/recipes', methods=['GET'])

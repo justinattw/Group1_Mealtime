@@ -20,6 +20,32 @@
     </tr>
     </tbody>
 </table>
+<table class="table">
+    <thead class="thead-light">
+    <tr>
+        <th scope="col">Calories</th>
+        <th scope="col">Fats</th>
+        <th scope="col">Saturates</th>
+        <th scope="col">Carbs</th>
+        <th scope="col">Sugars</th>
+        <th scope="col">Fibres</th>
+        <th scope="col">Proteins</th>
+        <th scope="col">Salts</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{{ nutrition.calories }} kcal</td>
+        <td>{{ nutrition.fats }} g</td>
+        <td>{{ nutrition.saturates }} g</td>
+        <td>{{ nutrition.carbs }} g</td>
+        <td>{{ nutrition.sugars }} g</td>
+        <td>{{ nutrition.fibres }} g</td>
+        <td>{{ nutrition.proteins }} g</td>
+        <td>{{ nutrition.salts }} g</td>
+    </tr>
+    </tbody>
+</table>
 <h2>Ingredients</h2>
 <ul>
     {% for i in ingredients %}
