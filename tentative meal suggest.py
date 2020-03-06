@@ -7,7 +7,7 @@ import sqlite3
 from sqlite3 import Error
 import random
 
-db = sqlite3.connect("mealtime.sqlite")
+db = sqlite3.connect("db/mealtime.sqlite")
 c = db.cursor()
 
 WeeklyCalorieCount = []
@@ -23,29 +23,29 @@ recipeids = []
 
 while WeeklyCalorieCount[i] <= desiredcount:
 
-    querystem = """SELECT DISTINCT r.recipeID
+    querystem = """SELECT DISTINCT r.recipe_id
     FROM Recipes r
-             JOIN NutritionValues nut ON r.RecipeID = nut.RecipeID
+             JOIN NutritionValues nut ON r.recipe_id = nut.recipe_id
     WHERE nut.Calories <= (?) AND nut.Calories != 0
     ORDER BY RANDOM() LIMIT 1"""
 
-    titlequerystem = """SELECT DISTINCT r.Recipe_name
+    titlequerystem = """SELECT DISTINCT r.recipe_name
     FROM Recipes r
-    WHERE r.RecipeID = ?"""
+    WHERE r.recipe_id = ?"""
 
     caloriequerystem = """SELECT DISTINCT nut.Calories
     FROM NutritionValues nut
-             JOIN Recipes r ON nut.RecipeID = r.RecipeID
-    WHERE r.RecipeID = ?"""
+             JOIN Recipes r ON nut.recipe_id = r.recipe_id
+    WHERE r.recipe_id = ?"""
 
-    servingsizequerystem = """SELECT DISTINCT r.Recipe_serves
+    servingsizequerystem = """SELECT DISTINCT r.serves
         FROM Recipes r
-        WHERE r.RecipeID = ?"""
+        WHERE r.recipe_id = ?"""
 
     ingredientquerystem = """SELECT DISTINCT ing.IngredientString
     FROM main.RecipeIngredients ing
-             JOIN Recipes r ON ing.RecipeID = r.RecipeID
-    WHERE r.RecipeID = ?"""
+             JOIN Recipes r ON ing.recipe_id = r.recipe_id
+    WHERE r.recipe_id = ?"""
 
     recipe = c.execute(querystem, ([CalorieLimit[i]]))
     recipe = c.fetchall()
