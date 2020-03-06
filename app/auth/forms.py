@@ -36,7 +36,7 @@ class SignupForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email(message='Valid email address required')])
     password = PasswordField('Password',
                              validators=[DataRequired(), EqualTo('confirm', message='The passwords do not match')])
-    confirm = PasswordField('Repeat Password')
+    confirm = PasswordField('Confirm Password')
 
     def validate_email(self, email):
         results = db.session.query(User).filter(User.email == email.data).first()
