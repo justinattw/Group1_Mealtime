@@ -46,6 +46,17 @@
     </tr>
     </tbody>
 </table>
+<h2>Allergies</h2>
+{% if allergies|length %}
+<p>Please note that this recipe contains:</p>
+<ul>
+    {% for a in allergies %}
+    <li>{{ a.Allergies.allergy_name }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No common allergies</p>
+{% endif %}
 <h2>Ingredients</h2>
 <ul>
     {% for i in ingredients %}
