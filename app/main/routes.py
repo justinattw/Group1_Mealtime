@@ -69,10 +69,28 @@ def search():
 def advanced_search():
     form = AdvSearchRecipes()
     search_term = form.search_term.data
+    form.diet_type.data
+    form.celery.data
+    form.gluten.data
+    seafood = BooleanField('Seafood-free')
+    eggs = BooleanField('Eggs-free')
+    lupin = BooleanField('Lupin-free')
+    mustard = BooleanField('Mustard-free')
+    tree_nuts = BooleanField('Tree nuts-free')
+    peanuts = BooleanField('Peanuts-free')
+    sesame = BooleanField('Sesame seeds-free')
+    soybeans = BooleanField('Soybeans-free')
 
     if request.method == 'POST' and form.validate():
+
+
         results = Recipes.query.filter(Recipes.recipe_name.contains(search_term)).all()
+
+        results = Recipes
+
         return render_template('search_results.html', results=results)
+
+        db.users.filter(or_(db.users.name == 'Ryan', db.users.country == 'England'))
 
     return render_template('advanced_search.html', form=form)
 

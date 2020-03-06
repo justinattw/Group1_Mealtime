@@ -73,16 +73,16 @@ c.execute("""CREATE TABLE IF NOT EXISTS Allergies (
                                         );""")
 
 sql = "INSERT INTO Allergies (allergy_id, allergy_name) VALUES (?, ?)"
-values = [(1, 'celery_free'),
-          (2, 'gluten_free'),
-          (3, 'seafood_free'),
-          (4, 'eggs_free'),
-          (5, 'lupin_free'),
-          (6, 'mustard_free'),
-          (7, 'tree_nuts_free'),
-          (8, 'peanuts_free'),
-          (9, 'sesame_seeds_free'),
-          (10, 'soybeans_free')]
+values = [(1, 'celery'),
+          (2, 'gluten'),
+          (3, 'seafood'),
+          (4, 'eggs'),
+          (5, 'lupin'),
+          (6, 'mustard'),
+          (7, 'tree_nuts'),
+          (8, 'peanuts'),
+          (9, 'sesame_seeds'),
+          (10, 'soybeans')]
 c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeDietTypes (
