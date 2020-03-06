@@ -8,6 +8,7 @@
         <th scope="col">Serves</th>
         <th scope="col">Cook time</th>
         <th scope="col">Prep time</th>
+        <th scope="col">Total time</th>
     </tr>
     </thead>
     <tbody>
@@ -15,6 +16,7 @@
         <td>{{ recipe.serves }}</td>
         <td>{{ recipe.cook_time }}</td>
         <td>{{ recipe.prep_time }}</td>
+        <td>{{ recipe.total_time }}</td>
     </tr>
     </tbody>
 </table>
@@ -24,4 +26,10 @@
     <li>{{ i.ingredient }}</li>
     {% endfor %}
 </ul>
+<h2>Steps</h2>
+<ol>
+    {% for s in steps %}
+    <li>{{ s.step_description }}</li>
+    {% endfor %}
+</ol>
 {% endblock %}
