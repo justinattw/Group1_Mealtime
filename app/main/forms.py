@@ -1,12 +1,5 @@
 from flask_wtf import FlaskForm
-from sqlalchemy import or_
-from sqlalchemy.orm import with_polymorphic
-from wtforms import StringField, PasswordField, SelectField, BooleanField
-from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
-
-from app import db
-# from app.models import Student, User, Teacher
-from app.models import Recipes, RecipeDietTypes, RecipeAllergies
+from wtforms import StringField, SelectField, BooleanField
 
 DIET_CHOICES = [('classic', 'Classic'),
                 ('pescatarian', 'Pescatarian'),

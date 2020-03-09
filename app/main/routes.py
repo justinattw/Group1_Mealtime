@@ -109,19 +109,9 @@ def advanced_search():
         allergies.append(11)
 
     if request.method == 'POST' and form.validate():
-        # results = db.session.query(Recipes) \
-        #     .join(RecipeDietTypes, Recipes.recipe_id == RecipeDietTypes.recipe_id) \
-        #     .join(RecipeAllergies, Recipes.recipe_id == RecipeAllergies.recipe_id) \
-        #     .filter(RecipeDietTypes.diet_type_id >= diet_type) \
-        #     .filter(~Recipes.recipe_id.in_(blacklist)) \
-        #     .filter(Recipes.recipe_name.contains(search_term)).all()
-
         # blacklist recipes if user does not want certain recipes
         blacklist = db.session.query(RecipeAllergies.recipe_id) \
             .filter(RecipeAllergies.allergy_id.in_(allergies)).distinct().subquery()
-
-        # blacklist_list = [value for value, in blacklist] # return recipe_id
-        # print(len(blacklist_list))
 
         results = db.session.query(Recipes) \
             .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
