@@ -302,7 +302,8 @@ for url in second_urls:
                                    "deer", "venison", "boar", "veal", "bovrin"]
         false_negatives_pescatarians = ["stock cube"]
         banned_for_vegetarians = seafoods
-        banned_for_vegans = dairies.append(
+        banned_for_vegans = dairies
+        banned_for_vegans.extend(
             ["egg", "dairy", "mayonnaise", "honey", "beeswax", "gelatin", "tapenade", "pesto", "carmine", "isinglass"]
         )
 
