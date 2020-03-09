@@ -112,7 +112,7 @@ def advanced_search():
         # blacklist recipes if user does not want certain recipes
         blacklist = db.session.query(RecipeAllergies.recipe_id) \
             .filter(RecipeAllergies.allergy_id.in_(allergies)).distinct().subquery()
-
+        # 'filter' allergies with an outer join, so that blacklisted recipes are not matched
         results = db.session.query(Recipes) \
             .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
             .filter(blacklist.c.recipe_id == None) \
