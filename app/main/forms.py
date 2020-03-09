@@ -16,6 +16,7 @@ DIET_CHOICES = [('classic', 'Classic'),
 class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
+    dairy = BooleanField('Dairy-free')
     celery = BooleanField('Celery-free')
     gluten = BooleanField('Gluten-free')
     seafood = BooleanField('Seafood-free')

@@ -82,7 +82,8 @@ values = [(1, 'celery'),
           (7, 'tree_nuts'),
           (8, 'peanuts'),
           (9, 'sesame_seeds'),
-          (10, 'soybeans')]
+          (10, 'soybeans'),
+          (11, 'dairy')]
 c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeDietTypes (
@@ -204,6 +205,7 @@ for url in second_urls:
     peanuts_allergy_added = False
     sesame_seeds_allergy_added = False
     soybeans_allergy_added = False
+    dairy_allergy_added = False
 
     is_classic = False
     is_vegan = False
@@ -228,7 +230,7 @@ for url in second_urls:
                    "croissant", "pita", "naan", "bagel", "flatbread", "cornbread", "bread",
                    "granola", "pancake", "panko breadcrumb", "soy sauce", "barley", "malt",
                    "bulger", "graham flour", "oatmeal", "flour", "rye", "semolina", "spelt",
-                   "wheat"]
+                   "wheat", "spaghetti", "lasagne"]
         for gluten in glutens:
             if gluten_allergy_added:
                 break
@@ -283,14 +285,26 @@ for url in second_urls:
             c.execute(queryrecipeallergies, (int(recipeidindex), 10))
             soybeans_allergy_added = True
 
+        # dairy_free: id=11
+        dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
+                   "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
+                   "ricotta", "cheese"]
+        for dairy in dairies:
+            if dairy_allergy_added:
+                break
+            if str(dairy) in ingred.lower():
+                c.execute(queryrecipeallergies, (int(recipeidindex), 11))
+                dairy_allergy_added = True
+
         banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
                                    "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
                                    "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
                                    "deer", "venison", "boar", "veal", "bovrin"]
         false_negatives_pescatarians = ["stock cube"]
         banned_for_vegetarians = seafoods
-        banned_for_vegans = ["egg", "milk", "cheese", "butter", "cream", "dairy", "mayonnaise", "honey", "beeswax",
-                             "gelatin", "whey", "yogurt", "yoghurt", "tapenade", "pesto", "carmine", "isinglass"]
+        banned_for_vegans = dairies.append(
+            ["egg", "dairy", "mayonnaise", "honey", "beeswax", "gelatin", "tapenade", "pesto", "carmine", "isinglass"]
+        )
 
         # Classic=1, pesc=2, vege=3, vegan=4
         if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:

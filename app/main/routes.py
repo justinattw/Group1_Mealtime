@@ -1,14 +1,15 @@
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
 from flask_wtf.csrf import CSRFError
 from markupsafe import escape
-from sqlalchemy import or_
+from sqlalchemy import and_, or_, outerjoin
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import with_polymorphic
+from sqlalchemy.orm import with_polymorphic, load_only
 
 from app import db
 from app.main.forms import AdvSearchRecipes
 # from app.models import Course, Student, Teacher, User
-from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, Allergies
+from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
+    Allergies, RecipeDietTypes
 
 bp_main = Blueprint('main', __name__)
 
@@ -73,28 +74,63 @@ def search():
 def advanced_search():
     form = AdvSearchRecipes()
     search_term = form.search_term.data
-    form.diet_type.data
-    form.celery.data
-    form.gluten.data
-    seafood = BooleanField('Seafood-free')
-    eggs = BooleanField('Eggs-free')
-    lupin = BooleanField('Lupin-free')
-    mustard = BooleanField('Mustard-free')
-    tree_nuts = BooleanField('Tree nuts-free')
-    peanuts = BooleanField('Peanuts-free')
-    sesame = BooleanField('Sesame seeds-free')
-    soybeans = BooleanField('Soybeans-free')
+
+    if form.diet_type.data == "classic":
+        diet_type = 1
+    elif form.diet_type.data == "pescatarian":
+        diet_type = 2
+    elif form.diet_type.data == "vegetarian":
+        diet_type = 3
+    else:
+        diet_type = 4
+
+    allergies = []
+    if form.celery.data:
+        allergies.append(1)
+    if form.gluten.data:
+        allergies.append(2)
+    if form.seafood.data:
+        allergies.append(3)
+    if form.eggs.data:
+        allergies.append(4)
+    if form.lupin.data:
+        allergies.append(5)
+    if form.mustard.data:
+        allergies.append(6)
+    if form.tree_nuts.data:
+        allergies.append(7)
+    if form.peanuts.data:
+        allergies.append(8)
+    if form.sesame.data:
+        allergies.append(9)
+    if form.soybeans.data:
+        allergies.append(10)
+    if form.dairy.data:
+        allergies.append(11)
 
     if request.method == 'POST' and form.validate():
+        # results = db.session.query(Recipes) \
+        #     .join(RecipeDietTypes, Recipes.recipe_id == RecipeDietTypes.recipe_id) \
+        #     .join(RecipeAllergies, Recipes.recipe_id == RecipeAllergies.recipe_id) \
+        #     .filter(RecipeDietTypes.diet_type_id >= diet_type) \
+        #     .filter(~Recipes.recipe_id.in_(blacklist)) \
+        #     .filter(Recipes.recipe_name.contains(search_term)).all()
 
+        # blacklist recipes if user does not want certain recipes
+        blacklist = db.session.query(RecipeAllergies.recipe_id) \
+            .filter(RecipeAllergies.allergy_id.in_(allergies)).distinct().subquery()
 
-        results = Recipes.query.filter(Recipes.recipe_name.contains(search_term)).all()
+        # blacklist_list = [value for value, in blacklist] # return recipe_id
+        # print(len(blacklist_list))
 
-        results = Recipes
+        results = db.session.query(Recipes) \
+            .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
+            .filter(blacklist.c.recipe_id == None) \
+            .join(RecipeDietTypes, Recipes.recipe_id == RecipeDietTypes.recipe_id) \
+            .filter(RecipeDietTypes.diet_type_id >= diet_type) \
+            .filter(Recipes.recipe_name.contains(search_term)).all()
 
         return render_template('search_results.html', results=results)
-
-        db.users.filter(or_(db.users.name == 'Ryan', db.users.country == 'England'))
 
     return render_template('advanced_search.html', form=form)
 

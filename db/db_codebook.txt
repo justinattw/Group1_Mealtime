@@ -23,6 +23,7 @@ allergy_id      name
 8               peanuts_free
 9               sesame_seeds_free
 10              soybeans_free
+11              dairy
 
 ------------------------------------------------------------------------------------------------------------------------
 # Currently we store all nutrition tags in NutritionValues table. Problem is that this is bad practice,

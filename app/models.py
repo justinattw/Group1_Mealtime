@@ -54,6 +54,9 @@ class MealPlanRecipes(db.Model):
 class RecipeAllergies(db.Model):
     __table__ = db.Model.metadata.tables['RecipeAllergies']
 
+    # def __repr__(self):
+    #     return str(self.recipe_id)
+
 class RecipeDietTypes(db.Model):
     __table__ = db.Model.metadata.tables['RecipeDietTypes']
 
