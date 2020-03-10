@@ -132,10 +132,11 @@ def delete_cookie():
     return response
 
 
-@bp_main.route('/user/<name>')
-def show_user(name):
-    user = Users.query.filter_by(first_name=name).first_or_404(description='There is no user {}'.format(name))
+@bp_main.route('/user/<userid>')
+def show_user(userid):
+    user = Users.query.filter_by(id=userid).first_or_404(description='There is no user {}'.format(userid))
     return render_template('show_user.html', user=user)
+
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
