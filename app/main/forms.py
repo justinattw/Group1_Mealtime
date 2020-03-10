@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField, IntegerField
+from wtforms import StringField, SelectField, BooleanField, IntegerField, validators
+from wtforms.fields.html5 import IntegerRangeField
 from wtforms.validators import DataRequired
 
 DIET_CHOICES = [('classic', 'Classic'),
@@ -25,5 +26,5 @@ class AdvSearchRecipes(FlaskForm):
 
 
 class CalorieSearch(FlaskForm):
-    upper_callimit = IntegerField('Enter max calories per meal (in kcal)')
-    lower_callimit = IntegerField('Enter min calories per meal (in kcal)')
+    upper_callimit = IntegerRangeField('Adjust max calories per meal (in kcal)', default=1000)
+    lower_callimit = IntegerRangeField('Adjust min calories per meal (in kcal)', default=0)
