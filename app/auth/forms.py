@@ -48,8 +48,6 @@ class EditPasswordForm(FlaskForm):
 
 class EditPreferencesForm(FlaskForm):
 
-
-
     DIET_CHOICES = [('classic', 'Classic'),
                     ('pescatarian', 'Pescatarian'),
                     ('vegetarian', 'Vegetarian'),

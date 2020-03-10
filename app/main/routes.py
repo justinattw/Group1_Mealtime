@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
-    Allergies, RecipeDietTypes, UserDietPreferences, UserAllergies
+    Allergies, RecipeDietTypes, UserDietPreferences, UserAllergies, DietTypes
 from app.main.search_functions import search_function
 
 bp_main = Blueprint('main', __name__)
@@ -63,6 +63,7 @@ def search():
         term = request.form['search_term']
 
         if current_user.is_authenticated:
+
             user_id = current_user.id
 
             diet_type, = db.session.query(UserDietPreferences.diet_type_id).filter_by(user_id=user_id).first()
@@ -93,10 +94,13 @@ def advanced_search():
 
         search_term = form.search_term.data
 
-        diet_types_dict = {"classic": 1,
-                           "pescatarian": 2,
-                           "vegetarian": 3,
-                           "vegan": 4}
+        diet_types_dict = {}
+        for dt in db.session.query(DietTypes).all():
+            dt_dict = dt.__dict__
+            key = dt_dict['diet_name']
+            value = dt_dict['diet_type_id']
+            diet_types_dict.update({key: value})
+
         diet_type = diet_types_dict[form.diet_type.data]
 
         results = search_function(search_term=search_term,

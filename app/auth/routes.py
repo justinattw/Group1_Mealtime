@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
 from app.auth.forms import SignupForm, LoginForm, EditPasswordForm, EditPreferencesForm
-from app.models import Users, UserAllergies, UserDietPreferences
+from app.models import Users, UserAllergies, UserDietPreferences, DietTypes
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -111,10 +111,13 @@ def edit_preferences():
     if request.method == 'POST' and form.validate():
         user_id = current_user.id
 
-        diet_types_dict = {"classic": 1,
-                           "pescatarian": 2,
-                           "vegetarian": 3,
-                           "vegan": 4}
+        diet_types_dict = {}
+        for dt in db.session.query(DietTypes).all():
+            dt_dict = dt.__dict__
+            key = dt_dict['diet_name']
+            value = dt_dict['diet_type_id']
+            diet_types_dict.update({key: value})
+
         diet_preference = UserDietPreferences(user_id=user_id, diet_type_id=diet_types_dict[form.diet_type.data])
 
         # Allergies responses from form
