@@ -21,6 +21,7 @@ function outputUpdate2(cals) {
             <p>
                 {{ form.upper_callimit.label }}:{{ form.upper_callimit(min=0, max=1000, oninput="outputUpdate(value)") }}
                 <output for="upper_callimit" id="selected-cals-upper">{{ form.upper_callimit.data }}</output>
+                <br>
                 {{ form.lower_callimit.label }}:
                 {{ form.lower_callimit(min=0, max=1000, oninput="outputUpdate2(value)") }}
                 <output for="upper_callimit" id="selected-cals-lower">{{ form.lower_callimit.data }}</output>
