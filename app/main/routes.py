@@ -141,13 +141,18 @@ def show_user(userid):
 @bp_main.route('/meal_planner', methods=['POST', 'GET'])
 def meal_planner():
     form = CalorieSearch()
-    upper = form.upper_callimit.data
-    lower = form.lower_callimit.data
 
-    results = db.session.query(NutritionValues) \
-        .filter(NutritionValues.recipe_id <= upper) \
-        .filter(NutritionValues.recipe_id >= lower) \
-        .all()
+    if request.method == 'POST':
+        upper = form.upper_callimit.data
+        lower = form.lower_callimit.data
+
+        results = db.session.query(NutritionValues) \
+            .filter(NutritionValues.calories <= upper) \
+            .filter(NutritionValues.calories >= lower) \
+            .all()
+
+        # return render_template('search_results.html', results=results)
+
     return render_template('meal_planner.html', form=form)
 
 # Mealplans route, query for mealplans based on logged in user_id,
