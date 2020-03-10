@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import or_
 from wtforms import StringField, PasswordField, BooleanField, SelectField
-from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
 
 from app import db
 from app.models import Users, UserAllergies, UserDietPreferences
@@ -18,7 +18,7 @@ class SignupForm(FlaskForm):
                              validators=[DataRequired(),
                                          Length(min=MIN_PW_LEN,
                                                 max=MAX_PW_LEN,
-                                                message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.')
+                                                message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'),
                                          EqualTo('confirm', message='The passwords do not match')])
     confirm = PasswordField('Confirm Password')
 

@@ -153,7 +153,7 @@ def delete_cookie():
 def meal_planner():
     form = CalorieSearch()
 
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         upper = form.upper_callimit.data
         lower = form.lower_callimit.data
 

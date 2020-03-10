@@ -25,5 +25,5 @@ class AdvSearchRecipes(FlaskForm):
 
 
 class CalorieSearch(FlaskForm):
-    upper_callimit = IntegerField('Enter max calories per meal (in kcal)', validators=[DataRequired()])
-    lower_callimit = IntegerField('Enter min calories per meal (in kcal)', validators=[DataRequired()])
+    upper_callimit = IntegerField('Enter max calories per meal (in kcal)')
+    lower_callimit = IntegerField('Enter min calories per meal (in kcal)')
