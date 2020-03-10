@@ -1,0 +1,6 @@
+{% extends "errors/base_errors.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+    <h1>Page Not Found</h1>
+    <p>Sometimes things go missing along the kitchen top. <a href="{{ url_for('main.index') }}">Go back home</a>.</p>
+{% endblock %}
