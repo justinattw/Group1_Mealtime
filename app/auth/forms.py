@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import or_
-from wtforms import StringField, PasswordField, BooleanField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 
 from app import db
@@ -25,3 +25,12 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
+
+
+class EditAccountForm(FlaskForm):
+
+    old_password = PasswordField('Old password', validators=[DataRequired()])
+    new_password = PasswordField('New password', validators=[DataRequired(),
+                                                           EqualTo('confirm_password',
+                                                                   message='The passwords do not match')])
+    confirm_password = PasswordField('Confirm password')

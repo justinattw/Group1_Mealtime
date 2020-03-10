@@ -1,11 +1,11 @@
 from urllib.parse import urlparse, urljoin
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
 from app.models import Users
-from app.auth.forms import SignupForm, LoginForm
+from app.auth.forms import SignupForm, LoginForm, EditAccountForm
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -66,6 +66,28 @@ def signup():
             flash('ERROR! Unable to register {}. Please check your details are correct and resubmit'.format(
                 form.email.data), 'error')
     return render_template('signup.html', form=form)
+
+
+@bp_auth.route('/edit_account', methods=['GET', 'POST'])
+@login_required
+def edit_account():
+    form = EditAccountForm()
+
+    if request.method == 'POST' and form.validate():
+
+        user = Users.query.filter_by(id=current_user.id).first()
+
+        if not user.check_password(form.old_password.data):
+            flash('Incorrect password')
+            return redirect(url_for('auth.edit_account'))
+
+        user.set_password(form.new_password.data)
+        db.session.commit()
+        flash('Your password has been changed.')
+        return redirect(url_for('auth.edit_account'))
+
+    return render_template('edit_account.html',
+                           form=form)
 
 
 def is_safe_url(target):
