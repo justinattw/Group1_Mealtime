@@ -120,7 +120,7 @@ def edit_preferences():
 
         diet_preference = UserDietPreferences(user_id=user_id, diet_type_id=diet_types_dict[form.diet_type.data])
 
-        # Allergies responses from form
+        # Allergies responses from form (must be in order of id)
         allergies_responses = [form.celery.data, form.gluten.data, form.seafood.data, form.eggs.data, form.lupin.data,
                                form.mustard.data, form.tree_nuts.data, form.peanuts.data, form.sesame.data,
                                form.soybeans.data, form.dairy.data]
@@ -132,11 +132,11 @@ def edit_preferences():
             UserDietPreferences.query.filter_by(user_id=user_id).delete()
             UserAllergies.query.filter_by(user_id=user_id).delete()
 
-            # Update diet_preference
+            # Re-add diet_preference
             db.session.add(diet_preference)
 
             for i in allergies_indices:
-                allergy_id = i+1
+                allergy_id = i + 1
                 db.session.add(UserAllergies(user_id=user_id, allergy_id=allergy_id))
 
             db.session.commit()
@@ -150,6 +150,15 @@ def edit_preferences():
 
 
     return render_template('edit_account/edit_preferences.html', form=form)
+
+
+# A public user profile viewer
+@bp_auth.route('/favourites')
+@login_required
+def favourites():
+    user = Users.query.filter_by(id=current_user.id) \
+        .first_or_404(description='There is no user {}'.format(current_user.id))
+    return render_template('favourites.html', user=user)
 
 
 def is_safe_url(target):

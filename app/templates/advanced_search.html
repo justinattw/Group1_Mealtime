@@ -25,7 +25,7 @@ function outputUpdate2(cals) {
                 {{ form.lower_callimit(min=0, max=1000, oninput="outputUpdate2(value)") }}
                 <output for="upper_callimit" id="selected-cals-lower">{{ form.lower_callimit.data }}</output>
             </p>
-            {{ render_field(form.diet_type, class='form-control') }}
+            {{ render_field(form.diet_type, class='form-control', placeholder='Enter recipe') }}
             {{ render_field(form.dairy, class='form-control') }}
             {{ render_field(form.celery, class='form-control') }}
             {{ render_field(form.gluten, class='form-control') }}

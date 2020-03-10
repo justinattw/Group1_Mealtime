@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{#{% import "bootstrap/wtf.html" as wtf %}#}
+
+
 {% block title %} Signup {% endblock %}
 {% from "_formhelpers.html" import render_field %}
 {% block content %}
@@ -10,6 +13,11 @@
             {{ render_field(form.email, class='form-control') }}
             {{ render_field(form.password, class='form-control') }}
             {{ render_field(form.confirm, class='form-control') }}
+{#            {{ wtf.form_field(form.first_name, class='form-control') }}#}
+{#            {{ wtf.form_field(form.last_name, class='form-control') }}#}
+{#            {{ wtf.form_field(form.email, class='form-control') }}#}
+{#            {{ wtf.form_field(form.password, class='form-control') }}#}
+{#            {{ wtf.form_field(form.confirm, class='form-control') }}#}
         </dl>
         <br>
         <button type="submit" class="btn btn-primary">Sign Up</button>

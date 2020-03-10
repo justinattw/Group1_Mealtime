@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <title>{% block title %}{{ title }}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <script>{% block script %}{{ script }}{% endblock %}</script>
 </head>
 <body>
-<nav class="navbar navbar-expand bg-primary navbar-dark">
+{#<nav class="navbar navbar-expand bg-primary navbar-dark">#}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
 
     <a class="navbar-brand" href="{{ url_for('main.index') }}">
         <picture>
@@ -21,24 +22,39 @@
 
     <!-- Navbar toggler-->
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            aria-controls="#navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-nav navbar-collapse" id="navbarNavAltMarkup">
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li>
+                <a class="nav-link" href="{{ url_for('main.recipes') }}">Recipes</a>
+            </li>
+            {# toolbar, If user not logged in then log in, else log out #}
+            {% if current_user.is_anonymous %}
+                <li>
+                    <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{{ url_for("auth.login") }}">Log in</a>
+                </li>
+            {% else %}
+                <li>
+                    <a class="nav-link" href="#">Meal Plans</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#">Auto Chef</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a>
+                </li>
+            {% endif %}
 
-        <a class="nav-link" href="{{ url_for('main.recipes') }}">Recipes</a>
-
-        {# toolbar, If user not logged in then log in, else log out #}
-        {% if current_user.is_anonymous %}
-            <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
-            <a class="nav-link" href="{{ url_for("auth.login") }}">Log in</a>
-        {% else %}
-            <a class="nav-link" href="#">Meal Plans</a>
-            <a class="nav-link" href="#">Auto Chef</a>
-            <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
-            <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a>
-        {% endif %}
+        </ul>
         {#        <ul class="navbar-nav">#}
         {#            <li class="nav-item">#}
         {#                <a class="nav-link" href="{{ url_for('main.recipes') }}">Recipes</a>#}
