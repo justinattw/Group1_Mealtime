@@ -1,3 +1,4 @@
+import shutil
 import requests
 import pprint
 from bs4 import BeautifulSoup
@@ -184,6 +185,23 @@ for url in second_urls:
     serving = serves.find('span', class_='recipe-details__text')
     name = title.text
 
+    photoplace = soup.find('div', class_='recipe-header__media').find("img")
+    if photoplace is not None:
+        photoprep = str(photoplace).split('"')
+        photoprep = photoprep[7]
+        photoprep = "https:" + photoprep
+
+    print(photoprep)
+
+    resp = requests.get(photoprep, stream=True)
+    file_path = "app/static/img/recipe_images/"
+    img_name = (file_path + str(recipeidindex) + ".jpg")
+    print(img_name)
+    local_file = open(img_name, 'wb')
+    resp.raw.decode_content = True
+    shutil.copyfileobj(resp.raw, local_file)
+    del resp
+
     # steps for database
     stepnum = 1
     for meth in method:
@@ -323,10 +341,8 @@ for url in second_urls:
         # Classic=1, pesc=2, vege=3, vegan=4
         if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
             for item in banned_for_pescatarians:
-                print(item, " compared to ", str(ingred.lower()))
                 if item in ingred.lower():
                     c.execute(queryrecipediettypes, (int(recipeidindex), 1))
-                    print("successful match")
                     is_classic = True
                 if is_classic:
                     break # break for loop if diet type is decided
@@ -556,11 +572,6 @@ for url in second_urls:
     print(f"{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
 
 print(nutritionalinfo)
-
-# Ingredients is working
-
-
-# method is mostly working (except for multiple links in methods)
 
 c.execute("""CREATE TABLE IF NOT EXISTS Users (
                                         id integer unique NOT NULL,

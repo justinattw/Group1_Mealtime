@@ -53,15 +53,15 @@ def signup():
                     email=form.email.data)
         user.set_password(form.password.data)
 
-
         try:
             db.session.add(user)
             db.session.commit()
 
+            user_id, = db.session.query(Users.id).filter_by(email=form.email.data).first()
             # Set user preferences to classic by default
-            # diet_preference = UserDietPreferences(user_id=, diet_type_id=1)
-            # db.session.add(diet_preference)
-            # db.session.commit()
+            diet_preference = UserDietPreferences(user_id=user_id, diet_type_id=1)
+            db.session.add(diet_preference)
+            db.session.commit()
 
             flash('You are now a registered user!')
 

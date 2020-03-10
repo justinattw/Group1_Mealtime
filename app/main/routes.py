@@ -62,36 +62,18 @@ def search():
     if request.method == 'POST':
         term = request.form['search_term']
 
-        try:
+        if current_user.is_authenticated:
             user_id = current_user.id
-        except:
-            user_id = None
 
-        if user_id is not None:
             diet_type, = db.session.query(UserDietPreferences.diet_type_id).filter_by(user_id=user_id).first()
-            allergies = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
+            # Query for allergies based on user_id, then turn query to list
+            allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
+            allergy_list = [value for value, in allergy_query]
 
-            print("Diet type: ", diet_type)
-            print("Allergies: ", allergies)
+            results = search_function(search_term=term, diet_type=diet_type, allergy_list=allergy_list)
 
-            celery, gluten, seafood, eggs, lupin, mustard, tree_nuts, peanuts, sesame, soybeans, dairy = False, False, False, False, False, False, False, False, False, False, False
         else:
-            diet_type=1
-            celery, gluten, seafood, eggs, lupin, mustard, tree_nuts, peanuts, sesame, soybeans, dairy = False, False, False, False, False, False, False, False, False, False, False
-
-        results = search_function(search_term=term,
-                                  diet_type=diet_type,
-                                  celery_free=celery,
-                                  gluten_free=gluten,
-                                  seafood_free=seafood,
-                                  eggs_free=eggs,
-                                  lupin_free=lupin,
-                                  mustard_free=mustard,
-                                  tree_nuts_free=tree_nuts,
-                                  peanuts_free=peanuts,
-                                  sesame_free=sesame,
-                                  soybeans_free=soybeans,
-                                  dairy_free=dairy)
+            results = search_function(search_term=term)
 
         if not results:
             flash("No recipes found.")
