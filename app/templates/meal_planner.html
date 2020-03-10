@@ -1,15 +1,49 @@
 {% extends "base.html" %}
 {% block title %}Meal Planner{% endblock %}
+{% block script %}
+function outputUpdate(cals) {
+    document.querySelector('#selected-cals-upper').value = cals;
+}
+function outputUpdate2(cals) {
+    document.querySelector('#selected-cals-lower').value = cals;
+}
+{% endblock %}
 {% block content %}
 <h1>Meal Planner</h1>
 {% from "_formhelpers.html" import render_field %}
 <form method="post" novalidate>
     {{ form.csrf_token }}
     <dl>
-        {{ render_field(form.upper_callimit, class='form-control') }}
-        {{ render_field(form.lower_callimit, class='form-control') }}
+    <p>
+        {{ form.upper_callimit.label }}:
+        {{ form.upper_callimit(min=0, max=1000, oninput="outputUpdate(value)") }}
+        <output for="upper_callimit" id="selected-cals-upper">{{ form.upper_callimit.data }}</output>
+        {{ form.lower_callimit.label }}:
+        {{ form.lower_callimit(min=0, max=1000, oninput="outputUpdate2(value)") }}
+        <output for="upper_callimit" id="selected-cals-lower">{{ form.lower_callimit.data }}</output>
+    </p>
     </dl>
     <button type="submit" class="btn btn-primary">Create meal plan</button>
 </form>
-
+{% if results|length %}
+{# Variable is not empty #}
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th scope="col">Recipe name</th>
+        <th scope="col">Calories</th>
+    </tr>
+    </thead>
+    <tbody> {% for result in results %}
+    <tr>
+        <td><a href="{{ url_for('main.view_recipe', id_num = result.recipe_id) }}">{{ result.Recipes.recipe_name }}</a></td>
+        <td>{{ result.NutritionValues.calories }}</td>
+    </tr>
+     {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{# Variable is empty #}
+<p>Meal plan empty. Please input calories to generate a meal plan</p>
+{% endif %}
 {% endblock %}
