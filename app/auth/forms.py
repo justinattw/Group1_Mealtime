@@ -6,13 +6,20 @@ from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 from app import db
 from app.models import Users, UserAllergies, UserDietPreferences
 
+# GLOBAL VARIABLES
+MIN_PW_LEN = 6
+MAX_PW_LEN = 20
 
 class SignupForm(FlaskForm):
     first_name = StringField('First name', validators=[DataRequired()])
     last_name = StringField('Last name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email(message='Valid email address required')])
     password = PasswordField('Password',
-                             validators=[DataRequired(), EqualTo('confirm', message='The passwords do not match')])
+                             validators=[DataRequired(),
+                                         Length(min=MIN_PW_LEN,
+                                                max=MAX_PW_LEN,
+                                                message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.')
+                                         EqualTo('confirm', message='The passwords do not match')])
     confirm = PasswordField('Confirm Password')
 
     def validate_email(self, email):
@@ -22,6 +29,7 @@ class SignupForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
+
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
@@ -31,8 +39,11 @@ class EditPasswordForm(FlaskForm):
 
     old_password = PasswordField('Old password', validators=[DataRequired()])
     new_password = PasswordField('New password', validators=[DataRequired(),
-                                                           EqualTo('confirm_password',
-                                                                   message='The passwords do not match')])
+                                                             Length(min=MIN_PW_LEN,
+                                                                    max=MAX_PW_LEN,
+                                                                    message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'),
+                                                             EqualTo('confirm_password',
+                                                                     message='The passwords do not match.')])
     confirm_password = PasswordField('Confirm password')
 
 class EditPreferencesForm(FlaskForm):

@@ -16,7 +16,7 @@ bp_main = Blueprint('main', __name__)
 
 @bp_main.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    return render_template('csrf_error.html', reason=e.description), 400
+    return render_template('errors/csrf_error.html', reason=e.description), 400
 
 
 @bp_main.route('/')
@@ -51,8 +51,8 @@ def view_recipe(id_num):
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
     recipes = search_function()
-    return render_template("recipes.html", recipes=recipes)
-
+    # return render_template("recipes.html", recipes=recipes)
+    return render_template("search_results.html", results=recipes)
 
 @bp_main.route('/search', methods=['POST', 'GET'])
 def search():
@@ -70,6 +70,7 @@ def search():
         if user_id is not None:
             diet_type, = db.session.query(UserDietPreferences.diet_type_id).filter_by(user_id=user_id).first()
             allergies = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
+
             print("Diet type: ", diet_type)
             print("Allergies: ", allergies)
 
@@ -141,11 +142,11 @@ def delete_cookie():
     response.set_cookie('name', '', expires=datetime.now())
     return response
 
-
-@bp_main.route('/user/<userid>')
-def show_user(userid):
-    user = Users.query.filter_by(id=userid).first_or_404(description='There is no user {}'.format(userid))
-    return render_template('account.html', user=user)
+# A public user profile viewer
+# @bp_main.route('/user/<userid>')
+# def show_user(userid):
+#     user = Users.query.filter_by(id=userid).first_or_404(description='There is no user {}'.format(userid))
+#     return render_template('account.html', user=user)
 
 
 @bp_main.route('/meal_planner', methods=['POST', 'GET'])
