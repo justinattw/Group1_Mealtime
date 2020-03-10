@@ -1,7 +1,9 @@
-from app import db
-from app.models import Recipes, RecipeAllergies, RecipeDietTypes
+from sqlalchemy import and_
 
-def search_function(search_term="", diet_type=1, allergy_list=[],
+from app import db
+from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues
+
+def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000,
                     celery_free=False,
                     gluten_free=False,
                     seafood_free=False,
@@ -53,7 +55,10 @@ def search_function(search_term="", diet_type=1, allergy_list=[],
         .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
         .filter(blacklist.c.recipe_id == None) \
         .join(RecipeDietTypes, Recipes.recipe_id == RecipeDietTypes.recipe_id) \
+        .join(NutritionValues, Recipes.recipe_id == NutritionValues.recipe_id) \
         .filter(RecipeDietTypes.diet_type_id >= diet_type) \
-        .filter(Recipes.recipe_name.contains(search_term)).all()
+        .filter(Recipes.recipe_name.contains(search_term)) \
+        .filter(and_(NutritionValues.calories >= min_cal,
+                     NutritionValues.calories <= max_cal)).all()
 
     return results

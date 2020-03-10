@@ -101,6 +101,8 @@ def advanced_search():
 
         results = search_function(search_term=search_term,
                                   diet_type=diet_type,
+                                  min_cal=form.lower_callimit.data,
+                                  max_cal=form.upper_callimit.data,
                                   celery_free=form.celery.data,
                                   gluten_free=form.gluten.data,
                                   seafood_free=form.seafood.data,
