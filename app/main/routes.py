@@ -70,6 +70,7 @@ def search():
         if user_id is not None:
             diet_type, = db.session.query(UserDietPreferences.diet_type_id).filter_by(user_id=user_id).first()
             allergies = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
+
             print("Diet type: ", diet_type)
             print("Allergies: ", allergies)
 
