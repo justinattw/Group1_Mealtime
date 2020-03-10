@@ -312,7 +312,7 @@ for url in second_urls:
         banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
                                    "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
                                    "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
-                                   "deer", "venison", "boar", "veal", "bovrin"]
+                                   "deer", "venison", "boar", "veal", "bovrin", "steak"]
         false_negatives_pescatarians = ["stock cube"]
         banned_for_vegetarians = seafoods
         banned_for_vegans = dairies
