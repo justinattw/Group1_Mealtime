@@ -1,11 +1,12 @@
 from urllib.parse import urlparse, urljoin
-from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
+
+from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
-from app.models import Users
-from app.auth.forms import SignupForm, LoginForm, EditPasswordForm
+from app.auth.forms import SignupForm, LoginForm, EditPasswordForm, EditPreferencesForm
+from app.models import Users, UserAllergies, UserDietPreferences
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -52,9 +53,16 @@ def signup():
                     email=form.email.data)
         user.set_password(form.password.data)
 
+
         try:
             db.session.add(user)
             db.session.commit()
+
+            # Set user preferences to classic by default
+            # diet_preference = UserDietPreferences(user_id=, diet_type_id=1)
+            # db.session.add(diet_preference)
+            # db.session.commit()
+
             flash('You are now a registered user!')
 
             # Set cookie and return to main, if successful
@@ -91,10 +99,54 @@ def edit_password():
         user.set_password(form.new_password.data)
         db.session.commit()
         flash('Your password has been changed.')
-        return redirect(url_for('auth.edit_password'))
+        return redirect(url_for('auth.account'))
 
-    return render_template('edit_password.html',
-                           form=form)
+    return render_template('edit_account/edit_password.html', form=form)
+
+@bp_auth.route('/edit_preferences', methods=['GET', 'POST'])
+@login_required
+def edit_preferences():
+    form = EditPreferencesForm()
+
+    if request.method == 'POST' and form.validate():
+        user_id = current_user.id
+
+        diet_types_dict = {"classic": 1,
+                           "pescatarian": 2,
+                           "vegetarian": 3,
+                           "vegan": 4}
+        diet_preference = UserDietPreferences(user_id=user_id, diet_type_id=diet_types_dict[form.diet_type.data])
+
+        # Allergies responses from form
+        allergies_responses = [form.celery.data, form.gluten.data, form.seafood.data, form.eggs.data, form.lupin.data,
+                               form.mustard.data, form.tree_nuts.data, form.peanuts.data, form.sesame.data,
+                               form.soybeans.data, form.dairy.data]
+        # If allergy response is True, add index to this list
+        allergies_indices = [i for i, x in enumerate(allergies_responses) if x]
+
+        try:
+            # Remove all diet preferences
+            UserDietPreferences.query.filter_by(user_id=user_id).delete()
+            UserAllergies.query.filter_by(user_id=user_id).delete()
+
+            # Update diet_preference
+            db.session.add(diet_preference)
+
+            for i in allergies_indices:
+                allergy_id = i+1
+                db.session.add(UserAllergies(user_id=user_id, allergy_id=allergy_id))
+
+            db.session.commit()
+
+        except IntegrityError:
+            db.session.rollback()
+            flash('ERROR! Unable to make preference changes. Please try again.')
+
+        flash('Your food preferences have been updated.')
+        return redirect(url_for('auth.account'))
+
+
+    return render_template('edit_account/edit_preferences.html', form=form)
 
 
 def is_safe_url(target):

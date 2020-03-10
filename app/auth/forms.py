@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import or_
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SelectField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 
 from app import db
-from app.models import Users
+from app.models import Users, UserAllergies, UserDietPreferences
 
 
 class SignupForm(FlaskForm):
@@ -34,3 +34,25 @@ class EditPasswordForm(FlaskForm):
                                                            EqualTo('confirm_password',
                                                                    message='The passwords do not match')])
     confirm_password = PasswordField('Confirm password')
+
+class EditPreferencesForm(FlaskForm):
+
+
+
+    DIET_CHOICES = [('classic', 'Classic'),
+                    ('pescatarian', 'Pescatarian'),
+                    ('vegetarian', 'Vegetarian'),
+                    ('vegan', 'Vegan')]
+
+    diet_type = SelectField('Diet type', choices=DIET_CHOICES)
+    dairy = BooleanField('Dairy-free')
+    celery = BooleanField('Celery-free')
+    gluten = BooleanField('Gluten-free')
+    seafood = BooleanField('Seafood-free')
+    eggs = BooleanField('Eggs-free')
+    lupin = BooleanField('Lupin-free')
+    mustard = BooleanField('Mustard-free')
+    tree_nuts = BooleanField('Tree nuts-free')
+    peanuts = BooleanField('Peanuts-free')
+    sesame = BooleanField('Sesame seeds-free')
+    soybeans = BooleanField('Soybeans-free')

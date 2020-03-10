@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Edit Preferences{% endblock %}
+
+{% block content %}
+    {% from "_formhelpers.html" import render_field %}
+    <form method=post novalidate>
+        {{ form.csrf_token }}
+        <dl>
+            {{ render_field(form.diet_type, class='form-control') }}
+            {{ render_field(form.dairy, class='form-control') }}
+            {{ render_field(form.celery, class='form-control') }}
+            {{ render_field(form.gluten, class='form-control') }}
+            {{ render_field(form.seafood, class='form-control') }}
+            {{ render_field(form.eggs, class='form-control') }}
+            {{ render_field(form.lupin, class='form-control') }}
+            {{ render_field(form.mustard, class='form-control') }}
+            {{ render_field(form.tree_nuts, class='form-control') }}
+            {{ render_field(form.peanuts, class='form-control') }}
+            {{ render_field(form.sesame, class='form-control') }}
+            {{ render_field(form.soybeans, class='form-control') }}
+        </dl>
+        <br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}

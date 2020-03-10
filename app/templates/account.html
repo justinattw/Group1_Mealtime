@@ -5,7 +5,6 @@
 <h1>Account details for {{ user.first_name }} {{ user.last_name }}</h1>
 <p>Email: {{ user.email }}</p>
 <a class="nav-link" href="{{ url_for("auth.edit_password") }}">Edit password</a>
-
-
+<a class="nav-link" href="{{ url_for("auth.edit_preferences") }}">Edit food preferences</a>
 
 {% endblock %}

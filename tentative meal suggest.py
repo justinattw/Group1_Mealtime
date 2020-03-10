@@ -17,7 +17,7 @@ maxcooktime = 60
 WeeklyCalorieCount.append(meal)
 CalorieLimit = []
 CalorieLimit.append(desiredcount)
-i=0
+i = 0
 shoppinglist = []
 recipeids = []
 
@@ -81,7 +81,6 @@ while WeeklyCalorieCount[i] <= desiredcount:
             andthen = c.execute(titlequerystem, recipe[0])
 
     i=i+1
-
 
     for r in recipe:
         ingredients = c.execute(ingredientquerystem, r)
