@@ -106,7 +106,7 @@ def search():
 def advanced_search():
     form = AdvSearchRecipes()
 
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
 
         search_term = form.search_term.data
 
@@ -152,18 +152,20 @@ def show_user(userid):
 def meal_planner():
     form = CalorieSearch()
 
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate():
         upper = form.upper_callimit.data
         lower = form.lower_callimit.data
 
-        results = db.session.query(NutritionValues) \
+        results = db.session.query(Recipes, NutritionValues) \
+            .join(NutritionValues) \
             .filter(NutritionValues.calories <= upper) \
             .filter(NutritionValues.calories >= lower) \
             .all()
 
-        # return render_template('search_results.html', results=results)
+        return render_template('meal_planner.html', form=form, results=results)
 
-    return render_template('meal_planner.html', form=form)
+    else:
+        return render_template('meal_planner.html', form=form)
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')

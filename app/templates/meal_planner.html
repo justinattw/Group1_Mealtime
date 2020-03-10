@@ -11,5 +11,25 @@
     </dl>
     <button type="submit" class="btn btn-primary">Create meal plan</button>
 </form>
-
+{% if results|length %}
+{# Variable is not empty #}
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th scope="col">Recipe name</th>
+        <th scope="col">Calories</th>
+    </tr>
+    </thead>
+    <tbody> {% for result in results %}
+    <tr>
+        <td><a href="{{ url_for('main.view_recipe', id_num = result.recipe_id) }}">{{ result.Recipes.recipe_name }}</a></td>
+        <td>{{ result.NutritionValues.calories }}</td>
+    </tr>
+     {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{# Variable is empty #}
+<p>Meal plan empty. Please input calories to generate a meal plan</p>
+{% endif %}
 {% endblock %}
