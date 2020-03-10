@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {# Add the title for this page #}
 {% block title %}Advanced Search{% endblock %}
+
+{% block script %}
+function outputUpdate(cals) {
+    document.querySelector('#selected-cals-upper').value = cals;
+}
+function outputUpdate2(cals) {
+    document.querySelector('#selected-cals-lower').value = cals;
+}
+{% endblock %}
 {# Add the content for this page #}
 
 {% block content %}
@@ -9,6 +18,13 @@
         {{ form.csrf_token }}
         <dl>
             {{ render_field(form.search_term, class='form-control') }}
+            <p>
+                {{ form.upper_callimit.label }}:{{ form.upper_callimit(min=0, max=1000, oninput="outputUpdate(value)") }}
+                <output for="upper_callimit" id="selected-cals-upper">{{ form.upper_callimit.data }}</output>
+                {{ form.lower_callimit.label }}:
+                {{ form.lower_callimit(min=0, max=1000, oninput="outputUpdate2(value)") }}
+                <output for="upper_callimit" id="selected-cals-lower">{{ form.lower_callimit.data }}</output>
+            </p>
             {{ render_field(form.diet_type, class='form-control') }}
             {{ render_field(form.dairy, class='form-control') }}
             {{ render_field(form.celery, class='form-control') }}

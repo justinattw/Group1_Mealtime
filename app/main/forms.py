@@ -23,8 +23,6 @@ class AdvSearchRecipes(FlaskForm):
     peanuts = BooleanField('Peanuts-free')
     sesame = BooleanField('Sesame seeds-free')
     soybeans = BooleanField('Soybeans-free')
-
-
-class CalorieSearch(FlaskForm):
+    # Fields for upper and lower calorie limits
     upper_callimit = IntegerRangeField('Adjust max calories per meal (in kcal)', default=1000)
     lower_callimit = IntegerRangeField('Adjust min calories per meal (in kcal)', default=0)

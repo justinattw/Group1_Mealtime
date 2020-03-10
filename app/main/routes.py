@@ -6,7 +6,7 @@ from sqlalchemy import outerjoin
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.main.forms import AdvSearchRecipes, CalorieSearch
+from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
     Allergies, RecipeDietTypes, UserDietPreferences, UserAllergies
 from app.main.search_functions import search_function
