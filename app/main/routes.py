@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
-    Allergies, RecipeDietTypes, UserDietPreferences, UserAllergies, DietTypes
+    Allergies, UserDietPreferences, UserAllergies, DietTypes
 from app.main.search_functions import search_function
 
 bp_main = Blueprint('main', __name__)
@@ -65,7 +65,6 @@ def search():
         if current_user.is_authenticated:
 
             user_id = current_user.id
-
             diet_type, = db.session.query(UserDietPreferences.diet_type_id).filter_by(user_id=user_id).first()
             # Query for allergies based on user_id, then turn query to list
             allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
@@ -94,30 +93,14 @@ def advanced_search():
 
         search_term = form.search_term.data
 
-        diet_types_dict = {}
-        for dt in db.session.query(DietTypes).all():
-            dt_dict = dt.__dict__
-            key = dt_dict['diet_name']
-            value = dt_dict['diet_type_id']
-            diet_types_dict.update({key: value})
-
-        diet_type = diet_types_dict[form.diet_type.data]
+        allergy_list = list(map(int, form.allergies.data))
+        diet_type = int(form.diet_type.data)
 
         results = search_function(search_term=search_term,
                                   diet_type=diet_type,
                                   min_cal=form.lower_callimit.data,
                                   max_cal=form.upper_callimit.data,
-                                  celery_free=form.celery.data,
-                                  gluten_free=form.gluten.data,
-                                  seafood_free=form.seafood.data,
-                                  eggs_free=form.eggs.data,
-                                  lupin_free=form.lupin.data,
-                                  mustard_free=form.mustard.data,
-                                  tree_nuts_free=form.tree_nuts.data,
-                                  peanuts_free=form.peanuts.data,
-                                  sesame_free=form.sesame.data,
-                                  soybeans_free=form.soybeans.data,
-                                  dairy_free=form.dairy.data)
+                                  allergy_list=allergy_list)
 
         return render_template('search_results.html', results=results)
 

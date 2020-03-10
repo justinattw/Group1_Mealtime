@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import or_
-from wtforms import StringField, PasswordField, BooleanField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
 
 from app import db
@@ -48,20 +48,22 @@ class EditPasswordForm(FlaskForm):
 
 class EditPreferencesForm(FlaskForm):
 
-    DIET_CHOICES = [('classic', 'Classic'),
-                    ('pescatarian', 'Pescatarian'),
-                    ('vegetarian', 'Vegetarian'),
-                    ('vegan', 'Vegan')]
+    DIET_CHOICES = [(1, 'Classic'),
+                    (2, 'Pescatarian'),
+                    (3, 'Vegetarian'),
+                    (4, 'Vegan')]
+
+    ALLERGY_CHOICES = [(11, 'Dairy-free'),
+                       (1, 'Celery-free'),
+                       (2, 'Gluten-free'),
+                       (3, 'Seafood-free'),
+                       (4, 'Eggs-free'),
+                       (5, 'Lupin-free'),
+                       (6, 'Mustard-free'),
+                       (7, 'Tree nuts-free'),
+                       (8, 'Peanuts-free'),
+                       (9, 'Sesame-free'),
+                       (10, 'Soybeans-free')]
 
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
-    dairy = BooleanField('Dairy-free')
-    celery = BooleanField('Celery-free')
-    gluten = BooleanField('Gluten-free')
-    seafood = BooleanField('Seafood-free')
-    eggs = BooleanField('Eggs-free')
-    lupin = BooleanField('Lupin-free')
-    mustard = BooleanField('Mustard-free')
-    tree_nuts = BooleanField('Tree nuts-free')
-    peanuts = BooleanField('Peanuts-free')
-    sesame = BooleanField('Sesame seeds-free')
-    soybeans = BooleanField('Soybeans-free')
+    allergies = SelectMultipleField(u'Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)

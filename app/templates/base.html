@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <script>{% block script %}{{ script }}{% endblock %}</script>
 </head>
+
+{#{% extends "bootstrap/base.html" %}#}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
 <body>
 {#<nav class="navbar navbar-expand bg-primary navbar-dark">#}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -74,6 +79,7 @@
     </div>
 </nav>
 <br>
+
 <div role=main class="container">
     {# Displays flashed messages on a page #}
     {% with messages = get_flashed_messages() %}

@@ -108,35 +108,23 @@ def edit_password():
 def edit_preferences():
     form = EditPreferencesForm()
 
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         user_id = current_user.id
 
-        diet_types_dict = {}
-        for dt in db.session.query(DietTypes).all():
-            dt_dict = dt.__dict__
-            key = dt_dict['diet_name']
-            value = dt_dict['diet_type_id']
-            diet_types_dict.update({key: value})
-
-        diet_preference = UserDietPreferences(user_id=user_id, diet_type_id=diet_types_dict[form.diet_type.data])
-
-        # Allergies responses from form (must be in order of id)
-        allergies_responses = [form.celery.data, form.gluten.data, form.seafood.data, form.eggs.data, form.lupin.data,
-                               form.mustard.data, form.tree_nuts.data, form.peanuts.data, form.sesame.data,
-                               form.soybeans.data, form.dairy.data]
-        # If allergy response is True, add index to this list
-        allergies_indices = [i for i, x in enumerate(allergies_responses) if x]
+        # Turn allergy list into integers
+        allergy_list = list(map(int, form.allergies.data))
+        diet_type_id = int(form.diet_type.data)
 
         try:
-            # Remove all diet preferences
+            # Remove all diet preferences for user
             UserDietPreferences.query.filter_by(user_id=user_id).delete()
             UserAllergies.query.filter_by(user_id=user_id).delete()
 
             # Re-add diet_preference
-            db.session.add(diet_preference)
+            db.session.add(UserDietPreferences(user_id=user_id, diet_type_id=diet_type_id))
 
-            for i in allergies_indices:
-                allergy_id = i + 1
+            # For each allergy identified, add to db
+            for allergy_id in allergy_list:
                 db.session.add(UserAllergies(user_id=user_id, allergy_id=allergy_id))
 
             db.session.commit()
@@ -147,7 +135,6 @@ def edit_preferences():
 
         flash('Your food preferences have been updated.')
         return redirect(url_for('auth.account'))
-
 
     return render_template('edit_account/edit_preferences.html', form=form)
 

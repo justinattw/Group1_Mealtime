@@ -4,6 +4,8 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from config import DevConfig
 
+from flask_bootstrap import Bootstrap
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 
@@ -23,6 +25,7 @@ def create_app(config_class=DevConfig):
     :return: A Flask object
     """
     app = Flask(__name__)
+    Bootstrap(app)
     app.config.from_object(config_class)
 
     db.init_app(app)

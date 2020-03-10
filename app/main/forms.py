@@ -1,28 +1,31 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField, IntegerField, validators
+from wtforms import StringField, SelectField, BooleanField, IntegerField, SelectMultipleField
 from wtforms.fields.html5 import IntegerRangeField
 from wtforms.validators import DataRequired
 
-DIET_CHOICES = [('classic', 'Classic'),
-                ('pescatarian', 'Pescatarian'),
-                ('vegetarian', 'Vegetarian'),
-                ('vegan', 'Vegan')]
+DIET_CHOICES = [(1, 'Classic'),
+                (2, 'Pescatarian'),
+                (3, 'Vegetarian'),
+                (4, 'Vegan')]
+
+ALLERGY_CHOICES = [(11, 'Dairy-free'),
+                   (1, 'Celery-free'),
+                   (2, 'Gluten-free'),
+                   (3, 'Seafood-free'),
+                   (4, 'Eggs-free'),
+                   (5, 'Lupin-free'),
+                   (6, 'Mustard-free'),
+                   (7, 'Tree nuts-free'),
+                   (8, 'Peanuts-free'),
+                   (9, 'Sesame-free'),
+                   (10, 'Soybeans-free')]
 
 
 class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
-    dairy = BooleanField('Dairy-free')
-    celery = BooleanField('Celery-free')
-    gluten = BooleanField('Gluten-free')
-    seafood = BooleanField('Seafood-free')
-    eggs = BooleanField('Eggs-free')
-    lupin = BooleanField('Lupin-free')
-    mustard = BooleanField('Mustard-free')
-    tree_nuts = BooleanField('Tree nuts-free')
-    peanuts = BooleanField('Peanuts-free')
-    sesame = BooleanField('Sesame seeds-free')
-    soybeans = BooleanField('Soybeans-free')
     # Fields for upper and lower calorie limits
     upper_callimit = IntegerRangeField('Adjust max calories per meal (in kcal)', default=1000)
     lower_callimit = IntegerRangeField('Adjust min calories per meal (in kcal)', default=0)
+
+    allergies = SelectMultipleField(u'Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)
