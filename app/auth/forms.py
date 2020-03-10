@@ -53,8 +53,7 @@ class EditPreferencesForm(FlaskForm):
                     (3, 'Vegetarian'),
                     (4, 'Vegan')]
 
-    ALLERGY_CHOICES = [(11, 'Dairy-free'),
-                       (1, 'Celery-free'),
+    ALLERGY_CHOICES = [(1, 'Dairy-free'),
                        (2, 'Gluten-free'),
                        (3, 'Seafood-free'),
                        (4, 'Eggs-free'),
@@ -63,7 +62,8 @@ class EditPreferencesForm(FlaskForm):
                        (7, 'Tree nuts-free'),
                        (8, 'Peanuts-free'),
                        (9, 'Sesame-free'),
-                       (10, 'Soybeans-free')]
+                       (10, 'Soybeans-free'),
+                       (11, 'Celery-free')]
 
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
     allergies = SelectMultipleField(u'Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)

@@ -17,7 +17,7 @@ function outputUpdate2(cals) {
     <form method=post novalidate>
         {{ form.csrf_token }}
         <dl>
-            {{ render_field(form.search_term, class='form-control') }}
+            {{ wtf.form_field(form.search_term, class='form-control') }}
             <p>
                 {{ form.upper_callimit.label }}:{{ form.upper_callimit(min=0, max=1000, oninput="outputUpdate(value)") }}
                 <output for="upper_callimit" id="selected-cals-upper">{{ form.upper_callimit.data }}</output>

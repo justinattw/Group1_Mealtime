@@ -8,8 +8,7 @@ DIET_CHOICES = [(1, 'Classic'),
                 (3, 'Vegetarian'),
                 (4, 'Vegan')]
 
-ALLERGY_CHOICES = [(11, 'Dairy-free'),
-                   (1, 'Celery-free'),
+ALLERGY_CHOICES = [(1, 'Dairy-free'),
                    (2, 'Gluten-free'),
                    (3, 'Seafood-free'),
                    (4, 'Eggs-free'),
@@ -18,7 +17,8 @@ ALLERGY_CHOICES = [(11, 'Dairy-free'),
                    (7, 'Tree nuts-free'),
                    (8, 'Peanuts-free'),
                    (9, 'Sesame-free'),
-                   (10, 'Soybeans-free')]
+                   (10, 'Soybeans-free'),
+                   (11, 'Celery-free')]
 
 
 class AdvSearchRecipes(FlaskForm):

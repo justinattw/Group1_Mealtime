@@ -250,10 +250,16 @@ for url in second_urls:
         print(ingred)
         c.execute(queryingredients, (int(ingredientindex), int(recipeidindex), str(ingred)))
 
-        # celery_free: id=1
-        if ("celery" in ingred.lower()) and (celery_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 1))
-            celery_allergy_added = True
+        # dairy_free: id=1
+        dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
+                   "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
+                   "ricotta", "cheese"]
+        for dairy in dairies:
+            if dairy_allergy_added:
+                break
+            if str(dairy) in ingred.lower():
+                c.execute(queryrecipeallergies, (int(recipeidindex), 1))
+                dairy_allergy_added = True
 
         # gluten_free: id=2
         glutens = ["pasta", "ravioli", "dumpling", "couscous", "gnocchi",
@@ -315,17 +321,10 @@ for url in second_urls:
         if ("soy" in ingred.lower()) and (soybeans_allergy_added == False):
             c.execute(queryrecipeallergies, (int(recipeidindex), 10))
             soybeans_allergy_added = True
-
-        # dairy_free: id=11
-        dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
-                   "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
-                   "ricotta", "cheese"]
-        for dairy in dairies:
-            if dairy_allergy_added:
-                break
-            if str(dairy) in ingred.lower():
-                c.execute(queryrecipeallergies, (int(recipeidindex), 11))
-                dairy_allergy_added = True
+        # celery_free: id=11
+        if ("celery" in ingred.lower()) and (celery_allergy_added == False):
+            c.execute(queryrecipeallergies, (int(recipeidindex), 11))
+            celery_allergy_added = True
 
         banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
                                    "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",

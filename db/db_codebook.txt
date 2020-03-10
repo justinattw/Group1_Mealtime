@@ -13,17 +13,17 @@ diet_type_id    name
 TABLE Allergies
 
 allergy_id      name
-1               celery_free
-2               gluten_free
-3               seafood_free
-4               eggs_free
-5               lupin_free
-6               mustard_free
-7               tree_nuts_free
-8               peanuts_free
-9               sesame_seeds_free
-10              soybeans_free
-11              dairy
+1               dairy
+2               gluten
+3               seafood
+4               eggs
+5               lupin
+6               mustard
+7               tree_nuts
+8               peanuts
+9               sesame_seeds
+10              soybeans
+11              celery
 
 ------------------------------------------------------------------------------------------------------------------------
 # Currently we store all nutrition tags in NutritionValues table. Problem is that this is bad practice,
