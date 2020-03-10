@@ -2,6 +2,7 @@
 {% block title %}Meal Planner{% endblock %}
 {% block content %}
 <h1>Meal Planner</h1>
+{% from "_formhelpers.html" import render_field %}
 <form method="post" novalidate>
     {{ form.csrf_token }}
     <dl>

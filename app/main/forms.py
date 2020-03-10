@@ -1,10 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField
+from wtforms import StringField, SelectField, BooleanField, IntegerField
 
 DIET_CHOICES = [('classic', 'Classic'),
                 ('pescatarian', 'Pescatarian'),
                 ('vegetarian', 'Vegetarian'),
                 ('vegan', 'Vegan')]
+
 
 class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
@@ -20,3 +21,7 @@ class AdvSearchRecipes(FlaskForm):
     peanuts = BooleanField('Peanuts-free')
     sesame = BooleanField('Sesame seeds-free')
     soybeans = BooleanField('Soybeans-free')
+
+
+class CalorieSearch(FlaskForm):
+    calories = IntegerField('Enter desired calories for the week (in kcal)')

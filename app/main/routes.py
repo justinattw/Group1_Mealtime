@@ -5,7 +5,7 @@ from sqlalchemy import outerjoin
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.main.forms import AdvSearchRecipes
+from app.main.forms import AdvSearchRecipes, CalorieSearch
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
     Allergies, RecipeDietTypes
 
@@ -137,6 +137,11 @@ def show_user(userid):
     user = Users.query.filter_by(id=userid).first_or_404(description='There is no user {}'.format(userid))
     return render_template('show_user.html', user=user)
 
+
+@bp_main.route('/meal_planner', methods=['POST', 'GET'])
+def meal_planner():
+    form = CalorieSearch()
+    return render_template('meal_planner.html', form=form)
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
