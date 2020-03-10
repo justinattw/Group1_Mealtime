@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
 from app.models import Users
-from app.auth.forms import SignupForm, LoginForm, EditAccountForm
+from app.auth.forms import SignupForm, LoginForm, EditPasswordForm
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -68,25 +68,32 @@ def signup():
     return render_template('signup.html', form=form)
 
 
-@bp_auth.route('/edit_account', methods=['GET', 'POST'])
+@bp_auth.route('/account')
 @login_required
-def edit_account():
-    form = EditAccountForm()
+def account():
+    user = Users.query.filter_by(id=current_user.id).first_or_404(description='There is no user {}'.format(current_user.id))
+    return render_template('account.html', user=user)
+
+
+@bp_auth.route('/edit_password', methods=['GET', 'POST'])
+@login_required
+def edit_password():
+    form = EditPasswordForm()
 
     if request.method == 'POST' and form.validate():
 
         user = Users.query.filter_by(id=current_user.id).first()
 
         if not user.check_password(form.old_password.data):
-            flash('Incorrect password')
-            return redirect(url_for('auth.edit_account'))
+            flash('Incorrect old password')
+            return redirect(url_for('auth.edit_password'))
 
         user.set_password(form.new_password.data)
         db.session.commit()
         flash('Your password has been changed.')
-        return redirect(url_for('auth.edit_account'))
+        return redirect(url_for('auth.edit_password'))
 
-    return render_template('edit_account.html',
+    return render_template('edit_password.html',
                            form=form)
 
 

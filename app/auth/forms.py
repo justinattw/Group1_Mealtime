@@ -27,7 +27,7 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember me')
 
 
-class EditAccountForm(FlaskForm):
+class EditPasswordForm(FlaskForm):
 
     old_password = PasswordField('Old password', validators=[DataRequired()])
     new_password = PasswordField('New password', validators=[DataRequired(),

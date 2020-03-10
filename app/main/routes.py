@@ -135,7 +135,7 @@ def delete_cookie():
 @bp_main.route('/user/<userid>')
 def show_user(userid):
     user = Users.query.filter_by(id=userid).first_or_404(description='There is no user {}'.format(userid))
-    return render_template('show_user.html', user=user)
+    return render_template('account.html', user=user)
 
 
 @bp_main.route('/meal_planner', methods=['POST', 'GET'])
