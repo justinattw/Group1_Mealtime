@@ -132,26 +132,6 @@ def delete_cookie():
 #     user = Users.query.filter_by(id=userid).first_or_404(description='There is no user {}'.format(userid))
 #     return render_template('account.html', user=user)
 
-
-@bp_main.route('/meal_planner', methods=['POST', 'GET'])
-def meal_planner():
-    form = CalorieSearch()
-
-    if request.method == 'POST':
-        upper = form.upper_callimit.data
-        lower = form.lower_callimit.data
-
-        results = db.session.query(Recipes, NutritionValues) \
-            .join(NutritionValues) \
-            .filter(NutritionValues.calories <= upper) \
-            .filter(NutritionValues.calories >= lower) \
-            .all()
-
-        return render_template('meal_planner.html', form=form, results=results)
-
-    else:
-        return render_template('meal_planner.html', form=form)
-
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
 # def mealplans(name):
