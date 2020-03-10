@@ -24,4 +24,5 @@ class AdvSearchRecipes(FlaskForm):
 
 
 class CalorieSearch(FlaskForm):
-    calories = IntegerField('Enter desired calories for the week (in kcal)')
+    upper_callimit = IntegerField('Enter max calories per meal (in kcal)')
+    lower_callimit = IntegerField('Enter min calories per meal (in kcal)')
