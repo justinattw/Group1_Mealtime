@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField, IntegerField, SelectMultipleField
+from wtforms import StringField, SelectField, SelectMultipleField
 from wtforms.fields.html5 import IntegerRangeField
 from wtforms.validators import DataRequired
 
@@ -22,10 +22,14 @@ ALLERGY_CHOICES = [(1, 'Dairy-free'),
 
 
 class AdvSearchRecipes(FlaskForm):
+    """
+    AdvSearchRecipes Form takes in different
+    """
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
+
     # Fields for upper and lower calorie limits
     upper_callimit = IntegerRangeField('Adjust max calories per meal (in kcal)', default=1000)
     lower_callimit = IntegerRangeField('Adjust min calories per meal (in kcal)', default=0)
 
-    allergies = SelectMultipleField(u'Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)
+    allergies = SelectMultipleField('Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)

@@ -6,6 +6,9 @@ import re
 import urllib3
 import sqlite3
 from sqlite3 import Error
+import time
+
+start_time = time.time()
 
 db = sqlite3.connect("db/mealtime.sqlite", isolation_level=None)
 c = db.cursor()
@@ -165,6 +168,8 @@ nutritionindex = 0
 
 for url in second_urls:
 
+    interim_time = time.time()
+
     queryrecipes = "insert into Recipes values (?, ?, ?, ?, ?, ?, ?)"
     queryingredients = "insert into RecipeIngredients values (?, ?, ?)"
     querynutrition = "insert into NutritionValues values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -226,22 +231,34 @@ for url in second_urls:
         recipestepsindex = recipestepsindex + 1
         stepnum = stepnum + 1
 
+    dairy_allergy_added = False
+    dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
+               "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
+               "ricotta", "cheese"]
     celery_allergy_added = False
     gluten_allergy_added = False
+    glutens = ["pasta", "ravioli", "dumpling", "couscous", "gnocchi",
+               "ramen", "udon", "soba", "chow mein",
+               "croissant", "pita", "naan", "bagel", "flatbread", "cornbread", "bread",
+               "granola", "pancake", "panko breadcrumb", "soy sauce", "barley", "malt",
+               "bulger", "graham flour", "oatmeal", "flour", "rye", "semolina", "spelt",
+               "wheat", "spaghetti", "lasagne"]
     seafood_allergy_added = False
+    seafoods = ["fish", "squid", "octopus", "fish", "snail", "mussel", "clam", "oyster", "scallop", "whelk",
+                "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
+                "tuna", "haddock", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
+                "calamari", "miso", "dashi", "takoyaki", "mackarel", "mackerel", "sea bass", "shark", "caviar",
+                "snapper"]
     egg_allergy_added = False
     lupin_allergy_added = False
     mustard_allergy_added = False
     tree_nuts_allergy_added = False
+    tree_nuts = ["almond", "brazil", "cashew", "chestnut", "filbert", "hazelnut", "hickory", "macadamia", "pecan",
+                 "pine", "pistachio", "walnut"]
     peanuts_allergy_added = False
     sesame_seeds_allergy_added = False
     soybeans_allergy_added = False
-    dairy_allergy_added = False
 
-    is_classic = False
-    is_vegan = False
-    is_vegetarian = False
-    is_pescatarian = False
 
     for ingredient in ingredients:
         ing = str(ingredient).split('"')
@@ -251,9 +268,6 @@ for url in second_urls:
         c.execute(queryingredients, (int(ingredientindex), int(recipeidindex), str(ingred)))
 
         # dairy_free: id=1
-        dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
-                   "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
-                   "ricotta", "cheese"]
         for dairy in dairies:
             if dairy_allergy_added:
                 break
@@ -262,12 +276,6 @@ for url in second_urls:
                 dairy_allergy_added = True
 
         # gluten_free: id=2
-        glutens = ["pasta", "ravioli", "dumpling", "couscous", "gnocchi",
-                   "ramen", "udon", "soba", "chow mein",
-                   "croissant", "pita", "naan", "bagel", "flatbread", "cornbread", "bread",
-                   "granola", "pancake", "panko breadcrumb", "soy sauce", "barley", "malt",
-                   "bulger", "graham flour", "oatmeal", "flour", "rye", "semolina", "spelt",
-                   "wheat", "spaghetti", "lasagne"]
         for gluten in glutens:
             if gluten_allergy_added:
                 break
@@ -276,10 +284,6 @@ for url in second_urls:
                 gluten_allergy_added = True
 
         # seafood_free: id=3
-        seafoods = ["squid", "octopus", "fish", "snail", "mussel", "clam", "oyster", "scallop", "whelk",
-                    "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
-                    "tuna", "haddock", "sea", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
-                    "calamari", "miso", "dashi", "takoyaki", "mackarel", "sea bass", "shark", "caviar"]
         for seafood in seafoods:
             if seafood_allergy_added:
                 break
@@ -301,7 +305,6 @@ for url in second_urls:
             mustard_allergy_added = True
 
         # tree_nuts_free: id=7
-        tree_nuts = ["almond", "brazil", "cashew", "chestnut", "filbert", "hazelnut", "hickory", "macadamia", "pecan", "pine", "pistachio", "walnut"]
         for nut in tree_nuts:
             if tree_nuts_allergy_added:
                 break
@@ -326,46 +329,69 @@ for url in second_urls:
             c.execute(queryrecipeallergies, (int(recipeidindex), 11))
             celery_allergy_added = True
 
-        banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
-                                   "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
-                                   "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
-                                   "deer", "venison", "boar", "veal", "bovrin", "steak"]
-        false_negatives_pescatarians = ["stock cube"]
-        banned_for_vegetarians = seafoods
-        banned_for_vegans = dairies
-        banned_for_vegans.extend(
-            ["egg", "dairy", "mayonnaise", "honey", "beeswax", "gelatin", "tapenade", "pesto", "carmine", "isinglass"]
-        )
+        ingredientindex = ingredientindex + 1
 
-        # Classic=1, pesc=2, vege=3, vegan=4
-        if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+    is_classic = False
+    is_vegan = False
+    is_vegetarian = False
+    is_pescatarian = False
+
+    banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
+                               "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
+                               "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
+                               "deer", "venison", "boar", "veal", "bovrin", "steak", "chorizo", "bacon"]
+    banned_for_vegetarians = seafoods
+
+    banned_for_vegans = dairies
+    banned_for_vegans.extend(
+        ["egg", "dairy", "mayonnaise", "honey", "beeswax", "gelatin", "tapenade", "pesto", "carmine", "isinglass"]
+    )
+
+    ingred_list = []
+    for ingredient in ingredients:
+        ing = str(ingredient).split('"')
+        ingred = str(ing[3])
+        ingred_list.append(ingred.lower())
+
+    # Is classic?
+    if is_classic is False:
+        for ingred in ingred_list:
             for item in banned_for_pescatarians:
-                if item in ingred.lower():
+                if item in ingred:
                     c.execute(queryrecipediettypes, (int(recipeidindex), 1))
                     is_classic = True
                 if is_classic:
-                    break # break for loop if diet type is decided
+                    break # break loop if diet type is decided
+            if is_classic:
+                break
 
-        if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+    # Is pescatarian?
+    if (is_classic is False) and (is_pescatarian is False):
+        for ingred in ingred_list:
             for item in banned_for_vegetarians:
-                if item in ingred.lower():
+                if item in ingred:
                     c.execute(queryrecipediettypes, (int(recipeidindex), 2))
                     is_pescatarian = True
                 if is_pescatarian:
-                    break
+                    break  # break loop if diet type is decided
+            if is_pescatarian:
+                break
 
-        if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+    # Is vegetarian?
+    if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False):
+
+        for ingred in ingred_list:
             for item in banned_for_vegans:
-                if item in ingred.lower():
+                if item in ingred:
                     c.execute(queryrecipediettypes, (int(recipeidindex), 3))
                     is_vegetarian = True
                 if is_vegetarian:
-                    break
-
-        ingredientindex = ingredientindex + 1
+                    break  # break for loop if diet type is decided
+            if is_vegetarian:
+                break
 
     # If after all ingredients are checked and no diet type is assigned, then recipe is vegan
-    if is_classic == is_pescatarian == is_vegetarian == is_vegan == False:
+    if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False) and (is_vegan is False):
         c.execute(queryrecipediettypes, (int(recipeidindex), 4))
         is_vegan = True
 
@@ -568,9 +594,21 @@ for url in second_urls:
     recipestepsindex = recipestepsindex + 1
     nutritionindex = nutritionindex + 1
 
-    print(f"{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
+    # functions below to keep track of progress
 
-print(nutritionalinfo)
+    print(f"\n{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
+
+    current_time = time.time()
+
+    recipes_left = len(second_urls) - int(recipeidindex)
+
+    total_time_elapsed = round(current_time - start_time, 3)
+    one_iter_time = current_time - interim_time
+    eta_time_to_complete = round(one_iter_time * recipes_left, 3)
+
+    print(f"Time elapsed: {total_time_elapsed} seconds/ {round(total_time_elapsed / 60, 3)} minutes")
+    print(f"ETA: complete in {eta_time_to_complete} seconds/ {round((eta_time_to_complete / 60), 3)} minutes")
+    print("--------------------------------------------------------------------------------------------------------\n")
 
 c.execute("""CREATE TABLE IF NOT EXISTS Users (
                                         id integer unique NOT NULL,

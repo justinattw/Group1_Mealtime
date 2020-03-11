@@ -3,12 +3,12 @@
 {% block title %}Advanced Search{% endblock %}
 
 {% block script %}
-function outputUpdate(cals) {
+    function outputUpdate(cals) {
     document.querySelector('#selected-cals-upper').value = cals;
-}
-function outputUpdate2(cals) {
+    }
+    function outputUpdate2(cals) {
     document.querySelector('#selected-cals-lower').value = cals;
-}
+    }
 {% endblock %}
 {# Add the content for this page #}
 
@@ -17,7 +17,7 @@ function outputUpdate2(cals) {
     <form method=post novalidate>
         {{ form.csrf_token }}
         <dl>
-            {{ wtf.form_field(form.search_term, class='form-control') }}
+            {{ wtf.form_field(form.search_term, class='form-control', placeholder="Enter recipe name") }}
             <p>
                 {{ form.upper_callimit.label }}:{{ form.upper_callimit(min=0, max=1000, oninput="outputUpdate(value)") }}
                 <output for="upper_callimit" id="selected-cals-upper">{{ form.upper_callimit.data }}</output>
@@ -27,7 +27,7 @@ function outputUpdate2(cals) {
                 <output for="upper_callimit" id="selected-cals-lower">{{ form.lower_callimit.data }}</output>
             </p>
 
-            {{ wtf.form_field(form.diet_type, class='form-control', placeholder='Enter recipe') }}
+            {{ wtf.form_field(form.diet_type, class='form-control') }}
             {{ wtf.form_field(form.allergies, class='form-control') }}
 
         </dl>

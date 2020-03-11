@@ -4,10 +4,7 @@ from app import db
 from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues
 
 
-def search_function(search_term="",
-                    diet_type=1,
-                    allergy_list=[],
-                    min_cal=0, max_cal=1000):
+def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000):
 
     # Query begins here
     # subquery: blacklist recipes if user have certain allergies
