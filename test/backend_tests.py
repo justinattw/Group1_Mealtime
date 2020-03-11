@@ -159,5 +159,26 @@ class TestModel(BaseTestCase):
         self.assertEqual(count2 - count, 1)
 
 
+class UserModelTestCase(unittest.TestCase):
+    # def test_password_setter(self):
+    #     u = Users(password = 'cat123')
+    #     self.assertTrue(u. is not None)
+    #
+    # def test_no_password_getter(self):
+    #     u = Users(password = 'cat123')
+    #     with self.assertRaises(AttributeError):
+    #         u.password
+    #
+    # def test_password_verification(self):
+    #     u = User(password = 'cat123')
+    #     self.assertTrue(u.verify_password('cat123'))
+    #     self.assertFalse(u.verify_password('cat321'))
+    #     self.assertFalse(u.verify_password('dog123'))
+    #
+    # def test_password_salts_are_random(self):
+    #     u = Users(password='cat123')
+    #     u2 = Users(password='cat123')
+    #     self.assertTrue(u.password_hash != u2.password_hash)
+
 if __name__ == '__main__':
     unittest.main()

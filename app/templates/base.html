@@ -38,12 +38,14 @@
             </li>
             {# toolbar, If user not logged in then log in, else log out #}
             {% if current_user.is_anonymous %}
-                <li>
-                    <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="{{ url_for("auth.login") }}">Log in</a>
-                </li>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{{ url_for("auth.login") }}">Log in</a>
+                    </li>
+                </ul>
             {% else %}
                 <li>
                     <a class="nav-link" href="#">Meal Plans</a>
@@ -51,12 +53,15 @@
                 <li>
                     <a class="nav-link" href="#">Auto Chef</a>
                 </li>
-                <li>
-                    <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a>
-                </li>
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a>
+                    </li>
+                </ul>
             {% endif %}
 
         </ul>
