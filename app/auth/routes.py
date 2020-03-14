@@ -1,12 +1,12 @@
 from urllib.parse import urlparse, urljoin
 
-from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response
+from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 
 from app import db, login_manager
 from app.auth.forms import SignupForm, LoginForm, EditPasswordForm, EditPreferencesForm
-from app.models import Users, UserAllergies, UserDietPreferences, DietTypes
+from app.models import Users, UserAllergies, UserDietPreferences
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -22,7 +22,7 @@ def login():
             return redirect(url_for('auth.login'))
 
         if not user.check_password(form.password.data):
-            flash('Incorrect password')
+            flash('Incorrect password.')
             return redirect(url_for('auth.login'))
 
         from datetime import timedelta
@@ -49,8 +49,8 @@ def signup():
     form = SignupForm(request.form)
     if request.method == 'POST' and form.validate():
         user = Users(first_name=form.first_name.data,
-                    last_name=form.last_name.data,
-                    email=form.email.data)
+                     last_name=form.last_name.data,
+                     email=form.email.data)
         user.set_password(form.password.data)
 
         try:
@@ -79,7 +79,8 @@ def signup():
 @bp_auth.route('/account')
 @login_required
 def account():
-    user = Users.query.filter_by(id=current_user.id).first_or_404(description='There is no user {}'.format(current_user.id))
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
     return render_template('account.html', user=user)
 
 
@@ -102,6 +103,7 @@ def edit_password():
         return redirect(url_for('auth.account'))
 
     return render_template('edit_account/edit_password.html', form=form)
+
 
 @bp_auth.route('/edit_preferences', methods=['GET', 'POST'])
 @login_required
@@ -152,6 +154,7 @@ def is_safe_url(target):
     host_url = urlparse(request.host_url)
     redirect_url = urlparse(urljoin(request.host_url, target))
     return redirect_url.scheme in ('http', 'https') and host_url.netloc == redirect_url.netloc
+
 
 def get_safe_redirect():
     url = request.args.get('next')
