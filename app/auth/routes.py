@@ -33,7 +33,7 @@ def login():
         if not is_safe_url(next):
             return abort(400)
         return redirect(next or url_for('main.index'))
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 
 @bp_auth.route('/logout/')
@@ -73,7 +73,7 @@ def signup():
             db.session.rollback()
             flash('ERROR! Unable to register {}. Please check your details are correct and resubmit'.format(
                 form.email.data), 'error')
-    return render_template('signup.html', form=form)
+    return render_template('auth/signup.html', form=form)
 
 
 @bp_auth.route('/account')
@@ -81,7 +81,7 @@ def signup():
 def account():
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
-    return render_template('account.html', user=user)
+    return render_template('auth/account.html', user=user)
 
 
 @bp_auth.route('/edit_password', methods=['GET', 'POST'])
@@ -147,7 +147,7 @@ def edit_preferences():
 def favourites():
     user = Users.query.filter_by(id=current_user.id) \
         .first_or_404(description='There is no user {}'.format(current_user.id))
-    return render_template('favourites.html', user=user)
+    return render_template('auth/favourites.html', user=user)
 
 
 def is_safe_url(target):

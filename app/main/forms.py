@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SelectMultipleField
-from wtforms.fields.html5 import IntegerRangeField
+from wtforms import StringField, SelectField, SelectMultipleField, HiddenField
+from wtforms.fields.html5 import IntegerRangeField, IntegerField
 from wtforms.validators import DataRequired
 
 DIET_CHOICES = [(1, 'Classic'),
@@ -28,8 +28,10 @@ class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
 
-    # Fields for upper and lower calorie limits
-    upper_callimit = IntegerRangeField('Adjust max calories per meal (in kcal)', default=1000)
-    lower_callimit = IntegerRangeField('Adjust min calories per meal (in kcal)', default=0)
+    # Set field to render slider current values
+    amount = StringField()
+
+    # Field for calorie range
+    hidden = HiddenField()
 
     allergies = SelectMultipleField('Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)

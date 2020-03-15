@@ -26,7 +26,7 @@ def index(name=""):
         name = request.cookies.get('name')
     if 'name' in session:
         name = escape(session['name'])
-    return render_template('index.html', name=name)
+    return render_template('main/index.html', name=name)
 
 
 @bp_main.route('/recipes/<id_num>', methods=['GET'])
@@ -45,14 +45,15 @@ def view_recipe(id_num):
     nutrition = db.session.query(NutritionValues)\
                     .filter(NutritionValues.recipe_id == id_num)\
                     .one()
-    return render_template("view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps, nutrition=nutrition, allergies=allergies)
+    return render_template("main/view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps, nutrition=nutrition, allergies=allergies)
 
 
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
     recipes = search_function()
     # return render_template("recipes.html", recipes=recipes)
-    return render_template("search_results.html", results=recipes)
+    return render_template("main/search_results.html", results=recipes)
+
 
 @bp_main.route('/search', methods=['POST', 'GET'])
 def search():
@@ -79,7 +80,7 @@ def search():
             flash("No recipes found.")
             return redirect('/')
 
-        return render_template('search_results.html', results=results)
+        return render_template('main/search_results.html', results=results)
 
     else:
         return redirect(url_for('main.index'))
@@ -90,7 +91,7 @@ def advanced_search():
     form = AdvSearchRecipes()
 
     if request.method == 'POST':
-
+        range = form.hidden.data.split(',')
         search_term = form.search_term.data
 
         allergy_list = list(map(int, form.allergies.data))
@@ -98,13 +99,13 @@ def advanced_search():
 
         results = search_function(search_term=search_term,
                                   diet_type=diet_type,
-                                  min_cal=form.lower_callimit.data,
-                                  max_cal=form.upper_callimit.data,
+                                  min_cal=float(range[0]),
+                                  max_cal=float(range[1]),
                                   allergy_list=allergy_list)
 
-        return render_template('search_results.html', results=results)
+        return render_template('main/search_results.html', results=results)
 
-    return render_template('advanced_search.html', form=form)
+    return render_template('main/advanced_search.html', form=form)
 
 
 @bp_main.route('/delete_cookie')
@@ -113,25 +114,6 @@ def delete_cookie():
     response.set_cookie('name', '', expires=datetime.now())
     return response
 
-
-@bp_main.route('/meal_planner', methods=['POST', 'GET'])
-def meal_planner():
-    form = CalorieSearch()
-
-    if request.method == 'POST':
-        upper = form.upper_callimit.data
-        lower = form.lower_callimit.data
-
-        results = db.session.query(Recipes, NutritionValues) \
-            .join(NutritionValues) \
-            .filter(NutritionValues.calories <= upper) \
-            .filter(NutritionValues.calories >= lower) \
-            .all()
-
-        return render_template('meal_planner.html', form=form, results=results)
-
-    else:
-        return render_template('meal_planner.html', form=form)
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
