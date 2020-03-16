@@ -51,6 +51,21 @@ jobs:
             . venv/bin/activate
             python -m pytest test
 
+      - store_test_results:
+          path: test-results
+
       - store_artifacts:
           path: test-reports
           destination: test-reports
+
+      # Herokuuuuuuuuu
+#      - run:
+#          name: Setup Heroku
+#          command: |
+#            chmod +x .circleci/setup-heroku.sh
+#            .circleci/setup-heroku.sh
+#      - run:
+#          name: Deploy to Heroku
+#          command: |
+#            cd app/
+#            git push heroku master
