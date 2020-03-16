@@ -34,4 +34,4 @@ class AdvSearchRecipes(FlaskForm):
     # Field for calorie range
     hidden = HiddenField()
 
-    allergies = SelectMultipleField('Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)
+    allergies = SelectMultipleField('Allergies (cmd/ctrl + click to select multiple)', choices=ALLERGY_CHOICES)
