@@ -20,7 +20,7 @@
         <picture>
             <source srcset="{{ url_for('static', filename='img/logos/mealtime-logo-wide.png') }}"
                     media="(min-width: 600px)">
-            <img src="{{ url_for('static', filename='img/logos/mealtime-logo-mini.png') }}" alt="logo" height="35"/>
+            <img src="{{ url_for('static', filename='img/logos/mealtime-logo-mini.png') }}" alt="mealtime-logo" height="35"/>
         </picture>
     </a>
 
@@ -30,14 +30,14 @@
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+    <div class="collapse navbar-nav navbar-collapse" id="navbarTogglerDemo01">
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li>
                 <a class="nav-link" href="{{ url_for('main.recipes') }}">Recipes</a>
             </li>
             {# toolbar, If user not logged in then log in, else log out #}
             {% if current_user.is_anonymous %}
-                <ul class="nav navbar-nav navbar-right">
+                <ul class="nav navbar-right">
                     <li>
                         <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
                     </li>
@@ -53,7 +53,7 @@
                     <a class="nav-link" href="#">Auto Chef</a>
                 </li>
 
-                <ul class="nav navbar-nav navbar-right">
+                <ul class="nav navbar-right">
                     <li>
                         <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
                     </li>
