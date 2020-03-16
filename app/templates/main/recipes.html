@@ -1,28 +1,0 @@
-{% extends "base.html" %}
-{% block title %}Recipes{% endblock %}
-{% block content %}
-{% if recipes|length %}
-<table class="table">
-    <thead class="thead-dark">
-    <tr>
-        <th scope="col">Recipes</th>
-        <th scope="col">Cook time</th>
-        <th scope="col">Prep time</th>
-        <th scope="col">Serves</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for recipe in recipes %}
-    <tr>
-        <td><a href="{{ url_for('main.view_recipe', id_num = recipe.recipe_id) }}">{{ recipe.recipe_name }}</a></td>
-        <td>{{ recipe.cook_time }}</td>
-        <td>{{ recipe.prep_time }}</td>
-        <td>{{ recipe.serves }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>Sorry, no recipes are available at this time</p>
-{% endif %}
-{% endblock %}
