@@ -190,6 +190,8 @@ for url in second_urls:
     serving = serves.find('span', class_='recipe-details__text')
     name = title.text
 
+
+
     pic_url = soup.find('div', class_='recipe-header__media').find("img")
     if pic_url is not None:
         pic_url = str(pic_url).split('"')
@@ -209,23 +211,6 @@ for url in second_urls:
                 break
 
             handle.write(block)
-
-    # photoplace = soup.find('div', class_='recipe-header__media').find("img")
-    # if photoplace is not None:
-    #     photoprep = str(photoplace).split('"')
-    #     photoprep = photoprep[7]
-    #     photoprep = "https:" + photoprep
-    #
-    # print(photoprep)
-    #
-    # resp = requests.get(photoprep, stream=True)
-    # file_path = "app/static/img/recipe_images/"
-    # img_name = (file_path + str(recipeidindex) + ".jpg")
-    # print(img_name)
-    # local_file = open(img_name, 'wb')
-    # resp.raw.decode_content = True
-    # shutil.copyfileobj(resp.raw, local_file)
-    # del resp
 
     # steps for database
     stepnum = 1

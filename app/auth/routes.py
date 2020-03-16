@@ -78,7 +78,7 @@ def signup():
     return render_template('auth/signup.html', form=form)
 
 
-@bp_auth.route('/account')
+@bp_auth.route('/account/')
 @login_required
 def account():
     user = Users.query.filter_by(id=current_user.id).first_or_404(
@@ -86,7 +86,7 @@ def account():
     return render_template('auth/account.html', user=user)
 
 
-@bp_auth.route('/edit_password', methods=['GET', 'POST'])
+@bp_auth.route('/edit_password/', methods=['GET', 'POST'])
 @login_required
 def edit_password():
     form = EditPasswordForm()
@@ -107,7 +107,7 @@ def edit_password():
     return render_template('auth/edit_account/edit_password.html', form=form)
 
 
-@bp_auth.route('/edit_preferences', methods=['GET', 'POST'])
+@bp_auth.route('/edit_preferences/', methods=['GET', 'POST'])
 @login_required
 def edit_preferences():
     form = EditPreferencesForm()

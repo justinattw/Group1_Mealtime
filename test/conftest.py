@@ -100,3 +100,11 @@ def login(client, email, password):
 
 def logout(client):
     return client.get('/logout/', follow_redirects=True)
+
+
+def edit_password(client, old_password, new_password, confirm_password):
+    return client.post('/edit_password/', data=dict(
+        old_password=old_password,
+        new_password=new_password,
+        confirm_password=confirm_password
+    ), follow_redirects=True)
