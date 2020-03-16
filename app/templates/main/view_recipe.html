@@ -23,7 +23,7 @@
     </tr>
     </tbody>
 </table>
-<h2>Nutrition</h2>
+<h3>Nutrition</h3>
 <p>(Per serving)</p>
 <table class="table">
     <thead class="thead-light">
@@ -51,7 +51,7 @@
     </tr>
     </tbody>
 </table>
-<h2>Allergies</h2>
+<h3>Allergies</h3>
 {% if allergies|length %}
 <p>Please note that this recipe may contain:</p>
 <ul>
@@ -62,13 +62,13 @@
 {% else %}
 <p>No common allergies</p>
 {% endif %}
-<h2>Ingredients</h2>
+<h3>Ingredients</h3>
 <ul>
     {% for i in ingredients %}
     <li>{{ i.ingredient }}</li>
     {% endfor %}
 </ul>
-<h2>Steps</h2>
+<h3>Steps</h3>
 <ol>
     {% for s in steps %}
     <li>{{ s.step_description }}</li>

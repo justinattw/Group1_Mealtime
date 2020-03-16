@@ -372,20 +372,22 @@ for url in second_urls:
             c.execute(queryingredients, (int(ingredientindex), int(recipeidindex), str(ingred)))
 
             # dairy_free: id=1
-            for dairy in dairies:
-                if dairy_allergy_added:
-                    break
-                if str(dairy) in ingred.lower():
-                    c.execute(queryrecipeallergies, (int(recipeidindex), 1))
-                    dairy_allergy_added = True
+            if "dairy-free" not in name.lower():
+                for dairy in dairies:
+                    if dairy_allergy_added:
+                        break
+                    if str(dairy) in ingred.lower():
+                        c.execute(queryrecipeallergies, (int(recipeidindex), 1))
+                        dairy_allergy_added = True
 
             # gluten_free: id=2
-            for gluten in glutens:
-                if gluten_allergy_added:
-                    break
-                if str(gluten) in ingred.lower():
-                    c.execute(queryrecipeallergies, (int(recipeidindex), 2))
-                    gluten_allergy_added = True
+            if "gluten-free" not in name.lower():
+                for gluten in glutens:
+                    if gluten_allergy_added:
+                        break
+                    if str(gluten) in ingred.lower():
+                        c.execute(queryrecipeallergies, (int(recipeidindex), 2))
+                        gluten_allergy_added = True
 
             # seafood_free: id=3
             for seafood in seafoods:
@@ -457,8 +459,12 @@ for url in second_urls:
             ingred = str(ing[3])
             ingred_list.append(ingred.lower())
 
+        if "vegan" in name.lower():
+            c.execute(queryrecipediettypes, (int(recipeidindex), 4))
+            is_vegan = True
+
         # Is classic?
-        if is_classic is False:
+        if (is_vegan is False) and (is_classic is False):
             for ingred in ingred_list:
                 for item in banned_for_pescatarians:
                     if item in ingred:
@@ -470,7 +476,7 @@ for url in second_urls:
                     break
 
         # Is pescatarian?
-        if (is_classic is False) and (is_pescatarian is False):
+        if (is_vegan is False) and (is_classic is False) and (is_pescatarian is False):
             for ingred in ingred_list:
                 for item in banned_for_vegetarians:
                     if item in ingred:
@@ -482,7 +488,7 @@ for url in second_urls:
                     break
 
         # Is vegetarian?
-        if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False):
+        if (is_vegan is False) and (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False):
 
             for ingred in ingred_list:
                 for item in banned_for_vegans:
