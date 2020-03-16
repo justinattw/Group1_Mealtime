@@ -190,22 +190,42 @@ for url in second_urls:
     serving = serves.find('span', class_='recipe-details__text')
     name = title.text
 
-    photoplace = soup.find('div', class_='recipe-header__media').find("img")
-    if photoplace is not None:
-        photoprep = str(photoplace).split('"')
-        photoprep = photoprep[7]
-        photoprep = "https:" + photoprep
+    pic_url = soup.find('div', class_='recipe-header__media').find("img")
+    if pic_url is not None:
+        pic_url = str(pic_url).split('"')
+        pic_url = pic_url[7]
+        pic_url = "https:" + pic_url
+    print(pic_url)
+    file_path = 'app/static/img/recipe_images/'
+    pic_name = file_path + str(recipeidindex) + '.jpg'
+    with open(pic_name, 'wb') as handle:
+        response = requests.get(pic_url, headers={'User-Agent': 'Mozilla/5.0'})
 
-    print(photoprep)
+        if not response.ok:
+            print(response)
 
-    resp = requests.get(photoprep, stream=True)
-    file_path = "app/static/img/recipe_images/"
-    img_name = (file_path + str(recipeidindex) + ".jpg")
-    print(img_name)
-    local_file = open(img_name, 'wb')
-    resp.raw.decode_content = True
-    shutil.copyfileobj(resp.raw, local_file)
-    del resp
+        for block in response.iter_content(1024):
+            if not block:
+                break
+
+            handle.write(block)
+
+    # photoplace = soup.find('div', class_='recipe-header__media').find("img")
+    # if photoplace is not None:
+    #     photoprep = str(photoplace).split('"')
+    #     photoprep = photoprep[7]
+    #     photoprep = "https:" + photoprep
+    #
+    # print(photoprep)
+    #
+    # resp = requests.get(photoprep, stream=True)
+    # file_path = "app/static/img/recipe_images/"
+    # img_name = (file_path + str(recipeidindex) + ".jpg")
+    # print(img_name)
+    # local_file = open(img_name, 'wb')
+    # resp.raw.decode_content = True
+    # shutil.copyfileobj(resp.raw, local_file)
+    # del resp
 
     # steps for database
     stepnum = 1
