@@ -5,6 +5,7 @@ from test.conftest import login, logout, edit_password
 import pytest
 
 
+
 def test_login_fails_with_invalid_input(test_client, user):
     """
     GIVEN a flask app
@@ -29,20 +30,22 @@ def test_login_success_with_valid_user(test_client, user):
     WHEN a user logs in with valid user details
     THEN 1) response is valid and 2) redirection occurs
     """
-    response = login(test_client, email=user.email, password=user.password)
+    response = login(test_client, email=user.email, password='cat123')
+    print(response.data)
     assert response.status_code == 200
-
-    # user_name = user.first_name + ' ' + user.last_name
-    # user_name = ''.join(format(ord(i), 'b') for i in user_name)
+    assert b'Logged in successfully' in response.data
+    assert (b'Logged in successfully. Welcome, Test') in response.data
+    # user_name = ''.join(format(ord(i), 'b') for i in user.first_name)
     # print(user_name)
-    # print(b'Logged in successfully. Welcome ')
-    # assert (b'Logged in successfully. Welcome ') in response.data
+    # print(b'Logged in successfully. Welcome ' + user_name)
+    # assert (b'Logged in successfully. Welcome, ' + user_name) in response.data
 
-    response = test_client.post('/login/', data=dict(
-        email=user.email,
-        password=user.password
-    ), follow_redirects=False)  # set follow_redirects to false and test the response is invalid
-    assert response.status_code == 302
+
+#    response = test_client.post('/login/', data=dict(
+#        email=user.email,
+#        password=user.password
+#    ), follow_redirects=False)  # set follow_redirects to false and test the response is invalid
+#    assert response.status_code == 302
 
 
 def test_logout_user_success(test_client, user):
@@ -51,10 +54,10 @@ def test_logout_user_success(test_client, user):
     WHEN user logs out
     THEN response is valid and success message is flashed
     """
-    login(test_client, email=user.email, password=user.password)
+    login(test_client, email=user.email, password='cat123')
     response = logout(test_client)
     assert response.status_code == 200
-    # assert b'You have been logged out.' in response.data
+    assert b'You have been logged out.' in response.data
 
 
 def test_register_user_success(test_client, user_data, db):
@@ -70,6 +73,7 @@ def test_register_user_success(test_client, user_data, db):
         password=user_data['password'],
         confirm=user_data['confirm']
     ), follow_redirects=True)
+    print(response.data)
     assert response.status_code == 200
 
     from app.models import Users
@@ -91,7 +95,7 @@ def test_duplicate_register_error(test_client, user):
         confirm="cat123"
     ), follow_redirects=True)
     assert response.status_code == 200
-
+    assert b'An account is already registered with this email.' in response.data
 
 def test_account_view_requires_login(test_client):
     """
@@ -109,22 +113,31 @@ def test_account_view_accessible_after_login(test_client, user):
     WHEN /account is requested
     THEN response is valid
     """
-    login(test_client, email=user.email, password=user.password)
-    response = test_client.post('/account/')
-    print(response.status_code)
-    # assert response.status_code == 200
+
+    response = login(test_client, email=user.email, password='cat123')
+    response = test_client.get('/account/')
+    print(response.data)
+ #   print(user.email)
+ #   print(user.password)
+ #   print(test_client.post('/account/'))
+    assert b'Account details for Test User' in response.data
+    assert response.status_code == 200
 
 
 def test_edit_password_success(test_client, user):
     old_password = 'cat123'
     assert user.check_password(old_password) is True  # assert old password is 'cat123'
 
-    login(test_client, email=user.email, password=user.password)  # login to test user
+    login(test_client, email=user.email, password=old_password)  # login to test user
 
     new_password = "dog123"
-    response = edit_password(test_client, user.password, new_password, new_password)  # change password to 'dog123'
-    print(response.data)
+    response = edit_password(test_client, old_password, new_password, new_password)  # change password to 'dog123'
 
-    # assert b'Your password has been changed.' in response.data
-    # assert user.check_password(new_password) is True # assert password is changed
-    # assert response.status_code == 200
+    assert b'Your password has been changed' in response.data
+    assert user.check_password(new_password) is True  # assert password is changed
+    logout(test_client)
+
+    response = login(test_client, email=user.email, password=new_password)  # login to test user
+    assert response.status_code == 200
+
+
