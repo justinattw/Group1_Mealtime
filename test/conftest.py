@@ -89,6 +89,17 @@ def user_data():
     }
     return user_data
 
+# Test browser configurations
+import pytest
+from selenium import webdriver
+
+@pytest.fixture
+def driver():
+    driver = webdriver.Chrome()
+    return driver
+
+
+
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
 def login(client, email, password):

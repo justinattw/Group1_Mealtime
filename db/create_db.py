@@ -107,6 +107,18 @@ c.execute("""CREATE TABLE IF NOT EXISTS RecipeAllergies (
                                         PRIMARY KEY (recipe_id, allergy_id) 
                                         );""")
 
+# Delete all recipe images
+from os.path import dirname, abspath, join
+
+CWD = dirname(abspath(__file__))
+recipe_img_dir = join(CWD, '../app/static/img/recipe_images')
+try:
+    import shutil
+    shutil.rmtree(recipe_img_dir)
+    import os
+    os.mkdir(recipe_img_dir)
+except:
+    pass
 
 
 URL = "https://www.bbcgoodfood.com/recipes/category/healthy"
@@ -654,6 +666,14 @@ c.execute("""CREATE TABLE IF NOT EXISTS MealPlanRecipes (
                                         PRIMARY KEY (mealplan_id, recipe_id) 
                                         );""")
 
+c.execute("""CREATE TABLE IF NOT EXISTS UserFavouriteRecipes (
+                                        user_id integer NOT NULL,
+                                        recipe_id integer NOT NULL,
+                                        FOREIGN KEY (user_id) References Users (id),
+                                        FOREIGN KEY (recipe_id) References Recipes (recipe_id),
+                                        PRIMARY KEY (user_id, recipe_id) 
+                                        );""")
+
 # c.execute("""CREATE TABLE IF NOT EXISTS Nutrition (
 #                                         nutrition_id integer NOT NULL PRIMARY KEY,
 #                                         nutrition_name varchar(40),
@@ -669,6 +689,5 @@ c.execute("""CREATE TABLE IF NOT EXISTS MealPlanRecipes (
 #                                         );""")
 
 db.commit
-
 db.close()
 

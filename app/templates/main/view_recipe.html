@@ -2,7 +2,9 @@
 {% block title %}{{ recipe.recipe_name }}{% endblock %}
 {% block content %}
 
-<img src="../static/img/recipe_images/{{ recipe.photo | default('0.jpg') }}" alt={{ recipe.recipe_name }} height="300" />
+<!-- Display recipe photo -->
+<img src="{{ url_for('static', filename=('img/recipe_images/' + recipe.photo)) }}" alt={{ recipe.recipe_name }}
+     height="300"/>
 
 <h1>{{ recipe.recipe_name }}</h1>
 <table class="table">

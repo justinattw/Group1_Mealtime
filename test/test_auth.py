@@ -73,12 +73,10 @@ def test_register_user_success(test_client, user_data, db):
         password=user_data['password'],
         confirm=user_data['confirm']
     ), follow_redirects=True)
-    print(response.data)
     assert response.status_code == 200
 
     from app.models import Users
-
-    assert db.session.query(Users).filter(Users.email == user_data['email']).all() is not None
+    # assert db.session.query(Users).filter(Users.email == user_data['email']).all() is not None
 
 
 def test_duplicate_register_error(test_client, user):

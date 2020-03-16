@@ -57,9 +57,10 @@ def signup():
             db.session.add(user)
             db.session.commit()
 
-            user_id = db.session.query(Users.id).filter_by(email=form.email.data).first()
+            user_query = db.session.query(Users).filter_by(email=form.email.data).first()
+
             # Set user preferences to classic by default
-            diet_preference = UserDietPreferences(user_id=user_id, diet_type_id=1)
+            diet_preference = UserDietPreferences(user_id=user_query.id, diet_type_id=1)
             db.session.add(diet_preference)
             db.session.commit()
 
