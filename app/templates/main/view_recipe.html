@@ -50,7 +50,7 @@
 </table>
 <h2>Allergies</h2>
 {% if allergies|length %}
-<p>Please note that this recipe contains:</p>
+<p>Please note that this recipe may contain:</p>
 <ul>
     {% for a in allergies %}
     <li>{{ a.Allergies.allergy_name }}</li>

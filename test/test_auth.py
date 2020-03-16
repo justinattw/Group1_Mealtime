@@ -40,7 +40,7 @@ def test_login_success_with_valid_user(test_client, user):
     response = test_client.post('/login/', data=dict(
         email=user.email,
         password=user.password
-    ), follow_redirects=False) # set follow_redirects to false and test the response is invalid
+    ), follow_redirects=False)  # set follow_redirects to false and test the response is invalid
     assert response.status_code == 302
 
 
@@ -72,7 +72,25 @@ def test_register_user_success(test_client, user_data, db):
     assert response.status_code == 200
 
     from app.models import Users
-    assert db.session.query(Users).filter(Users.email==user_data['email']).all() is not None
+
+    assert db.session.query(Users).filter(Users.email == user_data['email']).all() is not None
+
+
+def test_duplicate_register_error(test_client, user):
+    """
+    GIVEN a flask app
+    WHEN user registers new account with pre-registered email
+    THEN appropriate validation error is raised
+    """
+    response = test_client.post('/signup/', data=dict(
+        first_name="Test",
+        last_name="Name",
+        email=user.email,
+        password="cat123",
+        confirm="cat123"
+    ), follow_redirects=True)
+    assert response.status_code == 200
+    assert "An account is already registered with this email." in response.data
 
 
 def test_account_view_inaccessible_without_login(test_client):
@@ -95,8 +113,6 @@ def test_login_required(test_client, user):
 
 
 def test_account_view_success_with_login(test_client, user):
-
     login(test_client, email=user.email, password=user.password)
     response = test_client.post('/account/')
     # assert response.status_code == 200
-
