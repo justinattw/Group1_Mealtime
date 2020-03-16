@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
-from flask_login import current_user
+from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
 from markupsafe import escape
 from sqlalchemy import outerjoin
@@ -118,24 +118,7 @@ def delete_cookie():
 
 @bp_main.route('/meal_planner')
 def meal_planner():
-    form = AdvSearchRecipes()
-
-    if request.method == 'POST':
-        range = form.hidden.data.split(',')
-        search_term = form.search_term.data
-
-        allergy_list = list(map(int, form.allergies.data))
-        diet_type = int(form.diet_type.data)
-
-        results = search_function(search_term=search_term,
-                                  diet_type=diet_type,
-                                  min_cal=float(range[0]),
-                                  max_cal=float(range[1]),
-                                  allergy_list=allergy_list)
-
-        return render_template('main/search_results.html', results=results)
-
-    return render_template('main/meal_planner.html', form=form)
+    return render_template('main/meal_planner.html')
 
 
 # Mealplans route, query for mealplans based on logged in user_id,
