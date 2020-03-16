@@ -352,7 +352,7 @@ for url in second_urls:
                     "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
                     "tuna", "haddock", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
                     "calamari", "miso", "dashi", "takoyaki", "mackarel", "mackerel", "sea bass", "shark", "caviar",
-                    "snapper"]
+                    "snapper", "sole"]
         egg_allergy_added = False
         lupin_allergy_added = False
         mustard_allergy_added = False

@@ -32,6 +32,7 @@ def index(name=""):
 @bp_main.route('/recipes/<id_num>', methods=['GET'])
 def view_recipe(id_num):
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == id_num).one()
+
     allergies = db.session.query(Allergies, RecipeAllergies) \
         .join(RecipeAllergies) \
         .filter(RecipeAllergies.recipe_id == id_num) \
@@ -122,7 +123,6 @@ def meal_planner():
         None
 
     return render_template('main/meal_planner.html')
-
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
