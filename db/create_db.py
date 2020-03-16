@@ -89,7 +89,6 @@ values = [(1, 'celery'),
           (10, 'soybeans'),
           (11, 'dairy')]
 
-
 c.executemany(sql, values)
 
 c.execute("""CREATE TABLE IF NOT EXISTS RecipeDietTypes (
@@ -178,216 +177,6 @@ for url in second_urls:
     nutrition = soup.find_all('ul', class_='nutrition')
     serving = serves.find('span', class_='recipe-details__text')
     name = title.text
-
-
-
-    pic_url = soup.find('div', class_='recipe-header__media').find("img")
-    if pic_url is not None:
-        pic_url = str(pic_url).split('"')
-        pic_url = pic_url[7]
-        pic_url = "https:" + pic_url
-    print(pic_url)
-    file_path = 'app/static/img/recipe_images/'
-    pic_name = file_path + str(recipeidindex) + '.jpg'
-    with open(pic_name, 'wb') as handle:
-        response = requests.get(pic_url, headers={'User-Agent': 'Mozilla/5.0'})
-
-        if not response.ok:
-            print(response)
-
-        for block in response.iter_content(1024):
-            if not block:
-                break
-
-            handle.write(block)
-
-    # steps for database
-    stepnum = 1
-    for meth in method:
-        met = str(meth)
-        one = met.split('<p>')
-        two = str(one[1]).split('</p>')
-        if '</a>' in two[0]:
-            three = str(two[0]).split('<a')
-            four = str(three[1]).split('</a>')
-            final = (str(three[0]) + str(four[1]))
-            methodology.append(final)
-
-        else:
-            final = two[0]
-            three = []
-            methodology.append(final)
-        if len(three) > 2:
-            print('THREE!')
-            final = ''
-        # c.execute(queryinstructions, (int(recipestepsindex), int(recipeidindex), int(stepnum), str(final)))
-        c.execute(queryinstructions, (int(recipestepsindex), int(recipeidindex), int(stepnum), str(final)))
-        recipestepsindex = recipestepsindex + 1
-        stepnum = stepnum + 1
-
-    dairy_allergy_added = False
-    dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
-               "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
-               "ricotta", "cheese"]
-    celery_allergy_added = False
-    gluten_allergy_added = False
-    glutens = ["pasta", "ravioli", "dumpling", "couscous", "gnocchi",
-               "ramen", "udon", "soba", "chow mein",
-               "croissant", "pita", "naan", "bagel", "flatbread", "cornbread", "bread",
-               "granola", "pancake", "panko breadcrumb", "soy sauce", "barley", "malt",
-               "bulger", "graham flour", "oatmeal", "flour", "rye", "semolina", "spelt",
-               "wheat", "spaghetti", "lasagne"]
-    seafood_allergy_added = False
-    seafoods = ["fish", "squid", "octopus", "fish", "snail", "mussel", "clam", "oyster", "scallop", "whelk",
-                "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
-                "tuna", "haddock", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
-                "calamari", "miso", "dashi", "takoyaki", "mackarel", "mackerel", "sea bass", "shark", "caviar",
-                "snapper"]
-    egg_allergy_added = False
-    lupin_allergy_added = False
-    mustard_allergy_added = False
-    tree_nuts_allergy_added = False
-    tree_nuts = ["almond", "brazil", "cashew", "chestnut", "filbert", "hazelnut", "hickory", "macadamia", "pecan",
-                 "pine", "pistachio", "walnut"]
-    peanuts_allergy_added = False
-    sesame_seeds_allergy_added = False
-    soybeans_allergy_added = False
-
-
-    for ingredient in ingredients:
-        ing = str(ingredient).split('"')
-        ingredient_list.append(ing[3])
-        ingred = str(ing[3])
-        print(ingred)
-        c.execute(queryingredients, (int(ingredientindex), int(recipeidindex), str(ingred)))
-
-        # dairy_free: id=1
-        for dairy in dairies:
-            if dairy_allergy_added:
-                break
-            if str(dairy) in ingred.lower():
-                c.execute(queryrecipeallergies, (int(recipeidindex), 1))
-                dairy_allergy_added = True
-
-        # gluten_free: id=2
-        for gluten in glutens:
-            if gluten_allergy_added:
-                break
-            if str(gluten) in ingred.lower():
-                c.execute(queryrecipeallergies, (int(recipeidindex), 2))
-                gluten_allergy_added = True
-
-        # seafood_free: id=3
-        for seafood in seafoods:
-            if seafood_allergy_added:
-                break
-            if str(seafood) in ingred.lower():
-                c.execute(queryrecipeallergies, (int(recipeidindex), 3))
-                seafood_allergy_added = True
-
-        # egg_free: id=4
-        if ("egg" in ingred.lower()) and (egg_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 4))
-            egg_allergy_added = True
-        # lupin_free: id=5
-        if ("lupin" in ingred) and (lupin_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 5))
-            lupin_allergy_added = True
-        # mustard_free: id=6
-        if ("mustard" in ingred) and (mustard_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 6))
-            mustard_allergy_added = True
-
-        # tree_nuts_free: id=7
-        for nut in tree_nuts:
-            if tree_nuts_allergy_added:
-                break
-            if str(nut) in ingred.lower():
-                c.execute(queryrecipeallergies, (int(recipeidindex), 7))
-                tree_nuts_allergy_added = True
-
-        # peanuts_free: id=8
-        if ("peanut" in ingred.lower()) and (peanuts_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 8))
-            peanuts_allergy_added = True
-        # sesame_seed_free: id=9
-        if ("sesame" in ingred.lower()) and (sesame_seeds_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 9))
-            sesame_seeds_allergy_added = True
-        # soybeans_free: id=10
-        if ("soy" in ingred.lower()) and (soybeans_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 10))
-            soybeans_allergy_added = True
-        # celery_free: id=11
-        if ("celery" in ingred.lower()) and (celery_allergy_added == False):
-            c.execute(queryrecipeallergies, (int(recipeidindex), 11))
-            celery_allergy_added = True
-
-        ingredientindex = ingredientindex + 1
-
-    is_classic = False
-    is_vegan = False
-    is_vegetarian = False
-    is_pescatarian = False
-
-    banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
-                               "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
-                               "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
-                               "deer", "venison", "boar", "veal", "bovrin", "steak", "chorizo", "bacon"]
-    banned_for_vegetarians = seafoods
-
-    banned_for_vegans = dairies
-    banned_for_vegans.extend(
-        ["egg", "dairy", "mayonnaise", "honey", "beeswax", "gelatin", "tapenade", "pesto", "carmine", "isinglass"]
-    )
-
-    ingred_list = []
-    for ingredient in ingredients:
-        ing = str(ingredient).split('"')
-        ingred = str(ing[3])
-        ingred_list.append(ingred.lower())
-
-    # Is classic?
-    if is_classic is False:
-        for ingred in ingred_list:
-            for item in banned_for_pescatarians:
-                if item in ingred:
-                    c.execute(queryrecipediettypes, (int(recipeidindex), 1))
-                    is_classic = True
-                if is_classic:
-                    break # break loop if diet type is decided
-            if is_classic:
-                break
-
-    # Is pescatarian?
-    if (is_classic is False) and (is_pescatarian is False):
-        for ingred in ingred_list:
-            for item in banned_for_vegetarians:
-                if item in ingred:
-                    c.execute(queryrecipediettypes, (int(recipeidindex), 2))
-                    is_pescatarian = True
-                if is_pescatarian:
-                    break  # break loop if diet type is decided
-            if is_pescatarian:
-                break
-
-    # Is vegetarian?
-    if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False):
-
-        for ingred in ingred_list:
-            for item in banned_for_vegans:
-                if item in ingred:
-                    c.execute(queryrecipediettypes, (int(recipeidindex), 3))
-                    is_vegetarian = True
-                if is_vegetarian:
-                    break  # break for loop if diet type is decided
-            if is_vegetarian:
-                break
-
-    # If after all ingredients are checked and no diet type is assigned, then recipe is vegan
-    if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False) and (is_vegan is False):
-        c.execute(queryrecipediettypes, (int(recipeidindex), 4))
-        is_vegan = True
 
     preptimes = []
     cooktimes = []
@@ -498,111 +287,324 @@ for url in second_urls:
         if item.isdigit():
             why = float(item)
     print(why)
-    c.execute(queryrecipes, (int(recipeidindex), str(name), "", why, z, y, total))
 
-    for nut in nutrition:
-        types = nut.find_all('span', class_='nutrition__label')
-        values = nut.find_all('span', class_='nutrition__value')
-        if len(types) == len(values):
-            print(title.text + ': ' + serving.text + '-->' + times.text)
-            print(ingredient_list)
-            print(methodology)
-            for i in range(len(types)):
-                thisvalue = (values[i].text)
-                thistype = (types[i].text)
-                nutritionalinfo.append(thisvalue + ' ' + thistype)
-                print(thisvalue + ' ' + thistype)
+    if total < 200 and total != 0 and why != 0:
 
+        pic_url = soup.find('div', class_='recipe-header__media').find("img")
+        if pic_url is not None:
+            pic_url = str(pic_url).split('"')
+            pic_url = pic_url[7]
+            pic_url = "https:" + pic_url
+        print(pic_url)
+        file_path = 'app/static/img/recipe_images/'
+        pic_name = file_path + str(recipeidindex) + '.jpg'
+        file_name = str(recipeidindex) + '.jpg'
+        with open(pic_name, 'wb') as handle:
+            response = requests.get(pic_url, headers={'User-Agent': 'Mozilla/5.0'})
+
+            if not response.ok:
+                print(response)
+
+            for block in response.iter_content(1024):
+                if not block:
+                    break
+
+                handle.write(block)
+
+        # steps for database
+        stepnum = 1
+        for meth in method:
+            met = str(meth)
+            one = met.split('<p>')
+            two = str(one[1]).split('</p>')
+            if '</a>' in two[0]:
+                three = str(two[0]).split('<a')
+                four = str(three[1]).split('</a>')
+                final = (str(three[0]) + str(four[1]))
+                methodology.append(final)
+
+            else:
+                final = two[0]
+                three = []
+                methodology.append(final)
+            if len(three) > 2:
+                print('THREE!')
+                final = ''
+            # c.execute(queryinstructions, (int(recipestepsindex), int(recipeidindex), int(stepnum), str(final)))
+            c.execute(queryinstructions, (int(recipestepsindex), int(recipeidindex), int(stepnum), str(final)))
+            recipestepsindex = recipestepsindex + 1
+            stepnum = stepnum + 1
+
+        dairy_allergy_added = False
+        dairies = ["butter", "milk", "yogurt", "yoghurt", "yak", "whey", "sarasson", "semifreddo", "ayran",
+                   "curd", "custard", "crème fraîche", "eggnog", "fromage", "gelato", "mozzarella", "parmesan",
+                   "ricotta", "cheese"]
+        celery_allergy_added = False
+        gluten_allergy_added = False
+        glutens = ["pasta", "ravioli", "dumpling", "couscous", "gnocchi",
+                   "ramen", "udon", "soba", "chow mein",
+                   "croissant", "pita", "naan", "bagel", "flatbread", "cornbread", "bread",
+                   "granola", "pancake", "panko breadcrumb", "soy sauce", "barley", "malt",
+                   "bulger", "graham flour", "oatmeal", "flour", "rye", "semolina", "spelt",
+                   "wheat", "spaghetti", "lasagne"]
+        seafood_allergy_added = False
+        seafoods = ["fish", "squid", "octopus", "fish", "snail", "mussel", "clam", "oyster", "scallop", "whelk",
+                    "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
+                    "tuna", "haddock", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
+                    "calamari", "miso", "dashi", "takoyaki", "mackarel", "mackerel", "sea bass", "shark", "caviar",
+                    "snapper"]
+        egg_allergy_added = False
+        lupin_allergy_added = False
+        mustard_allergy_added = False
+        tree_nuts_allergy_added = False
+        tree_nuts = ["almond", "brazil", "cashew", "chestnut", "filbert", "hazelnut", "hickory", "macadamia", "pecan",
+                     "pine", "pistachio", "walnut"]
+        peanuts_allergy_added = False
+        sesame_seeds_allergy_added = False
+        soybeans_allergy_added = False
+
+
+        for ingredient in ingredients:
+            ing = str(ingredient).split('"')
+            ingredient_list.append(ing[3])
+            ingred = str(ing[3])
+            print(ingred)
+            c.execute(queryingredients, (int(ingredientindex), int(recipeidindex), str(ingred)))
+
+            # dairy_free: id=1
+            for dairy in dairies:
+                if dairy_allergy_added:
+                    break
+                if str(dairy) in ingred.lower():
+                    c.execute(queryrecipeallergies, (int(recipeidindex), 1))
+                    dairy_allergy_added = True
+
+            # gluten_free: id=2
+            for gluten in glutens:
+                if gluten_allergy_added:
+                    break
+                if str(gluten) in ingred.lower():
+                    c.execute(queryrecipeallergies, (int(recipeidindex), 2))
+                    gluten_allergy_added = True
+
+            # seafood_free: id=3
+            for seafood in seafoods:
+                if seafood_allergy_added:
+                    break
+                if str(seafood) in ingred.lower():
+                    c.execute(queryrecipeallergies, (int(recipeidindex), 3))
+                    seafood_allergy_added = True
+
+            # egg_free: id=4
+            if ("egg" in ingred.lower()) and (egg_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 4))
+                egg_allergy_added = True
+            # lupin_free: id=5
+            if ("lupin" in ingred) and (lupin_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 5))
+                lupin_allergy_added = True
+            # mustard_free: id=6
+            if ("mustard" in ingred) and (mustard_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 6))
+                mustard_allergy_added = True
+
+            # tree_nuts_free: id=7
+            for nut in tree_nuts:
+                if tree_nuts_allergy_added:
+                    break
+                if str(nut) in ingred.lower():
+                    c.execute(queryrecipeallergies, (int(recipeidindex), 7))
+                    tree_nuts_allergy_added = True
+
+            # peanuts_free: id=8
+            if ("peanut" in ingred.lower()) and (peanuts_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 8))
+                peanuts_allergy_added = True
+            # sesame_seed_free: id=9
+            if ("sesame" in ingred.lower()) and (sesame_seeds_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 9))
+                sesame_seeds_allergy_added = True
+            # soybeans_free: id=10
+            if ("soy" in ingred.lower()) and (soybeans_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 10))
+                soybeans_allergy_added = True
+            # celery_free: id=11
+            if ("celery" in ingred.lower()) and (celery_allergy_added == False):
+                c.execute(queryrecipeallergies, (int(recipeidindex), 11))
+                celery_allergy_added = True
+
+            ingredientindex = ingredientindex + 1
+
+        is_classic = False
+        is_vegan = False
+        is_vegetarian = False
+        is_pescatarian = False
+
+        banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
+                                   "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
+                                   "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
+                                   "deer", "venison", "boar", "veal", "bovrin", "steak", "chorizo", "bacon"]
+        banned_for_vegetarians = seafoods
+
+        banned_for_vegans = dairies
+        banned_for_vegans.extend(
+            ["egg", "dairy", "mayonnaise", "honey", "beeswax", "gelatin", "tapenade", "pesto", "carmine", "isinglass"]
+        )
+
+        ingred_list = []
+        for ingredient in ingredients:
+            ing = str(ingredient).split('"')
+            ingred = str(ing[3])
+            ingred_list.append(ingred.lower())
+
+        # Is classic?
+        if is_classic is False:
+            for ingred in ingred_list:
+                for item in banned_for_pescatarians:
+                    if item in ingred:
+                        c.execute(queryrecipediettypes, (int(recipeidindex), 1))
+                        is_classic = True
+                    if is_classic:
+                        break # break loop if diet type is decided
+                if is_classic:
+                    break
+
+        # Is pescatarian?
+        if (is_classic is False) and (is_pescatarian is False):
+            for ingred in ingred_list:
+                for item in banned_for_vegetarians:
+                    if item in ingred:
+                        c.execute(queryrecipediettypes, (int(recipeidindex), 2))
+                        is_pescatarian = True
+                    if is_pescatarian:
+                        break  # break loop if diet type is decided
+                if is_pescatarian:
+                    break
+
+        # Is vegetarian?
+        if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False):
+
+            for ingred in ingred_list:
+                for item in banned_for_vegans:
+                    if item in ingred:
+                        c.execute(queryrecipediettypes, (int(recipeidindex), 3))
+                        is_vegetarian = True
+                    if is_vegetarian:
+                        break  # break for loop if diet type is decided
+                if is_vegetarian:
+                    break
+
+        # If after all ingredients are checked and no diet type is assigned, then recipe is vegan
+        if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False) and (is_vegan is False):
+            c.execute(queryrecipediettypes, (int(recipeidindex), 4))
+            is_vegan = True
+
+
+        c.execute(queryrecipes, (int(recipeidindex), str(name), file_name, why, z, y, total))
+
+        for nut in nutrition:
+            types = nut.find_all('span', class_='nutrition__label')
+            values = nut.find_all('span', class_='nutrition__value')
+            if len(types) == len(values):
+                print(title.text + ': ' + serving.text + '-->' + times.text)
+                print(ingredient_list)
+                print(methodology)
+                for i in range(len(types)):
+                    thisvalue = (values[i].text)
+                    thistype = (types[i].text)
+                    nutritionalinfo.append(thisvalue + ' ' + thistype)
+                    print(thisvalue + ' ' + thistype)
+
+            else:
+                print('fail!')
+        methodology = []
+
+        c1 = values[0].text
+        f = values[1].text
+        s = values[2].text
+        c2 = values[3].text
+        s1 = values[4].text
+        f1 = values[5].text
+        p = values[6].text
+        s2 = values[7].text
+        calnum = re.split('[-|g|kcal]', c1)
+        fatnum = re.split('[-|g|kcal]', f)
+        satnum = re.split('[-|g|kcal]', s)
+        carbnum = re.split('[-|g|kcal]', c2)
+        sugnum = re.split('[-|g|kcal]', s1)
+        fibnum = re.split('[-|g|kcal]', f1)
+        pronum = re.split('[-|g|kcal]', p)
+        salnum = re.split('[-|g|kcal]', s2)
+        if calnum[0] == '':
+            c1 = 0
+        elif calnum[0] != None:
+            c1 = float(calnum[0])
         else:
-            print('fail!')
-    methodology = []
+            c1 = 0
+        if fatnum[0] == '':
+            f = 0
+        elif fatnum[0] != None:
+            f = float(fatnum[0])
+        else:
+            f = 0
+        if satnum[0] == '':
+            s = 0
+        elif satnum[0] != None:
+            s = float(satnum[0])
+        else:
+            s = 0
+        if carbnum[0] == '':
+            c2 = 0
+        elif carbnum[0] != None:
+            c2 = float(carbnum[0])
+        else:
+            c2 = 0
+        if sugnum[0] == '':
+            s1 = 0
+        elif sugnum[0] != None:
+            s1 = float(sugnum[0])
+        else:
+            s1 = 0
+        if fibnum[0] == '':
+            f1 = 0
+        elif fibnum[0] != None:
+            f1 = float(fibnum[0])
+        else:
+            f1 = 0
+        if pronum[0] == '':
+            p = 0
+        elif pronum[0] != None:
+            p = float(pronum[0])
+        else:
+            p = 0
+        if salnum[0] == '':
+            s2 = 0
+        elif salnum[0] != None:
+            s2 = float(salnum[0])
+        else:
+            s2 = 0
 
-    c1 = values[0].text
-    f = values[1].text
-    s = values[2].text
-    c2 = values[3].text
-    s1 = values[4].text
-    f1 = values[5].text
-    p = values[6].text
-    s2 = values[7].text
-    calnum = re.split('[-|g|kcal]', c1)
-    fatnum = re.split('[-|g|kcal]', f)
-    satnum = re.split('[-|g|kcal]', s)
-    carbnum = re.split('[-|g|kcal]', c2)
-    sugnum = re.split('[-|g|kcal]', s1)
-    fibnum = re.split('[-|g|kcal]', f1)
-    pronum = re.split('[-|g|kcal]', p)
-    salnum = re.split('[-|g|kcal]', s2)
-    if calnum[0] == '':
-        c1 = 0
-    elif calnum[0] != None:
-        c1 = float(calnum[0])
-    else:
-        c1 = 0
-    if fatnum[0] == '':
-        f = 0
-    elif fatnum[0] != None:
-        f = float(fatnum[0])
-    else:
-        f = 0
-    if satnum[0] == '':
-        s = 0
-    elif satnum[0] != None:
-        s = float(satnum[0])
-    else:
-        s = 0
-    if carbnum[0] == '':
-        c2 = 0
-    elif carbnum[0] != None:
-        c2 = float(carbnum[0])
-    else:
-        c2 = 0
-    if sugnum[0] == '':
-        s1 = 0
-    elif sugnum[0] != None:
-        s1 = float(sugnum[0])
-    else:
-        s1 = 0
-    if fibnum[0] == '':
-        f1 = 0
-    elif fibnum[0] != None:
-        f1 = float(fibnum[0])
-    else:
-        f1 = 0
-    if pronum[0] == '':
-        p = 0
-    elif pronum[0] != None:
-        p = float(pronum[0])
-    else:
-        p = 0
-    if salnum[0] == '':
-        s2 = 0
-    elif salnum[0] != None:
-        s2 = float(salnum[0])
-    else:
-        s2 = 0
+        c.execute(querynutrition, (int(nutritionindex), int(recipeidindex), c1, f, s, c2, s1, f1, p, s2))
 
-    c.execute(querynutrition, (int(nutritionindex), int(recipeidindex), c1, f, s, c2, s1, f1, p, s2))
+        recipeidindex = recipeidindex + 1
+        recipestepsindex = recipestepsindex + 1
+        nutritionindex = nutritionindex + 1
 
-    recipeidindex = recipeidindex + 1
-    recipestepsindex = recipestepsindex + 1
-    nutritionindex = nutritionindex + 1
+        # functions below to keep track of progress
 
-    # functions below to keep track of progress
+        print(f"\n{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
 
-    print(f"\n{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
+        current_time = time.time()
 
-    current_time = time.time()
+        recipes_left = len(second_urls) - int(recipeidindex)
 
-    recipes_left = len(second_urls) - int(recipeidindex)
+        total_time_elapsed = round(current_time - start_time, 3)
+        one_iter_time = current_time - interim_time
+        eta_time_to_complete = round(one_iter_time * recipes_left, 3)
 
-    total_time_elapsed = round(current_time - start_time, 3)
-    one_iter_time = current_time - interim_time
-    eta_time_to_complete = round(one_iter_time * recipes_left, 3)
-
-    print(f"Time elapsed: {total_time_elapsed} seconds/ {round(total_time_elapsed / 60, 3)} minutes")
-    print(f"ETA: complete in {eta_time_to_complete} seconds/ {round((eta_time_to_complete / 60), 3)} minutes")
-    print("--------------------------------------------------------------------------------------------------------\n")
+        print(f"Time elapsed: {total_time_elapsed} seconds/ {round(total_time_elapsed / 60, 3)} minutes")
+        print(f"ETA: complete in {eta_time_to_complete} seconds/ {round((eta_time_to_complete / 60), 3)} minutes")
+        print("--------------------------------------------------------------------------------------------------------\n")
 
 c.execute("""CREATE TABLE IF NOT EXISTS Users (
                                         id integer unique NOT NULL,
