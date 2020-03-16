@@ -115,6 +115,12 @@ def delete_cookie():
     response.set_cookie('name', '', expires=datetime.now())
     return response
 
+
+@bp_main.route('/meal_planner')
+def meal_planner():
+    return render_template('main/meal_planner.html')
+
+
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')
 # def mealplans(name):

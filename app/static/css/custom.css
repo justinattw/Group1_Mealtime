@@ -5,6 +5,10 @@
     margin-bottom: 20px
 }
 
+.recipes_table {
+    margin-top: 20px;
+}
+
 body {
     background-repeat: no-repeat;
     width: 100%;
@@ -18,3 +22,4 @@ body {
     -o-background-size: cover;
     background-size: cover;
 }
+
