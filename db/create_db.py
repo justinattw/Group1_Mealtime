@@ -89,17 +89,6 @@ values = [(1, 'celery'),
           (10, 'soybeans'),
           (11, 'dairy')]
 
-# values = [(1, 'Celery'),
-#           (2, 'Gluten'),
-#           (3, 'Seafood'),
-#           (4, 'Eggs'),
-#           (5, 'Lupin'),
-#           (6, 'Mustard'),
-#           (7, 'Tree nuts'),
-#           (8, 'Peanuts'),
-#           (9, 'Sesame seeds'),
-#           (10, 'Soybeans'),
-#           (11, 'Dairy')]
 
 c.executemany(sql, values)
 
