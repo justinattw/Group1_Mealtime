@@ -1,10 +1,51 @@
 {% extends "base.html" %}
 {% block title %}Meal Planner{% endblock %}
 
+{% block head %}
+    <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
+{%  endblock %}
+
 {% block content %}
-    <body>
     <h1>Meal Planner</h1>
     <h3>Step 1: Search for recipes</h3>
-    
-    </body>
+    {% from "_formhelpers.html" import render_field %}
+    <form method=post novalidate>
+        {{ form.csrf_token }}
+        <dl>
+            {{ wtf.form_field(form.search_term, class='form-control', placeholder="Enter recipe name") }}
+            <p>
+                <label for="amount">Calorie range (per person):</label>
+                <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                <input class='form-control' id="hidden" name="hidden" type="hidden" value="">
+            </p>
+            <div id="slider-range"></div>
+            <br>
+            {{ wtf.form_field(form.diet_type, class='form-control') }}
+            {{ wtf.form_field(form.allergies, class='form-control') }}
+        </dl>
+        <br>
+        <button onclick="SetRangeFunction()" type="submit" class="btn btn-primary">Search</button>
+    </form>
+{% endblock %}
+{% block footer %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            $("#slider-range").slider({
+                range: true,
+                min: 0,
+                max: 1000,
+                values: [250, 750],
+                slide: function (event, ui) {
+                    $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+                }
+            });
+            $("#amount").val($("#slider-range").slider("values", 0) +
+                " - " + $("#slider-range").slider("values", 1));
+        });
+        function SetRangeFunction() {
+            var range = $("#slider-range").slider("values")
+            document.getElementById("hidden").setAttribute('value', range);
+        }
+    </script>
 {% endblock %}

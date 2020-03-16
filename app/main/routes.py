@@ -26,7 +26,7 @@ def index(name=""):
         name = request.cookies.get('name')
     if 'name' in session:
         name = escape(session['name'])
-    return render_template('main/index.html', name=name)
+    return render_template('main/index.html', name=name, body_id="hero_image")
 
 
 @bp_main.route('/recipes/<id_num>', methods=['GET'])
@@ -118,7 +118,24 @@ def delete_cookie():
 
 @bp_main.route('/meal_planner')
 def meal_planner():
-    return render_template('main/meal_planner.html')
+    form = AdvSearchRecipes()
+
+    if request.method == 'POST':
+        range = form.hidden.data.split(',')
+        search_term = form.search_term.data
+
+        allergy_list = list(map(int, form.allergies.data))
+        diet_type = int(form.diet_type.data)
+
+        results = search_function(search_term=search_term,
+                                  diet_type=diet_type,
+                                  min_cal=float(range[0]),
+                                  max_cal=float(range[1]),
+                                  allergy_list=allergy_list)
+
+        return render_template('main/search_results.html', results=results)
+
+    return render_template('main/meal_planner.html', form=form)
 
 
 # Mealplans route, query for mealplans based on logged in user_id,
