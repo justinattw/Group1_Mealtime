@@ -32,20 +32,21 @@ def index(name=""):
 @bp_main.route('/recipes/<id_num>', methods=['GET'])
 def view_recipe(id_num):
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == id_num).one()
-    allergies = db.session.query(Allergies, RecipeAllergies)\
-                    .join(RecipeAllergies)\
-                    .filter(RecipeAllergies.recipe_id == id_num)\
-                    .all()
-    ingredients = db.session.query(RecipeIngredients)\
-                    .filter(RecipeIngredients.recipe_id == id_num)\
-                    .all()
-    steps = db.session.query(RecipeInstructions)\
-                .filter(RecipeInstructions.recipe_id == id_num)\
-                .all()
-    nutrition = db.session.query(NutritionValues)\
-                    .filter(NutritionValues.recipe_id == id_num)\
-                    .one()
-    return render_template("main/view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps, nutrition=nutrition, allergies=allergies)
+    allergies = db.session.query(Allergies, RecipeAllergies) \
+        .join(RecipeAllergies) \
+        .filter(RecipeAllergies.recipe_id == id_num) \
+        .all()
+    ingredients = db.session.query(RecipeIngredients) \
+        .filter(RecipeIngredients.recipe_id == id_num) \
+        .all()
+    steps = db.session.query(RecipeInstructions) \
+        .filter(RecipeInstructions.recipe_id == id_num) \
+        .all()
+    nutrition = db.session.query(NutritionValues) \
+        .filter(NutritionValues.recipe_id == id_num) \
+        .one()
+    return render_template("main/view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps,
+                           nutrition=nutrition, allergies=allergies)
 
 
 @bp_main.route('/recipes', methods=['GET'])
@@ -113,7 +114,6 @@ def delete_cookie():
     response = make_response(redirect(url_for('main.index')))
     response.set_cookie('name', '', expires=datetime.now())
     return response
-
 
 # Mealplans route, query for mealplans based on logged in user_id,
 # @bp_main.route('/mealplans')

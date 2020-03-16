@@ -1,17 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Login{% endblock %}
 {% from "_formhelpers.html" import render_field %}
+
 {% block content %}
-<form method="post" novalidate>
-    {{ form.csrf_token }}
-    <dl>
-{#        {{ render_field(form.email, class='form-control') }}#}
-{#        {{ render_field(form.password, class='form-control') }}#}
-{#        {{ render_field(form.remember_me) }}#}
-        {{ wtf.form_field(form.email, class='form-control') }}
-        {{ wtf.form_field(form.password, class='form-control') }}
-        {{ wtf.form_field(form.remember_me) }}
-        <input type=submit value='Login' class='btn btn-primary'>
-    </dl>
-</form>
+<div class="card" style="width: 50vw;">
+    <div class="card-header">Login</div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {{ form.csrf_token }}
+            <dl>
+                {#        {{ render_field(form.email, class='form-control') }}#}
+                {#        {{ render_field(form.password, class='form-control') }}#}
+                {#        {{ render_field(form.remember_me) }}#}
+                {{ wtf.form_field(form.email, class='form-control') }}
+                {{ wtf.form_field(form.password, class='form-control') }}
+                {{ wtf.form_field(form.remember_me) }}
+                <input type=submit value='Login' class='btn btn-primary'>
+            </dl>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
