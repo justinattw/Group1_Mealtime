@@ -116,8 +116,11 @@ def delete_cookie():
     return response
 
 
-@bp_main.route('/meal_planner')
+@bp_main.route('/meal_planner', methods=['POST', 'GET'])
 def meal_planner():
+    if request.method == 'POST':
+        None
+
     return render_template('main/meal_planner.html')
 
 

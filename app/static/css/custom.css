@@ -23,7 +23,7 @@ body {
     background-size: cover;
 }
 
-li {
+#meal_planner_list > li {
     margin-top: 20px;
     margin-bottom: 20px;
 }
