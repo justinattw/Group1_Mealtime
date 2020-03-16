@@ -30,7 +30,18 @@ class ProdConfig(Config):
 class TestConfig(Config):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+
+    CWD = dirname(abspath(__file__))
+
+    # Create a duplicate of the current database
+    from shutil import copy
+    src = join(CWD, 'db/mealtime.sqlite') # current working db
+    dst = join(CWD, 'db/mealtime_testing.sqlite') # destination for test db
+    copy(src, dst) # copy (and overwrite) working db to test db
+
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + dst
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
     #  To allow forms to be submitted from the tests without the CSRF token
     WTF_CSRF_ENABLED = False
 

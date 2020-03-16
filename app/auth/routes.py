@@ -63,6 +63,8 @@ def signup():
             db.session.add(diet_preference)
             db.session.commit()
 
+            login_user(user)
+
             flash('You are now a registered user!')
 
             # Set cookie and return to main, if successful
@@ -71,7 +73,7 @@ def signup():
             return response
         except IntegrityError:
             db.session.rollback()
-            flash('ERROR! Unable to register {}. Please check your details are correct and resubmit'.format(
+            flash('ERROR! Unable to register {}. Please check your details are correct and resubmit.'.format(
                 form.email.data), 'error')
     return render_template('auth/signup.html', form=form)
 
@@ -102,7 +104,7 @@ def edit_password():
         flash('Your password has been changed.')
         return redirect(url_for('auth.account'))
 
-    return render_template('edit_account/edit_password.html', form=form)
+    return render_template('auth/edit_account/edit_password.html', form=form)
 
 
 @bp_auth.route('/edit_preferences', methods=['GET', 'POST'])
@@ -138,7 +140,7 @@ def edit_preferences():
         flash('Your food preferences have been updated.')
         return redirect(url_for('auth.account'))
 
-    return render_template('edit_account/edit_preferences.html', form=form)
+    return render_template('auth/edit_account/edit_preferences.html', form=form)
 
 
 # A public user profile viewer

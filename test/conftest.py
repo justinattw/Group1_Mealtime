@@ -30,6 +30,8 @@ def db(app):
     _db.app = app
     _db.create_all()
 
+    # _db.Model.metadata.reflect(db.engine)
+
     yield _db
 
     _db.drop_all()
@@ -37,11 +39,11 @@ def db(app):
 
 @pytest.fixture(scope='function')
 def user(test_client, db):
-    """ Creates a student user. """
+    """ Creates a test user. """
     from app.models import Users
-    user = Users(first_name='Justin',
-                 last_name='Test',
-                 email='justin@test.com')
+    user = Users(first_name='Test',
+                 last_name='User',
+                 email='user@test.com')
     user.set_password('cat123')
     db.session.add(user)
     db.session.commit()
@@ -79,11 +81,11 @@ def logged_in_user(app, request, user):
 def user_data():
     """ Provides the details for a user registration. """
     user_data = {
-        "first_name": "Justin",
+        "first_name": "Signup",
         "last_name": "Test",
-        "email": "justin@test.com",
-        "password": "test123",
-        "confirm": "test123"
+        "email": "signup@test.com",
+        "password": "dog123",
+        "confirm": "dog123"
     }
     return user_data
 
