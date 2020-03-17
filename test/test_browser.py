@@ -3,7 +3,7 @@ from selenium import webdriver
 from test.conftest import driver
 
 
-def test_func(driver):
+def test_func():
     pass
     # request = ...
     #
