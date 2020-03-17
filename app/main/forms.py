@@ -1,3 +1,6 @@
+"""
+Authors: Ethan Low, Danny Wallis, Justin Wong
+"""
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, HiddenField
 from wtforms.fields.html5 import IntegerRangeField, IntegerField

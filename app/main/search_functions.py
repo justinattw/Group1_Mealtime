@@ -1,5 +1,7 @@
+"""
+Author: Justin Wong
+"""
 from sqlalchemy import and_
-
 from app import db
 from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues
 

@@ -1,3 +1,6 @@
+"""
+Authors: Ethan Low, Danny Wallis, Justin Wong
+"""
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError

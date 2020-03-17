@@ -1,3 +1,6 @@
+"""
+Authors: Ethan Low, Danny Wallis, Justin Wong
+"""
 from urllib.parse import urlparse, urljoin
 
 from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response, abort

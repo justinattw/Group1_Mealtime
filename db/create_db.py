@@ -1,3 +1,8 @@
+"""
+Author: Danny Wallis
+"""
+
+
 import shutil
 import requests
 import pprint
