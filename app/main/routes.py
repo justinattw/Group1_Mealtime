@@ -1,5 +1,8 @@
 """
 Authors: Ethan Low, Danny Wallis, Justin Wong
+
+This document contains routes for the main functionalities of the Mealtime application (any non-authentication
+functions). This includes index, recipes, mealplanner.
 """
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
 from flask_login import current_user, login_required
@@ -29,6 +32,7 @@ def index(name=""):
         name = request.cookies.get('name')
     if 'name' in session:
         name = escape(session['name'])
+
     return render_template('main/index.html', name=name, body_id="hero_image")
 
 
@@ -126,7 +130,3 @@ def meal_planner():
         None
 
     return render_template('main/meal_planner.html')
-
-# Mealplans route, query for mealplans based on logged in user_id,
-# @bp_main.route('/mealplans')
-# def mealplans(name):

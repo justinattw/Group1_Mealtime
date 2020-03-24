@@ -1,13 +1,22 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Authors: Ethan Low, Danny Wallis, Justin Wong
+Created on 11:45 10 March 2020
+
+This document includes WTForms for authentication methods.
+Authentication methods include signup, login, edit account details and log out.
 """
-from flask_wtf import FlaskForm
-from sqlalchemy import or_
-from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField
-from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
+__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__copyright__ = "Copyright 2020, UCL"
+__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__license__ = "MIT"
 
 from app import db
 from app.models import Users, UserAllergies, UserDietPreferences
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField
+from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
 
 # GLOBAL VARIABLES
 MIN_PW_LEN = 6

@@ -1,9 +1,10 @@
 """
 Author: Justin Wong
 """
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 from app import db
-from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues
+from app.models import Users, Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, MealPlanRecipes, \
+    RecipeIngredients
 
 
 def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000):
@@ -34,3 +35,24 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
                      NutritionValues.calories <= max_cal)).all()
 
     return results
+
+
+def generate_groceries_list(user_id, mealplan_id=None):
+    """
+
+    :param user_id: user details for which the grocery list should be generated
+    :return:
+    """
+    if not mealplan_id:
+        mealplan_id = db.session.Query(Users) \
+            .join(MealPlans, Users.id == MealPlanRecipes.user_id) \
+            .filter(Users.id == user_id) \
+            .order_by(desc(MealPlans.mealplan_id)) \
+            .limit(1) \
+            .mealplan_id
+
+    results = db.session.Query(Users) \
+        .join(MealPlans, Users.id == MealPlanRecipes.user_id) \
+        .join(MealPlanRecipes, MealPlans.mealplan_id == MealPlanRecipes.mealplan_id) \
+        .join(RecipeIngredients, MealPlanRecipes.recipe_id == RecipeIngredients.recipe_id) \
+        .filter(MealPlans.mealplan_id == mealplan_id)

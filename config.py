@@ -42,7 +42,7 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + dst
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    #  To allow forms to be submitted from the tests without the CSRF token
+    # To allow forms to be submitted from the tests without the CSRF token
     WTF_CSRF_ENABLED = False
 
 

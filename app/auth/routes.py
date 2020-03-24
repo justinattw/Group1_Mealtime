@@ -1,15 +1,24 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Authors: Ethan Low, Danny Wallis, Justin Wong
-"""
-from urllib.parse import urlparse, urljoin
+Created on 11:45 10 March 2020
 
-from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response, abort
-from flask_login import login_required, login_user, logout_user, current_user
-from sqlalchemy.exc import IntegrityError
+This document includes WTForms for authentication methods.
+Authentication methods include signup, login, edit account details and log out.
+"""
+__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__copyright__ = "Copyright 2020, UCL"
+__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__license__ = "MIT"
 
 from app import db, login_manager
 from app.auth.forms import SignupForm, LoginForm, EditPasswordForm, EditPreferencesForm
 from app.models import Users, UserAllergies, UserDietPreferences
+
+from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response, abort
+from flask_login import login_required, login_user, logout_user, current_user
+from sqlalchemy.exc import IntegrityError
+from urllib.parse import urlparse, urljoin
 
 bp_auth = Blueprint('auth', __name__)
 
