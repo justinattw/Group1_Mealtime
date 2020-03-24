@@ -156,13 +156,11 @@ def edit_preferences():
     return render_template('auth/edit_account/edit_preferences.html', form=form)
 
 
-# A public user profile viewer
-@bp_auth.route('/favourites')
+@bp_auth.route('/reset_password/', methods=['GET', 'POST'])
 @login_required
-def favourites():
-    user = Users.query.filter_by(id=current_user.id) \
-        .first_or_404(description='There is no user {}'.format(current_user.id))
-    return render_template('auth/favourites.html', user=user)
+def edit_preferences():
+    return redirect(url_for('main.index'))
+    return render_template('auth/edit_account/edit_preferences.html', form=form)
 
 
 def is_safe_url(target):

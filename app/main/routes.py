@@ -125,6 +125,15 @@ def advanced_search():
     return render_template('main/advanced_search.html', form=form)
 
 
+# A public user profile viewer
+@bp_main.route('/favourites')
+@login_required
+def favourites():
+    user = Users.query.filter_by(id=current_user.id) \
+        .first_or_404(description='There is no user {}'.format(current_user.id))
+    return render_template('auth/favourites.html', user=user)
+
+
 @bp_main.route('/delete_cookie')
 def delete_cookie():
     response = make_response(redirect(url_for('main.index')))
