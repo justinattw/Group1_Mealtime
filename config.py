@@ -1,3 +1,15 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+config.py:
+
+Defining the configurations for the Mealtime Flask application, including production, development and test configs.
+"""
+__authors__ = "Danny Wallis, Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 """Flask config class."""
 from os.path import dirname, abspath, join
 

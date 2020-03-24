@@ -1,6 +1,16 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Author: Justin Wong
+app/auth/routes.py:
+
+This document includes WTForms for authentication methods.
+Authentication methods include signup, login, edit account details and log out.
 """
+__authors__ = "Danny Wallis and Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 from sqlalchemy import and_, desc
 from app import db
 from app.models import Users, Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, MealPlanRecipes, \

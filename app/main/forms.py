@@ -1,6 +1,16 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Authors: Ethan Low, Danny Wallis, Justin Wong
+app/main/forms.py:
+
+This document includes WTForms for authentication methods.
+Authentication methods include signup, login, edit account details and log out.
 """
+__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, HiddenField
 from wtforms.fields.html5 import IntegerRangeField, IntegerField

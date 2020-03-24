@@ -1,13 +1,23 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Author: Justin Wong
+app/models.py:
+
+This document creates SQLAlchemy models by referencing the pre-existing mealtime.sqlite database (if non-existing db,
+first run db/create_db.py)
+For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
 """
+__authors__ = "Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import db
 
 """
-Create SQLAlchemy models by referencing the already created mealtime.sqlite database.
-For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
+
 """
 
 

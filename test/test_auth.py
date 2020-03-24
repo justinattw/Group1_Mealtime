@@ -1,7 +1,17 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Contains tests for the auth blueprint
+test/test_auth.py:
+
+Pytests tests for authentication methods (relating to files in app/auth/)
 """
+__authors__ = "Danny Wallis, Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 from test.conftest import login, logout, edit_password
+
 import pytest
 
 

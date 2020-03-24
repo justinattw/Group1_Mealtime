@@ -1,6 +1,15 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Contains the functional tests for the main blueprint.
+test/test_main.py:
+
+Pytests tests for Mealtime app models
 """
+__authors__ = "Danny Wallis, Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 from sqlalchemy import and_
 
 

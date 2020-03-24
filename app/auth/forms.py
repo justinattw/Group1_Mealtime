@@ -1,15 +1,16 @@
 #!usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on 11:45 10 March 2020
+app/auth/forms.py:
 
 This document includes WTForms for authentication methods.
 Authentication methods include signup, login, edit account details and log out.
 """
 __authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
-__copyright__ = "Copyright 2020, UCL"
+__email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
-__license__ = "MIT"
+__status__ = "Development"
+
 
 from app import db
 from app.models import Users, UserAllergies, UserDietPreferences

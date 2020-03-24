@@ -1,9 +1,18 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Contains the functional tests for the main blueprint.
+test/test_main.py:
+
+Pytests tests for main methods (relating to files in app/main/)
 """
-from flask_login import current_user
+__authors__ = "Danny Wallis, Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Danny Wallis", "Justin Wong"]
+__status__ = "Development"
 
 from test.conftest import login
+
+from flask_login import current_user
 
 
 def test_index_page_valid(test_client):
@@ -28,7 +37,6 @@ def test_index_content(test_client):
 
 def test_search_recipes(test_client):
     pass
-
 
 # def test_profile_displayed_when_user_logged_in(test_client, user):
 #     login(test_client, password=user.password, email=user.email)

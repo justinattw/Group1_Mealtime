@@ -1,9 +1,17 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Authors: Ethan Low, Danny Wallis, Justin Wong
+app/main/routes.py:
 
-This document contains routes for the main functionalities of the Mealtime application (any non-authentication
-functions). This includes index, recipes, mealplanner.
+This document includes WTForms for authentication methods.
+Authentication methods include signup, login, edit account details and log out.
 """
+__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
+
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError

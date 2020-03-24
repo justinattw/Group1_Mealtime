@@ -1,10 +1,21 @@
-"""Fixtures for the tests"""
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+test/conftest.py:
 
-import pytest
-from flask_login import login_user, logout_user
+Configures settings for Pytest (the selected testing framework for Mealtime). Includes setup and teardowns (fixtures),
+as well as helper functions.
+"""
+__authors__ = "Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Danny Wallis", "Justin Wong"]
+__status__ = "Development"
 
 from app import create_app
 from app import db as _db
+
+import pytest
+from flask_login import login_user, logout_user
 
 
 @pytest.yield_fixture(scope='session')
@@ -89,16 +100,16 @@ def user_data():
     }
     return user_data
 
+
 # Test browser configurations
 import pytest
 from selenium import webdriver
+
 
 @pytest.fixture
 def driver():
     driver = webdriver.Chrome()
     return driver
-
-
 
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/

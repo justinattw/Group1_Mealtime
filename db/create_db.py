@@ -1,17 +1,27 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Author: Danny Wallis
-"""
+app/models.py:
 
+This document creates SQLAlchemy models by referencing the pre-existing mealtime.sqlite database (if non-existing db,
+first run db/create_db.py)
+For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
+"""
+__authors__ = "Danny Wallis"
+__email__ = "danny.wallis.16@ucl.ac.uk"
+__credits__ = ["Danny Wallis"]
+__status__ = "Development"
 
 import shutil
-import requests
-import pprint
-from bs4 import BeautifulSoup
 import re
-import urllib3
+import requests
+from bs4 import BeautifulSoup
 import sqlite3
-from sqlite3 import Error
 import time
+# import pprint
+# import urllib3
+# from sqlite3 import Error
+
 
 start_time = time.time()
 
@@ -118,13 +128,12 @@ from os.path import dirname, abspath, join
 CWD = dirname(abspath(__file__))
 recipe_img_dir = join(CWD, '../app/static/img/recipe_images')
 try:
-    import shutil
     shutil.rmtree(recipe_img_dir)
     import os
+
     os.mkdir(recipe_img_dir)
 except:
     pass
-
 
 URL = "https://www.bbcgoodfood.com/recipes/category/healthy"
 page = requests.get(URL, headers={'User-Agent': 'Mozilla/5.0'})
@@ -380,7 +389,6 @@ for url in second_urls:
         sesame_seeds_allergy_added = False
         soybeans_allergy_added = False
 
-
         for ingredient in ingredients:
             ing = str(ingredient).split('"')
             ingredient_list.append(ing[3])
@@ -488,7 +496,7 @@ for url in second_urls:
                         c.execute(queryrecipediettypes, (int(recipeidindex), 1))
                         is_classic = True
                     if is_classic:
-                        break # break loop if diet type is decided
+                        break  # break loop if diet type is decided
                 if is_classic:
                     break
 
@@ -521,7 +529,6 @@ for url in second_urls:
         if (is_classic is False) and (is_pescatarian is False) and (is_vegetarian is False) and (is_vegan is False):
             c.execute(queryrecipediettypes, (int(recipeidindex), 4))
             is_vegan = True
-
 
         c.execute(queryrecipes, (int(recipeidindex), str(name), file_name, why, z, y, total))
 
@@ -615,7 +622,8 @@ for url in second_urls:
 
         # functions below to keep track of progress
 
-        print(f"\n{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
+        print(
+            f"\n{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")
 
         current_time = time.time()
 
@@ -627,7 +635,8 @@ for url in second_urls:
 
         print(f"Time elapsed: {total_time_elapsed} seconds/ {round(total_time_elapsed / 60, 3)} minutes")
         print(f"ETA: complete in {eta_time_to_complete} seconds/ {round((eta_time_to_complete / 60), 3)} minutes")
-        print("--------------------------------------------------------------------------------------------------------\n")
+        print(
+            "--------------------------------------------------------------------------------------------------------\n")
 
 c.execute("""CREATE TABLE IF NOT EXISTS Users (
                                         id integer unique NOT NULL,
@@ -695,4 +704,3 @@ c.execute("""CREATE TABLE IF NOT EXISTS UserFavouriteRecipes (
 
 db.commit
 db.close()
-
