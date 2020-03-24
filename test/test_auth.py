@@ -23,7 +23,7 @@ def test_login_fails_with_invalid_input(test_client, user):
     THEN an associated error message flashes
     """
     response = login(test_client, email="notregistered@test.com", password='cat123')
-    assert b'No account has been registered with this email.' in response.data
+    assert b'No account has been registered with this email. DELETE' in response.data
 
     """
     GIVEN a flask app
