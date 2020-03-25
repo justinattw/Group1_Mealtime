@@ -96,7 +96,8 @@ def signup():
 def account():
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
-    return render_template('auth/account.html', user=user)
+    title = f"{user.first_name} {user.last_name}"
+    return render_template('auth/account.html', title=title, user=user)
 
 
 @bp_auth.route('/edit_password/', methods=['GET', 'POST'])
@@ -158,9 +159,8 @@ def edit_preferences():
 
 @bp_auth.route('/reset_password/', methods=['GET', 'POST'])
 @login_required
-def edit_preferences():
+def reset_password():
     return redirect(url_for('main.index'))
-    return render_template('auth/edit_account/edit_preferences.html', form=form)
 
 
 def is_safe_url(target):

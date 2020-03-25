@@ -13,13 +13,18 @@
 <table class="table recipes_table">
     <thead class="thead-dark">
     <tr>
+        <th scope="col">Photo</th>
         <th scope="col">Recipe name</th>
         <th scope="col">Time</th>
         <th scope="col">Serves</th>
     </tr>
     </thead>
-    <tbody> {% for result in results %}
+    <tbody>
+    {% for result in results %}
     <tr>
+        <td><img src="{{ url_for('static', filename=('img/recipe_images/' + result.photo)) }}" alt={{ result.recipe_name
+                 }}
+                 height="80"></td>
         <td><a href="{{ url_for('main.view_recipe', id_num = result.recipe_id) }}">{{ result.recipe_name }}</a></td>
         <td>{{ result.total_time }}</td>
         <td>{{ result.serves }}</td>
@@ -31,4 +36,12 @@
 {# Variable is empty #}
 <p>Sorry, no recipes found</p>
 {% endif %}
+
+{% if prev_url %}
+<a href="{{ prev_url }}">Back</a>
+{% endif %}
+{% if next_url %}
+<a href="{{ next_url }}">Next</a>
+{% endif %}
+
 {% endblock %}

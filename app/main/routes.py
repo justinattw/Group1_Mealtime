@@ -11,19 +11,19 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-
-from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
-from flask_login import current_user, login_required
-from flask_wtf.csrf import CSRFError
-from markupsafe import escape
-from sqlalchemy import outerjoin
-from sqlalchemy.exc import IntegrityError
-
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
     Allergies, UserDietPreferences, UserAllergies, DietTypes
 from app.main.search_functions import search_function
+
+from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
+from flask_login import current_user, login_required
+from flask_wtf.csrf import CSRFError
+from markupsafe import escape
+import sqlalchemy
+from sqlalchemy import outerjoin
+from sqlalchemy.exc import IntegrityError
 
 bp_main = Blueprint('main', __name__)
 
@@ -67,9 +67,16 @@ def view_recipe(id_num):
 
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
-    recipes = search_function()
+    query = search_function()
+    page = request.args.get('page', 1, type=int)
+    recipes = query.paginate(page, 20, False)
+
+    next_url = url_for('main.recipes', page=recipes.next_num) if recipes.has_next else None
+    prev_url = url_for('main.recipes', page=recipes.prev_num) if recipes.has_prev else None
+
     # return render_template("recipes.html", recipes=recipes)
-    return render_template("main/search_results.html", results=recipes)
+    return render_template("main/search_results.html", results=recipes.items, next_url=next_url,
+                           prev_url=prev_url)
 
 
 @bp_main.route('/search', methods=['POST', 'GET'])
@@ -88,16 +95,28 @@ def search():
             allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
             allergy_list = [value for value, in allergy_query]
 
-            results = search_function(search_term=term, diet_type=diet_type, allergy_list=allergy_list)
+            query = search_function(search_term=term, diet_type=diet_type, allergy_list=allergy_list)
+            page = request.args.get('page', 1, type=int)
+            recipes = query.paginate(page, 20, False)
+
 
         else:
-            results = search_function(search_term=term)
+            query = search_function(search_term=term)
+            page = request.args.get('page', 1, type=int)
+            recipes = query.paginate(page, 20, False)
 
-        if not results:
+        if not recipes:
             flash("No recipes found.")
             return redirect('/')
 
-        return render_template('main/search_results.html', results=results)
+        next_url = url_for('main.recipes', page=recipes.next_num) if recipes.has_next else None
+        prev_url = url_for('main.recipes', page=recipes.prev_num) if recipes.has_prev else None
+
+        return redirect(url_for('main.recipes', results=recipes.items, next_url=next_url,
+                               prev_url=prev_url))
+
+        # return render_template('main/search_results.html', results=recipes.items, next_url=next_url,
+        #                        prev_url=prev_url)
 
     else:
         return redirect(url_for('main.index'))
@@ -120,7 +139,14 @@ def advanced_search():
                                   max_cal=float(range[1]),
                                   allergy_list=allergy_list)
 
-        return render_template('main/search_results.html', results=results)
+        page = request.args.get('page', 1, type=int)
+        recipes = results.paginate(page, 20, False)
+
+        next_url = url_for('main.advanced_search', page=recipes.next_num) if recipes.has_next else None
+        prev_url = url_for('main.advanced_search', page=recipes.prev_num) if recipes.has_prev else None
+
+        return render_template('main/search_results.html', results=recipes.items, next_url=next_url,
+                               prev_url=prev_url)
 
     return render_template('main/advanced_search.html', form=form)
 

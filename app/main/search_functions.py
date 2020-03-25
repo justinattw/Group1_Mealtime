@@ -17,7 +17,7 @@ from app.models import Users, Recipes, RecipeAllergies, RecipeDietTypes, Nutriti
     RecipeIngredients
 
 
-def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000):
+def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, max_time = 99999):
     """
     This function accepts 5 parameters to find appropriate recipes according to user input (or default values)
 
@@ -26,6 +26,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
     :param allergy_list: list of allergies
     :param min_cal: minimum calorie
     :param max_cal: maximum calorie
+    :param max_time: maximum time that user wants to prep+cook for
     :return: an SQLAlchemy query of recipes matching the above parameters
     """
 
@@ -42,7 +43,8 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
         .filter(RecipeDietTypes.diet_type_id >= diet_type) \
         .filter(Recipes.recipe_name.contains(search_term)) \
         .filter(and_(NutritionValues.calories >= min_cal,
-                     NutritionValues.calories <= max_cal)).all()
+                     NutritionValues.calories <= max_cal))\
+        .filter(Recipes.total_time <= max_time)
 
     return results
 

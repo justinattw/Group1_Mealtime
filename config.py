@@ -30,6 +30,29 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'db/mealtime.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # For pagination
+    POSTS_PER_PAGE = 12
+
+    MIN_PW_LEN = 6
+    MAX_PW_LEN = 20
+
+    DIET_CHOICES = [(1, 'Classic'),
+                    (2, 'Pescatarian'),
+                    (3, 'Vegetarian'),
+                    (4, 'Vegan')]
+
+    ALLERGY_CHOICES = [(1, 'Dairy-free'),
+                       (2, 'Gluten-free'),
+                       (3, 'Seafood-free'),
+                       (4, 'Eggs-free'),
+                       (5, 'Lupin-free'),
+                       (6, 'Mustard-free'),
+                       (7, 'Tree nuts-free'),
+                       (8, 'Peanuts-free'),
+                       (9, 'Sesame-free'),
+                       (10, 'Soybeans-free'),
+                       (11, 'Celery-free')]
+
 
 class ProdConfig(Config):
     # The following are fictitious details for a MySQL server database! Included to illustrate the syntax.
