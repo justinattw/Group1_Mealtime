@@ -14,31 +14,18 @@ __status__ = "Development"
 
 from app import db
 from app.models import Users, UserAllergies, UserDietPreferences
+import config
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField
+from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
 
-# GLOBAL VARIABLES
-MIN_PW_LEN = 6
-MAX_PW_LEN = 20
+# GLOBAL VARIABLES taken from config file
+MIN_PW_LEN = config.MIN_PW_LEN
+MAX_PW_LEN = config.MAX_PW_LEN
 
-DIET_CHOICES = [(1, 'Classic'),
-                (2, 'Pescatarian'),
-                (3, 'Vegetarian'),
-                (4, 'Vegan')]
-
-ALLERGY_CHOICES = [(1, 'Dairy-free'),
-                   (2, 'Gluten-free'),
-                   (3, 'Seafood-free'),
-                   (4, 'Eggs-free'),
-                   (5, 'Lupin-free'),
-                   (6, 'Mustard-free'),
-                   (7, 'Tree nuts-free'),
-                   (8, 'Peanuts-free'),
-                   (9, 'Sesame-free'),
-                   (10, 'Soybeans-free'),
-                   (11, 'Celery-free')]
+DIET_CHOICES = config.DIET_CHOICES
+ALLERGY_CHOICES = config.ALLERGY_CHOICES
 
 
 class SignupForm(FlaskForm):

@@ -18,10 +18,6 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 import time
-# import pprint
-# import urllib3
-# from sqlite3 import Error
-
 
 start_time = time.time()
 
@@ -620,7 +616,7 @@ for url in second_urls:
         recipestepsindex = recipestepsindex + 1
         nutritionindex = nutritionindex + 1
 
-        # functions below to keep track of progress
+        # Below: keep track of progress
 
         print(
             f"\n{int(recipeidindex)} / {len(second_urls)} ({round(100 * (int(recipeidindex) / len(second_urls)), 3)}%) complete")

@@ -25,6 +25,11 @@ bp_auth = Blueprint('auth', __name__)
 
 @bp_auth.route('/login/', methods=['GET', 'POST'])
 def login():
+    """
+    Login route allowing users to sign into the application to access its services.
+
+    :return:
+    """
     form = LoginForm()
 
     if request.method == 'POST' and form.validate():
@@ -155,12 +160,6 @@ def edit_preferences():
         return redirect(url_for('auth.account'))
 
     return render_template('auth/edit_account/edit_preferences.html', form=form)
-
-
-@bp_auth.route('/reset_password/', methods=['GET', 'POST'])
-@login_required
-def reset_password():
-    return redirect(url_for('main.index'))
 
 
 def is_safe_url(target):
