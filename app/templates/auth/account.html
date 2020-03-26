@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}User details{% endblock %}
+{% block title %}{{ user.first_name }} {{ user.last_name }}{% endblock %}
 {% block content %}
 
 <h3>Account details for {{ user.first_name }} {{ user.last_name }}</h3>

@@ -14,7 +14,7 @@ __status__ = "Development"
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
-    Allergies, UserDietPreferences, UserAllergies, DietTypes, UserFavouriteRecipes
+    Allergies, UserDietPreferences, UserAllergies, UserFavouriteRecipes, MealPlanRecipes, MealPlans
 from app.main.search_functions import search_function
 import config
 
@@ -22,6 +22,7 @@ from flask import render_template, Blueprint, request, flash, redirect, url_for,
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import func
 from markupsafe import escape
 
 bp_main = Blueprint('main', __name__)
@@ -150,13 +151,28 @@ def advanced_search():
 @login_required
 def add_to_mealplan(recipe_id):
     """
-    Allows user to add recipe to mealplan
+    Allows user to add recipe to the most recent mealplan
 
     :param recipe_id: adds recipe associated with recipe_id to mealplan
     :return: stays on same page
     """
-    user_id = current_user.id
-    mealplan_id = 1
+
+    # Get the most recent mealplan by taking max(mealplan_id). We will add recipe to this mealplan.
+    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
+        .filter(MealPlans.user_id == current_user.id).first()
+
+    print(mealplan_id)
+
+    if mealplan_id is None:
+        flash("Please create a meal plan first!")
+    else:
+        try:
+            db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("This recipe is already in your mealplan!")
+
     print(f"Added recipe {recipe_id} to mealplan {mealplan_id}")
     return '', 204
 
@@ -199,8 +215,8 @@ def favourites():
     page = request.args.get('page', 1, type=int)  # Get current page of results
     recipes = query.paginate(page, config.RECIPES_PER_PAGE, False)
 
-    next_url = url_for('main.recipes', page=recipes.next_num) if recipes.has_next else None
-    prev_url = url_for('main.recipes', page=recipes.prev_num) if recipes.has_prev else None
+    next_url = url_for('main.favourites', page=recipes.next_num) if recipes.has_next else None
+    prev_url = url_for('main.favourites', page=recipes.prev_num) if recipes.has_prev else None
 
     return render_template('main/favourites.html', user=user, results=recipes.items, next_url=next_url,
                            prev_url=prev_url)
