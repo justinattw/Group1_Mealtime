@@ -1,7 +1,12 @@
 # Python CircleCI 2.0 configuration file
+
+# The following code is informed by and adapted from the CircleCI documentations
 #
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
+# Title: Configuring a Python Application on CircleCI
+# Author: CircleCI
+# Date: 2020
+# Availability: https://circleci.com/docs/2.0/language-python/ [Accessed 16 March 2020]
+
 version: 2
 
 jobs:
@@ -44,8 +49,6 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       # run tests!
-
-      # other common Python testing frameworks include pytest and nose
       # https://pytest.org
       # https://nose.readthedocs.io
       - run:
@@ -61,7 +64,7 @@ jobs:
           path: test-reports
           destination: test-reports
 
-      # Herokuuuuuuuuu
+
 #      - run:
 #          name: Setup Heroku
 #          command: |

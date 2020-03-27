@@ -72,25 +72,52 @@ def view_recipe(recipe_id):
 
 
 @bp_main.route('/recipes', methods=['GET'])
-def recipes(query=None):
-    query = search_function() if query is None else query
+def recipes():
+    """
+    This route takes
+
+    :return:
+    """
+
+    # This dictionary allows search parameters to be kept in the page, so that they are saved even when navigating to
+    # next/ prev urls
+    args_dict = {'search_term': request.args.get('search_term', ""),
+                 'allergy_list': request.args.get('allergy_list', [], type=list),
+                 'diet_type': request.args.get('diet_type', 1, type=int),
+                 'min_cal': request.args.get('min_cal', 0, type=int),
+                 'max_cal': request.args.get('max_cal', 1000, type=int),
+                 'max_time': request.args.get('max_time', 99999, type=int)}
 
     # The following code related to pagination is adapted from:
     #
     # Title: The Flask Mega-Tutorial Part IX: Pagination
     # Author: Miguel Grinberg
     # Date: 2018
-    # Availability: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ix-pagination [Accessed 25 March 2020]
+    # Availability: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ix-pagination
+    # [Accessed 25 March 2020]
 
+    query = search_function(**args_dict)
     page = request.args.get('page', 1, type=int)  # Get current page of results
-    # recipes = query.paginate(page, 2000, False)
     recipes = query.paginate(page, config.RECIPES_PER_PAGE, False)
 
-    next_url = url_for('main.recipes', page=recipes.next_num) if recipes.has_next else None
-    prev_url = url_for('main.recipes', page=recipes.prev_num) if recipes.has_prev else None
+    next_url = url_for('main.recipes', **args_dict, page=recipes.next_num) if recipes.has_next else None
+    prev_url = url_for('main.recipes', **args_dict, page=recipes.prev_num) if recipes.has_prev else None
 
     # return render_template("recipes.html", recipes=recipes)
-    return render_template("main/search_results.html", results=recipes.items, next_url=next_url, prev_url=prev_url)
+    return render_template("main/search_results.html",
+                           results=recipes.items,
+                           **args_dict,
+                           next_url=next_url, prev_url=prev_url)
+
+
+@bp_main.route('/view_all_recipes', methods=['GET'])
+def view_all_recipes():
+    """
+    Redirect route to view all recipes
+
+    :return: the recipes route, with no search parameters (so that it queries all recipes)
+    """
+    return redirect(url_for('main.recipes'))
 
 
 @bp_main.route('/search', methods=['POST', 'GET'])
@@ -102,10 +129,10 @@ def search():
     allergies in the search.
     If user is not logged in, then search progresses with only the search_term.
 
-    :return: the recipes route with associated query
+    :return: the recipes route, passing appropriate search parameters
     """
     if request.method == 'POST':
-        term = request.form['search_term']
+        search_term = request.form['search_term']
 
         if current_user.is_authenticated:
 
@@ -114,16 +141,10 @@ def search():
             allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
             allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
 
-            query = search_function(search_term=term, diet_type=diet_type, allergy_list=allergy_list)
+            return redirect(url_for('main.recipes', search_term=search_term, diet_type=diet_type, allergy_list=allergy_list))
 
         else:
-            query = search_function(search_term=term)
-
-        if not query:
-            flash("No recipes found.")
-            return redirect('/')
-
-        return recipes(query)  # returns the route for recipes, using queried results
+            return redirect(url_for('main.recipes', search_term=search_term))
 
     else:
         return redirect(url_for('main.index'))
@@ -140,17 +161,16 @@ def advanced_search():
 
     if request.method == 'POST':
         range = form.hidden.data.split(',')
-        search_term = form.search_term.data
 
-        allergy_list = list(map(int, form.allergies.data))
-        diet_type = int(form.diet_type.data)
+        args_dict = {'search_term': form.search_term.data,
+                     'allergy_list': list(map(int, form.allergies.data)),
+                     'diet_type': int(form.diet_type.data),
+                     'min_cal': float(range[0]),
+                     'max_cal': float(range[1])
+                     }
 
-        query = search_function(search_term=search_term,
-                                diet_type=diet_type,
-                                min_cal=float(range[0]),
-                                max_cal=float(range[1]),
-                                allergy_list=allergy_list)
-        return recipes(query)
+        return redirect(url_for('main.recipes', **args_dict))
+
     return render_template('main/advanced_search.html', form=form)
 
 

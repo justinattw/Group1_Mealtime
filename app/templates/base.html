@@ -33,7 +33,7 @@
     <div class="collapse navbar-nav navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li>
-                <a class="nav-link" href="{{ url_for('main.recipes') }}">Recipes</a>
+                <a class="nav-link" href="{{ url_for('main.view_all_recipes') }}">Recipes</a>
             </li>
 
             {% if current_user.is_anonymous %}
