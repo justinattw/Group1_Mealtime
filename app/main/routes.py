@@ -75,6 +75,13 @@ def view_recipe(recipe_id):
 def recipes(query=None):
     query = search_function() if query is None else query
 
+    # The following code related to pagination is adapted from:
+    #
+    # Title: The Flask Mega-Tutorial Part IX: Pagination
+    # Author: Miguel Grinberg
+    # Date: 2018
+    # Availability: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ix-pagination [Accessed 25 March 2020]
+
     page = request.args.get('page', 1, type=int)  # Get current page of results
     # recipes = query.paginate(page, 2000, False)
     recipes = query.paginate(page, config.RECIPES_PER_PAGE, False)
