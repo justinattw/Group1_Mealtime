@@ -10,6 +10,7 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
+# from app.main.search_functions import search_function, generate_groceries_list
 from test.conftest import login
 
 from flask_login import current_user
@@ -38,6 +39,7 @@ def test_index_content(test_client):
 def test_search_recipes(test_client):
     pass
 
+
 # def test_profile_displayed_when_user_logged_in(test_client, user):
 #     login(test_client, password=user.password, email=user.email)
 #     response = test_client.get('/account/')
@@ -55,3 +57,15 @@ def test_search_recipes(test_client):
 #     """
 #     # response(/)
 #     pass
+
+
+# Test methods in search_functions
+
+def test_search_function(test_client):
+    # query = search_function()
+    pass
+
+
+def test_generate_groceries_list(test_client):
+    # query = generate_groceries_list()
+    pass

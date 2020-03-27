@@ -4,17 +4,12 @@
 {% block title %} Signup {% endblock %}
 {% from "_formhelpers.html" import render_field %}
 {% block content %}
-    <div class="card" style="width: 50vw;">
+    <div class="card mx-auto" style="max-width: 500px;"> {# TODO: Put style in custom.css #}
         <div class="card-header">Create a new account</div>
         <div class="card-body">
             <form method=post novalidate>
                 {{ form.csrf_token }}
                 <dl>
-                    {#            {{ render_field(form.first_name, class='form-control') }}#}
-                    {#            {{ render_field(form.last_name, class='form-control') }}#}
-                    {#            {{ render_field(form.email, class='form-control') }}#}
-                    {#            {{ render_field(form.password, class='form-control') }}#}
-                    {#            {{ render_field(form.confirm, class='form-control') }}#}
                     {{ wtf.form_field(form.first_name, class='form-control') }}
                     {{ wtf.form_field(form.last_name, class='form-control') }}
                     {{ wtf.form_field(form.email, class='form-control') }}

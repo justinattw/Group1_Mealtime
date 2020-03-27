@@ -11,16 +11,16 @@
     <thead class="thead-dark">
     <tr>
         <th scope="col">Serves</th>
-        <th scope="col">Cook time</th>
         <th scope="col">Prep time</th>
+        <th scope="col">Cook time</th>
         <th scope="col">Total time</th>
     </tr>
     </thead>
     <tbody>
     <tr>
         <td>{{ recipe.serves }}</td>
-        <td>{{ recipe.cook_time }}</td>
         <td>{{ recipe.prep_time }}</td>
+        <td>{{ recipe.cook_time }}</td>
         <td>{{ recipe.total_time }}</td>
     </tr>
     </tbody>
@@ -76,5 +76,18 @@
     <li>{{ s.step_description }}</li>
     {% endfor %}
 </ol>
+
+
+{#-------------------------------------------------------------#}
 <a href="{{ url_for('main.recipes') }}">Return to all recipes</a>
+
+{#<button onclick="goBack()">Go Back</button>#}
+{##}
+{#<script>#}
+{#function goBack() {#}
+{#  window.history.back();#}
+{#}#}
+{#</script>#}
+
+
 {% endblock %}

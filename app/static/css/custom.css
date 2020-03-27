@@ -27,3 +27,7 @@ body {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+.auth-card {
+    max-width: 500px;
+}

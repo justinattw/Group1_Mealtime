@@ -25,6 +25,11 @@ bp_auth = Blueprint('auth', __name__)
 
 @bp_auth.route('/login/', methods=['GET', 'POST'])
 def login():
+    """
+    Login route allowing users to sign into the application to access its services.
+
+    :return:
+    """
     form = LoginForm()
 
     if request.method == 'POST' and form.validate():
@@ -67,33 +72,37 @@ def signup():
 
         try:
             db.session.add(user)
-            db.session.commit()
 
+            # Set user diet preference to classic upon signing up
             user_query = db.session.query(Users).filter_by(email=form.email.data).first()
-
-            # Set user preferences to classic by default
             diet_preference = UserDietPreferences(user_id=user_query.id, diet_type_id=1)
             db.session.add(diet_preference)
             db.session.commit()
 
-            login_user(user)
-
+            login_user(user)  # User is logged in upon signing up
             flash('You are now a registered user!')
 
-            # Set cookie and return to main, if successful
-            response = make_response(redirect(url_for('main.index')))
+            response = make_response(redirect(url_for('main.index')))  # Set cookie and return to main, if successful
             response.set_cookie("name", form.first_name.data)
             return response
+
         except IntegrityError:
+            # Validations in forms are already done (e.g. email is already registered), this error probably can't be
+            # triggered from frontend.
             db.session.rollback()
-            flash('ERROR! Unable to register {}. Please check your details are correct and resubmit.'.format(
-                form.email.data), 'error')
+            flash(f'ERROR! Unable to register {form.email.data}. Please check your details are correct and resubmit.')
+
     return render_template('auth/signup.html', form=form)
 
 
 @bp_auth.route('/account/')
 @login_required
 def account():
+    """
+    Shows a logged-in user their account details
+
+    :return: template for account.html
+    """
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
     return render_template('auth/account.html', user=user)
@@ -102,6 +111,11 @@ def account():
 @bp_auth.route('/edit_password/', methods=['GET', 'POST'])
 @login_required
 def edit_password():
+    """
+    Allows a logged-in user to change their password by verifying their old password and validating their new passwords.
+
+    :return: edit_password route if check_password fails, or account route if edit_password is a success.
+    """
     form = EditPasswordForm()
 
     if request.method == 'POST' and form.validate():
@@ -113,8 +127,14 @@ def edit_password():
             return redirect(url_for('auth.edit_password'))
 
         user.set_password(form.new_password.data)
-        db.session.commit()
-        flash('Your password has been changed.')
+
+        try:
+            db.session.commit()
+            flash('Your password has been changed.')
+        except IntegrityError:
+            db.session.rollback()
+            flash('ERROR! Unable to change your password, please check your details are correct and try again.')
+
         return redirect(url_for('auth.account'))
 
     return render_template('auth/edit_account/edit_password.html', form=form)
@@ -153,13 +173,6 @@ def edit_preferences():
         flash('Your food preferences have been updated.')
         return redirect(url_for('auth.account'))
 
-    return render_template('auth/edit_account/edit_preferences.html', form=form)
-
-
-@bp_auth.route('/reset_password/', methods=['GET', 'POST'])
-@login_required
-def edit_preferences():
-    return redirect(url_for('main.index'))
     return render_template('auth/edit_account/edit_preferences.html', form=form)
 
 

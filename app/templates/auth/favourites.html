@@ -1,11 +1,0 @@
-{% extends "base.html" %}
-{% block title %}User details{% endblock %}
-{% block content %}
-
-<h3>Account details for {{ user.first_name }} {{ user.last_name }}</h3>
-<p>Email: {{ user.email }}</p>
-<p>Password: ********</p>
-<a class="nav-link" href="{{ url_for("auth.edit_password") }}">Edit password</a>
-<a class="nav-link" href="{{ url_for("auth.edit_preferences") }}">Edit food preferences</a>
-
-{% endblock %}
