@@ -10,6 +10,7 @@ Allows logged-in users to create meal-plans, add items to meal-plans, and additi
 
 - GitHub repository: https://github.com/justinattw/Group1_Mealtime
 - Video demonstration:
+- Heroku application: https://comp0034-mealtime.herokuapp.com
 
 ---
 
