@@ -21,6 +21,7 @@ import config
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
+import datetime
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 from markupsafe import escape
@@ -52,6 +53,12 @@ def index(name=""):
 
 @bp_main.route('/recipe/<recipe_id>', methods=['GET'])
 def view_recipe(recipe_id):
+    """
+    Page which shows details for specific recipes
+
+    :param recipe_id: which recipe should be shown
+    :return:
+    """
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == recipe_id).one()
 
     allergies = db.session.query(Allergies, RecipeAllergies) \
@@ -74,7 +81,9 @@ def view_recipe(recipe_id):
 @bp_main.route('/recipes', methods=['GET'])
 def recipes():
     """
-    This route takes
+    This route comes after view_all_recipes, search, or advanced_search routes.
+
+    This route uses page parameters (using request.args.get) from those previous routes to query a set of recipes
 
     :return:
     """
@@ -94,7 +103,7 @@ def recipes():
     # Author: Miguel Grinberg
     # Date: 2018
     # Availability: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ix-pagination
-    # [Accessed 25 March 2020]
+    # Accessed: 25 March 2020
 
     query = search_function(**args_dict)
     page = request.args.get('page', 1, type=int)  # Get current page of results
@@ -103,7 +112,6 @@ def recipes():
     next_url = url_for('main.recipes', **args_dict, page=recipes.next_num) if recipes.has_next else None
     prev_url = url_for('main.recipes', **args_dict, page=recipes.prev_num) if recipes.has_prev else None
 
-    # return render_template("recipes.html", recipes=recipes)
     return render_template("main/search_results.html",
                            results=recipes.items,
                            **args_dict,
@@ -141,7 +149,18 @@ def search():
             allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
             allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
 
-            return redirect(url_for('main.recipes', search_term=search_term, diet_type=diet_type, allergy_list=allergy_list))
+            # In DIET CHOICES, get corresponding tuple, and second element of that tuple
+            flash_diet_type = (config.DIET_CHOICES[diet_type - 1])[1]
+            flash_allergies = "None" if not allergy_list else ''.join(allergy_list)
+
+            # For new lines in flash message, implement this:
+            # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
+            flash(f"Based on user preferences, we have applied the following filters:<br/>"
+                  f"Diet type: {flash_diet_type}<br/>"
+                  f"Allergies: {flash_allergies}", "success")
+
+            return redirect(
+                url_for('main.recipes', search_term=search_term, diet_type=diet_type, allergy_list=allergy_list))
 
         else:
             return redirect(url_for('main.recipes', search_term=search_term))
@@ -188,20 +207,48 @@ def add_to_mealplan(recipe_id):
     mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
         .filter(MealPlans.user_id == current_user.id).first()
 
-    print(mealplan_id)
-
     if mealplan_id is None:
-        flash("Please create a meal plan first!")
+        flash("Please create a meal plan first!", "warning")
+
     else:
         try:
             db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            flash("This recipe is already in your mealplan!")
+            recipe_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+            flash(f"{recipe_name} is already in your meal plan!", "warning")
 
-    print(f"Added recipe {recipe_id} to mealplan {mealplan_id}")
-    return '', 204
+    print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
+    return '', 204  # keeps user on the same page
+
+
+@bp_main.route('/create_new_mealplan/', methods=['GET', 'POST'])
+@login_required
+def create_new_mealplan():
+
+    # Users cannot create a new mealplan if their current mealplan is empty
+    most_recent_mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
+        .filter(MealPlans.user_id == current_user.id).first()
+    most_recent_mealplan_is_used = db.session.query(MealPlanRecipes) \
+        .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
+
+    if not most_recent_mealplan_is_used:
+        print("You already have a fresh new meal plan!")
+
+    else:
+        try:
+            d = datetime.datetime.now()
+            created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
+
+            db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
+            db.session.commit()
+            print(f"Adding new mealplan for user {current_user.id}")
+        except IntegrityError:
+            db.session.rollback()
+            flash(f"ERROR! Meal plan could not be created, please try again.", "danger")
+
+    return '', 204  # keeps user on the same page
 
 
 @bp_main.route('/add_to_favourites/<recipe_id>', methods=['GET', 'POST'])
@@ -214,14 +261,17 @@ def add_to_favourites(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to favourites of user with associated user_id
     :return: stays on same page
     """
+
     try:
         db.session.add(UserFavouriteRecipes(user_id=current_user.id, recipe_id=recipe_id))
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        flash("This recipe is already in your favourites!")
-    print(f"Added recipe {recipe_id} to user {current_user.id}'s favourites")
-    return '', 204
+        recipe_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+        flash(f"{recipe_name} is already in your favourites!", "warning")
+
+    print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
+    return '', 204  # keeps user on the same page
 
 
 @bp_main.route('/favourites')

@@ -16,12 +16,15 @@ from config import DevConfig
 from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+# from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
+
+# mail = Mail()
 
 
 def page_not_found(e):
@@ -40,6 +43,18 @@ def create_app(config_class=DevConfig):
     app = Flask(__name__)
     Bootstrap(app)
     app.config.from_object(config_class)
+
+    # app.config.update(
+    #     DEBUG=True,
+    #     # EMAIL SETTINGS
+    #     MAIL_SERVER='smtp.gmail.com',
+    #     MAIL_PORT=465,
+    #     MAIL_USE_SSL=True,
+    #     MAIL_USERNAME='secret_email',
+    #     MAIL_PASSWORD='secret_password'
+    # )
+    #
+    # mail.init_app(app)
 
     db.init_app(app)
     login_manager.init_app(app)

@@ -34,13 +34,13 @@
 
                     {# Buttons to add to mealplan/ favourites #}
                     {% if current_user.is_authenticated %}
-                    <form action="{{ url_for('main.add_to_mealplan', recipe_id = result.recipe_id) }}"
+                    <form action="{{ url_for('main.add_to_mealplan', recipe_id=result.recipe_id) }}"
                           method="post">
                         <input type="image" src="{{ url_for('static', filename='img/icons/more.png') }}"
                                alt="Add to Mealplan" height="25" name="addToMealplan" class="btTxt submit"
                                id="saveForm"/>
                     </form>
-                    <form action="{{ url_for('main.add_to_favourites', recipe_id = result.recipe_id) }}"
+                    <form action="{{ url_for('main.add_to_favourites', recipe_id=result.recipe_id) }}"
                           method="post">
                         <input type="image" src="{{ url_for('static', filename='img/icons/heart.png') }}"
                                alt="Add to Favourites" height="25" name="addToFavourites" class="btTxt submit"

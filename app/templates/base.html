@@ -40,22 +40,16 @@
                 <li>
                     <a class="nav-link" href="{{ url_for("main.about") }}">About</a>
                 </li>
-                {#                </ul>#}
-                {#                <ul class="navbar-nav ml-auto">#}
                 <li>
                     <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
                 </li>
                 <li>
                     <a class="nav-link" href="{{ url_for("auth.login") }}">Log in</a>
                 </li>
-                {#                </ul>#}
             {% else %}
                 <li>
                     <a class="nav-link" href="{{ url_for('main.mealplanner') }}">Meal Plans</a>
                 </li>
-{#                <li>#}
-{#                    <a class="nav-link" href="#">Auto Chef</a>#}
-{#                </li>#}
                 <li>
                     <a class="nav-link" href="{{ url_for('main.favourites') }}">Favourites</a>
                 </li>
@@ -73,14 +67,46 @@
 <br>
 
 <div role=main class="container">
+
+    {# The following code to set different flash stypes is adapted from Pythonise #}
+
+    {# Title: Flash message flashing #}
+    {# Author: Julian Nash #}
+    {# Date: 2019 #}
+    {# Availability: https://pythonise.com/series/learning-flask/flask-message-flashing #}
+    {# Accessed: 23 January 2020 #}
+
     {# Displays flashed messages on a page #}
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(category_filter=["success"]) %}
         {% if messages %}
-            <ul class="alert-warning list-unstyled">
-                {% for message in messages %}
+            {% for message in messages %}
+                <ul class="alert alert-success list-unstyled" id="flashmsg">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
                     <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
+                </ul>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% with messages = get_flashed_messages(category_filter=["warning"]) %}
+        {% if messages %}
+            {% for message in messages %}
+                <ul class="alert alert-warning list-unstyled" id="flashmsg">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <li>{{ message }}</li>
+                </ul>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% with messages = get_flashed_messages(category_filter=["danger"]) %}
+        {% if messages %}
+            {% for message in messages %}
+                <ul class="alert alert-danger list-unstyled" id="flashmsg">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <li>{{ message }}</li>
+                </ul>
+            {% endfor %}
         {% endif %}
     {% endwith %}
 
@@ -98,6 +124,34 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
+
+
+    <script>
+        var heading = $("#flashmsg");
+        setInterval(function () {
+            if (heading.style.display == "block") {
+                heading.style.display = "none";
+            } else if (heading.style.display == "none") {
+                heading.style.display = "block";
+            }
+        }, 1000);
+    </script>
+
+
+    {# The following script causes flash messages to auto close after 4 seconds. It is adapted from OmniTunes#}
+
+    {# Author: OmniTunes #}
+    {# Date: 2017 #}
+    {# Availability: https://www.youtube.com/watch?v=rjIuZbG9190&list=PLQVvvaa0QuDc_owjTbIY4rbgXOFkUYOUB&index=10 #}
+    {# Accessed: 27 March 2020 #}
+
+    {#    <script>  window.setTimeout(function () {#}
+    {#        $("#flashmsg").fadeTo(500, 0).slideUp(500, function () {#}
+    {#            $(this).remove();#}
+    {#        });#}
+    {#    }, 4000);  </script>#}
+
+
     {% block footer %}{{ footer }}{% endblock %}
 </footer>
 

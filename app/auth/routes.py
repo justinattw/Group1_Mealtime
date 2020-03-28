@@ -11,12 +11,13 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from app import db, login_manager
+from app import db, login_manager #, mail
 from app.auth.forms import SignupForm, LoginForm, EditPasswordForm, EditPreferencesForm
 from app.models import Users, UserAllergies, UserDietPreferences
 
 from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response, abort
 from flask_login import login_required, login_user, logout_user, current_user
+# from flask_mail import Message
 from sqlalchemy.exc import IntegrityError
 from urllib.parse import urlparse, urljoin
 
@@ -35,17 +36,17 @@ def login():
     if request.method == 'POST' and form.validate():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
-            flash('No account has been registered with this email.')
+            flash('No account has been registered with this email.', 'warning')
             return redirect(url_for('auth.login'))
 
         if not user.check_password(form.password.data):
-            flash('Incorrect password.')
+            flash('Incorrect password.', 'danger')
             return redirect(url_for('auth.login'))
 
         from datetime import timedelta
         login_user(user, remember=form.remember_me.data, duration=timedelta(minutes=5))
 
-        flash('Logged in successfully. Welcome, {}'.format(user.first_name))
+        flash(f'Logged in successfully. Welcome, {user.first_name}!', 'success')
         next = request.args.get('next')
         if not is_safe_url(next):
             return abort(400)
@@ -57,7 +58,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.')
+    flash('You have been logged out.', 'success')
     return redirect(url_for('main.index'))
 
 
@@ -80,7 +81,7 @@ def signup():
             db.session.commit()
 
             login_user(user)  # User is logged in upon signing up
-            flash('You are now a registered user!')
+            flash('You are now a registered user!', 'success')
 
             response = make_response(redirect(url_for('main.index')))  # Set cookie and return to main, if successful
             response.set_cookie("name", form.first_name.data)
@@ -90,7 +91,8 @@ def signup():
             # Validations in forms are already done (e.g. email is already registered), this error probably can't be
             # triggered from frontend.
             db.session.rollback()
-            flash(f'ERROR! Unable to register {form.email.data}. Please check your details are correct and resubmit.')
+            flash(f'ERROR! Unable to register {form.email.data}. Please check your details are correct and resubmit.',
+                  'danger')
 
     return render_template('auth/signup.html', form=form)
 
@@ -123,17 +125,18 @@ def edit_password():
         user = Users.query.filter_by(id=current_user.id).first()
 
         if not user.check_password(form.old_password.data):
-            flash('Incorrect old password')
+            flash('Incorrect old password', 'warning')
             return redirect(url_for('auth.edit_password'))
 
         user.set_password(form.new_password.data)
 
         try:
             db.session.commit()
-            flash('Your password has been changed.')
+            flash('Your password has been changed.', 'success')
         except IntegrityError:
             db.session.rollback()
-            flash('ERROR! Unable to change your password, please check your details are correct and try again.')
+            flash('ERROR! Unable to change your password, please check your details are correct and try again.',
+                  'warning')
 
         return redirect(url_for('auth.account'))
 
@@ -157,10 +160,8 @@ def edit_preferences():
             UserDietPreferences.query.filter_by(user_id=user_id).delete()
             UserAllergies.query.filter_by(user_id=user_id).delete()
 
-            # Re-add diet_preference
+            # Re-add diet_preference and allergies
             db.session.add(UserDietPreferences(user_id=user_id, diet_type_id=diet_type_id))
-
-            # For each allergy identified, add to db
             for allergy_id in allergy_list:
                 db.session.add(UserAllergies(user_id=user_id, allergy_id=allergy_id))
 
@@ -168,9 +169,9 @@ def edit_preferences():
 
         except IntegrityError:
             db.session.rollback()
-            flash('ERROR! Unable to make preference changes. Please try again.')
+            flash('ERROR! Unable to make preference changes. Please try again.', 'danger')
 
-        flash('Your food preferences have been updated.')
+        flash('Your food preferences have been updated.', 'success')
         return redirect(url_for('auth.account'))
 
     return render_template('auth/edit_account/edit_preferences.html', form=form)
@@ -203,5 +204,5 @@ def load_user(user_id):
 @login_manager.unauthorized_handler
 def unauthorized():
     """Redirect unauthorized users to Login page."""
-    flash('You must be logged in to view that page.')
+    flash('You must be logged in to view that page.', 'warning')
     return redirect(url_for('auth.login'))
