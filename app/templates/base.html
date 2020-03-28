@@ -82,7 +82,12 @@
             {% for message in messages %}
                 <ul class="alert alert-success list-unstyled" id="flashmsg">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <li>{{ message }}</li>
+                    <li>
+                        {{ message }}
+{#                        {% for para in message %}#}
+{#                            {{ para }}<br>#}
+{#                        {% endfor %}#}
+                    </li>
                 </ul>
             {% endfor %}
         {% endif %}

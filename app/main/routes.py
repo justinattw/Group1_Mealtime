@@ -14,7 +14,7 @@ __status__ = "Development"
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
-    Allergies, UserDietPreferences, UserAllergies, UserFavouriteRecipes, MealPlanRecipes, MealPlans
+    Allergies, UserDietPreferences, UserAllergies, UserFavouriteRecipes, MealPlanRecipes, MealPlans, DietTypes
 from app.main.search_functions import search_function
 import config
 
@@ -90,8 +90,11 @@ def recipes():
 
     # This dictionary allows search parameters to be kept in the page, so that they are saved even when navigating to
     # next/ prev urls
+
+    #TODO getting allergy_list this way only returns 1 value, and it converts integer into a string
     args_dict = {'search_term': request.args.get('search_term', ""),
-                 'allergy_list': request.args.get('allergy_list', [], type=list),
+                 # Parse string allergies into a string, because you can't pass entire lists as parameters
+                 'allergy_list': list(map(int, request.args.get('allergy_list', [], type=list))),
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
                  'max_cal': request.args.get('max_cal', 1000, type=int),
@@ -143,24 +146,34 @@ def search():
         search_term = request.form['search_term']
 
         if current_user.is_authenticated:
-
             user_id = current_user.id
-            diet_type, = db.session.query(UserDietPreferences.diet_type_id).filter_by(user_id=user_id).first()
+            diet_type, diet_name = db.session.query(UserDietPreferences) \
+                .join(DietTypes) \
+                .filter(UserDietPreferences.user_id == user_id)\
+                .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name)\
+                .first()
             allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
+
             allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
+            # Return list of allergies strings corresponding to allergy id, through config
+            allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
 
-            # In DIET CHOICES, get corresponding tuple, and second element of that tuple
-            flash_diet_type = (config.DIET_CHOICES[diet_type - 1])[1]
-            flash_allergies = "None" if not allergy_list else ''.join(allergy_list)
+            flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
+            flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
+                            f"Diet type: {diet_name}\n" \
+                            f"Allergies: {flash_allergies}"
 
-            # For new lines in flash message, implement this:
+            # To show flash messages on new line, implement:
             # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
-            flash(f"Based on user preferences, we have applied the following filters:<br/>"
-                  f"Diet type: {flash_diet_type}<br/>"
-                  f"Allergies: {flash_allergies}", "success")
+            flash(flash_message, "success")
+
+            # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
+            # request.args.get in recipes route can
+            allergy_id_str = map(str, allergy_list)
+            allergies = ''.join(allergy_id_str)
 
             return redirect(
-                url_for('main.recipes', search_term=search_term, diet_type=diet_type, allergy_list=allergy_list))
+                url_for('main.recipes', search_term=search_term, diet_type=diet_type, allergy_list=allergies))
 
         else:
             return redirect(url_for('main.recipes', search_term=search_term))
@@ -182,7 +195,7 @@ def advanced_search():
         range = form.hidden.data.split(',')
 
         args_dict = {'search_term': form.search_term.data,
-                     'allergy_list': list(map(int, form.allergies.data)),
+                     'allergy_list': ''.join(form.allergies.data),
                      'diet_type': int(form.diet_type.data),
                      'min_cal': float(range[0]),
                      'max_cal': float(range[1])
@@ -226,7 +239,6 @@ def add_to_mealplan(recipe_id):
 @bp_main.route('/create_new_mealplan/', methods=['GET', 'POST'])
 @login_required
 def create_new_mealplan():
-
     # Users cannot create a new mealplan if their current mealplan is empty
     most_recent_mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
         .filter(MealPlans.user_id == current_user.id).first()
