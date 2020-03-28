@@ -7,7 +7,7 @@ import sqlite3
 from sqlite3 import Error
 import random
 
-db = sqlite3.connect("db/mealtime.sqlite")
+db = sqlite3.connect("db/mealtime.db")
 c = db.cursor()
 
 WeeklyCalorieCount = []

@@ -47,7 +47,7 @@ class Config(object):
 
     # Database config
     CWD = dirname(abspath(__file__))
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'db/mealtime.sqlite')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'db/mealtime.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # # EMAIL SETTINGS
@@ -74,7 +74,7 @@ class TestConfig(Config):
 
     # Create a duplicate of the current database
     from shutil import copy
-    src = join(CWD, 'db/mealtime.sqlite') # current working db
+    src = join(CWD, 'db/mealtime.db') # current working db
     dst = join(CWD, 'db/mealtime_testing.sqlite') # destination for test db
     copy(src, dst) # copy (and overwrite) working db to test db
 

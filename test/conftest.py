@@ -41,7 +41,7 @@ def db(app):
     _db.app = app
     _db.create_all()
 
-    # _db.Model.metadata.reflect(db.engine)
+    _db.Model.metadata.reflect(_db.engine)
 
     yield _db
 
@@ -130,3 +130,12 @@ def edit_password(client, old_password, new_password, confirm_password):
         new_password=new_password,
         confirm_password=confirm_password
     ), follow_redirects=True)
+
+def edit_preferences(client, DIET_CHOICES, ALLERGY_CHOICES):
+    return client.post('/edit_preferences/', data=dict(
+        diet_type=DIET_CHOICES,
+        allergies=ALLERGY_CHOICES
+    ), follow_redirects=True
+    )
+
+#def search_function(test_client, search_term):

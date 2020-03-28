@@ -3,7 +3,7 @@
 """
 app/models.py:
 
-This document creates SQLAlchemy models by referencing the pre-existing mealtime.sqlite database (if non-existing db,
+This document creates SQLAlchemy models by referencing the pre-existing mealtime.db database (if non-existing db,
 first run db/create_db.py)
 For entity relationship diagram, see: https://www.lucidchart.com/invitations/accept/a9b31da9-ee84-4aca-8e64-996f781f17b7
 """
@@ -21,7 +21,7 @@ import time
 
 start_time = time.time()
 
-db = sqlite3.connect("db/mealtime.sqlite", isolation_level=None)
+db = sqlite3.connect("db/mealtime.db", isolation_level=None)
 c = db.cursor()
 
 c.execute("""CREATE TABLE IF NOT EXISTS Recipes (

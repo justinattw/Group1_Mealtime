@@ -5,14 +5,16 @@ test/test_auth.py:
 
 Pytests tests for authentication methods (relating to files in app/auth/)
 """
+
+
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from test.conftest import login, logout, edit_password
-
-import pytest
+from test.conftest import login, logout, edit_password, edit_preferences, session
+import config
+import numpy as np
 
 
 
@@ -41,21 +43,9 @@ def test_login_success_with_valid_user(test_client, user):
     THEN 1) response is valid and 2) redirection occurs
     """
     response = login(test_client, email=user.email, password='cat123')
-    print(response.data)
     assert response.status_code == 200
     assert b'Logged in successfully' in response.data
     assert (b'Logged in successfully. Welcome, Test') in response.data
-    # user_name = ''.join(format(ord(i), 'b') for i in user.first_name)
-    # print(user_name)
-    # print(b'Logged in successfully. Welcome ' + user_name)
-    # assert (b'Logged in successfully. Welcome, ' + user_name) in response.data
-
-
-#    response = test_client.post('/login/', data=dict(
-#        email=user.email,
-#        password=user.password
-#    ), follow_redirects=False)  # set follow_redirects to false and test the response is invalid
-#    assert response.status_code == 302
 
 
 def test_logout_user_success(test_client, user):
@@ -70,7 +60,7 @@ def test_logout_user_success(test_client, user):
     assert b'You have been logged out.' in response.data
 
 
-def test_register_user_success(test_client, user_data, db):
+def test_register_user_success(test_client, user_data):
     """
     GIVEN a flask app
     WHEN a user registers with valid user details
@@ -84,9 +74,6 @@ def test_register_user_success(test_client, user_data, db):
         confirm=user_data['confirm']
     ), follow_redirects=True)
     assert response.status_code == 200
-
-    from app.models import Users
-    # assert db.session.query(Users).filter(Users.email == user_data['email']).all() is not None
 
 
 def test_duplicate_register_error(test_client, user):
@@ -124,12 +111,23 @@ def test_account_view_accessible_after_login(test_client, user):
 
     response = login(test_client, email=user.email, password='cat123')
     response = test_client.get('/account/')
-    print(response.data)
- #   print(user.email)
- #   print(user.password)
- #   print(test_client.post('/account/'))
     assert b'Account details for Test User' in response.data
     assert response.status_code == 200
+
+def test_edit_preferences(test_client, user, db):
+    from app.models import UserDietPreferences, UserAllergies
+    login(test_client, email=user.email, password='cat123')
+    full_diet_choices = config.DIET_CHOICES
+    full_allergy = config.ALLERGY_CHOICES
+    random_diet = np.random.randint(1, 4)
+    random_allergy = np.random.randint(1, len(full_allergy))
+    response = edit_preferences(test_client, DIET_CHOICES=random_diet, ALLERGY_CHOICES=random_allergy)
+
+    assert b'Your food preferences have been updated' in response.data
+    diet_query = db.session.query(UserDietPreferences).filter(UserDietPreferences.user_id == user.id).filter(UserDietPreferences.diet_type_id == random_diet).first()
+    allergy_query = db.session.query(UserAllergies).filter(UserAllergies.user_id == user.id).filter(UserAllergies.allergy_id == random_allergy).first()
+    assert diet_query is not None
+    assert allergy_query is not None
 
 
 def test_edit_password_success(test_client, user):
@@ -147,5 +145,3 @@ def test_edit_password_success(test_client, user):
 
     response = login(test_client, email=user.email, password=new_password)  # login to test user
     assert response.status_code == 200
-
-
