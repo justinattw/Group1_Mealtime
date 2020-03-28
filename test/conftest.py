@@ -13,9 +13,12 @@ __status__ = "Development"
 
 from app import create_app
 from app import db as _db
+import config
 
-import pytest
 from flask_login import login_user, logout_user
+import numpy as np
+import random
+import pytest
 
 
 @pytest.yield_fixture(scope='session')
@@ -40,11 +43,9 @@ def test_client(app):
 def db(app):
     _db.app = app
     _db.create_all()
-
     _db.Model.metadata.reflect(_db.engine)
 
     yield _db
-
     _db.drop_all()
 
 
@@ -56,8 +57,16 @@ def user(test_client, db):
                  last_name='User',
                  email='user@test.com')
     user.set_password('cat123')
+
+    # Set random food preferences (diet types and allergies) for test user
+    random_diet_type = np.random.randint(1, len(config.DIET_CHOICES))
+    random_allergies = [random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(np.random.randint(1, 5))]
+    edit_preferences(test_client, random_diet_type, random_allergies)
+
     db.session.add(user)
     db.session.commit()
+
+
     return user
 
 
@@ -120,6 +129,13 @@ def login(client, email, password):
     ), follow_redirects=True)
 
 
+def login_test_user(client):
+    return client.post('/login/', data=dict(
+        email="user@test.com",
+        password="cat123"
+    ), follow_redirects=True)
+
+
 def logout(client):
     return client.get('/logout/', follow_redirects=True)
 
@@ -131,11 +147,9 @@ def edit_password(client, old_password, new_password, confirm_password):
         confirm_password=confirm_password
     ), follow_redirects=True)
 
+
 def edit_preferences(client, DIET_CHOICES, ALLERGY_CHOICES):
     return client.post('/edit_preferences/', data=dict(
         diet_type=DIET_CHOICES,
         allergies=ALLERGY_CHOICES
-    ), follow_redirects=True
-    )
-
-#def search_function(test_client, search_term):
+    ), follow_redirects=True)

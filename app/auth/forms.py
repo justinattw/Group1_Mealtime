@@ -70,4 +70,4 @@ class EditPasswordForm(FlaskForm):
 
 class EditPreferencesForm(FlaskForm):
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
-    allergies = SelectMultipleField(u'Allergies (shift+click to select multiple)', choices=ALLERGY_CHOICES)
+    allergies = SelectMultipleField(u'Allergies (ctrl+click to select multiple)', choices=ALLERGY_CHOICES)
