@@ -3,7 +3,7 @@
 """
 app/auth/emails.py:
 
-This file includes sample
+This file includes an example for a send_email method
 
 The emails are not used in the final deliverable. However, we have kept it in the final submission as it is a potential
 future requirement.

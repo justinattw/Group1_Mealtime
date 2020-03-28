@@ -6,15 +6,16 @@ test/test_auth.py:
 Pytests tests for authentication methods (relating to files in app/auth/)
 """
 
-
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from test.conftest import login, logout, edit_password, edit_preferences, session
 import config
+from test.conftest import login, logout, edit_password, edit_preferences, session
+
 import numpy as np
+
 
 
 
@@ -108,26 +109,10 @@ def test_account_view_accessible_after_login(test_client, user):
     WHEN /account is requested
     THEN response is valid
     """
-
-    response = login(test_client, email=user.email, password='cat123')
+    login(test_client, email=user.email, password='cat123')
     response = test_client.get('/account/')
     assert b'Account details for Test User' in response.data
     assert response.status_code == 200
-
-def test_edit_preferences(test_client, user, db):
-    from app.models import UserDietPreferences, UserAllergies
-    login(test_client, email=user.email, password='cat123')
-    full_diet_choices = config.DIET_CHOICES
-    full_allergy = config.ALLERGY_CHOICES
-    random_diet = np.random.randint(1, 4)
-    random_allergy = np.random.randint(1, len(full_allergy))
-    response = edit_preferences(test_client, DIET_CHOICES=random_diet, ALLERGY_CHOICES=random_allergy)
-
-    assert b'Your food preferences have been updated' in response.data
-    diet_query = db.session.query(UserDietPreferences).filter(UserDietPreferences.user_id == user.id).filter(UserDietPreferences.diet_type_id == random_diet).first()
-    allergy_query = db.session.query(UserAllergies).filter(UserAllergies.user_id == user.id).filter(UserAllergies.allergy_id == random_allergy).first()
-    assert diet_query is not None
-    assert allergy_query is not None
 
 
 def test_edit_password_success(test_client, user):
@@ -145,3 +130,61 @@ def test_edit_password_success(test_client, user):
 
     response = login(test_client, email=user.email, password=new_password)  # login to test user
     assert response.status_code == 200
+
+
+def test_edit_preferences_response_and_database(test_client, user, db):
+    """
+    GIVEN a flask app and user is logged in
+    WHEN /edit_preferences is requested and user has input some random diet preference and allergy
+    THEN response is valid
+    """
+    from app.models import UserDietPreferences, UserAllergies
+
+    login(test_client, email=user.email, password='cat123')
+
+    # random_diet = np.random.randint(1, len(config.DIET_CHOICES))
+    # random_allergy = np.random.randint(1, len(config.ALLERGY_CHOICES))
+    random_diet = 1
+    random_allergy = 1
+
+    response = edit_preferences(test_client, DIET_CHOICES=random_diet, ALLERGY_CHOICES=random_allergy)
+    assert b'Your food preferences have been updated' in response.data
+    assert response.status_code == 200
+
+    """
+    GIVEN a flask app and user is logged in
+    WHEN /edit_preferences is requested and user has input some random diet preference and allergy
+    THEN the database is updated accordingly with newly selected diet type
+    """
+    diet_query = db.session.query(UserDietPreferences) \
+        .filter(UserDietPreferences.user_id == user.id) \
+        .filter(UserDietPreferences.diet_type_id == random_diet) \
+        .first()
+    allergy_query = db.session.query(UserAllergies) \
+        .filter(UserAllergies.user_id == user.id) \
+        .filter(UserAllergies.allergy_id == random_allergy) \
+        .first()
+
+    assert diet_query is not None
+    assert allergy_query is not None
+
+    """
+    GIVEN a flask app and user is logged in
+    WHEN /edit_preferences is requested and user has input some random diet preference and allergy
+    THEN the database is updated and old diet type/ incorrect type type is not kept in database
+    """
+    random_wrong_diet = 2
+    random_wrong_allergy = 2
+
+    diet_query = db.session.query(UserDietPreferences) \
+        .filter(UserDietPreferences.user_id == user.id) \
+        .filter(UserDietPreferences.diet_type_id == random_wrong_diet) \
+        .first()
+
+    allergy_query = db.session.query(UserDietPreferences) \
+        .filter(UserDietPreferences.user_id == user.id) \
+        .filter(UserDietPreferences.diet_type_id == random_wrong_allergy) \
+        .first()
+
+    assert diet_query is None
+    assert allergy_query is None

@@ -14,7 +14,7 @@ __status__ = "Development"
 from os.path import dirname, abspath, join
 
 """Global project variables set up in config"""
-RECIPES_PER_PAGE = 12 # For pagination
+RECIPES_PER_PAGE = 12  # For pagination
 MIN_PW_LEN = 6
 MAX_PW_LEN = 20
 DIET_CHOICES = [(1, 'Classic'),
@@ -32,6 +32,8 @@ ALLERGY_CHOICES = [(1, 'Dairy-free'),
                    (9, 'Sesame-free'),
                    (10, 'Soybeans-free'),
                    (11, 'Celery-free')]
+
+
 
 
 class Config(object):

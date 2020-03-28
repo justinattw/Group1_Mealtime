@@ -62,7 +62,7 @@ def test_search_recipes(test_client):
 # Test methods in search_functions
 
 def test_search_function(test_client):
-    query = search_function()
+    # query = search_function()
     pass
 
 
