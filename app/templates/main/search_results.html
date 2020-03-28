@@ -40,15 +40,17 @@
                                alt="Add to Mealplan" height="25" name="addToMealplan" class="btTxt submit"
                                id="saveForm"/>
                     </form>
+                    {#
                     <form action="{{ url_for('main.add_to_favourites', recipe_id=result.recipe_id) }}"
                           method="post">
                         <input type="image" src="{{ url_for('static', filename='img/icons/heart.png') }}"
                                alt="Add to Favourites" height="25" name="addToFavourites" class="btTxt submit"
                                id="saveForm"/>
                     </form>
+                    #}
+                    <button id="fav{{result.recipe_id}}" onclick="ajax_fav('{{result.recipe_id}}')">Add Favourite</button>
 
                     {% endif %}
-
                 </div>
             </div>
         </div>
@@ -69,4 +71,31 @@
 <p>Sorry, no recipes found</p>
 {% endif %}
 
+{% endblock %}
+
+{% block footer %}
+<script>
+    var flashMessage = function(data){
+      html = '';
+      for (i=0; i<data.length; i++) {
+        html += '<div class="alert alert-' + data[i]['type'] + '"><a href="#" class="close" data-dismiss="alert">&times;</a>' + data[i].message + '</div>';
+      }
+      return html;
+    };
+
+    function ajax_fav(id) {
+        $.post("/add_to_favourites/" + id, JSON.stringify({'calls': 'whatever'}), function(returnedData) {
+            $('#flashmsg').append(flashMessage(JSON.parse(returnedData)));
+        });
+        $.ajax({
+            url: "/add_to_favourites/" + id, success: function (result) {
+                if (result == 'success') {
+                    $("#fav" + id).text("Remove Favourite");
+                    $("#unfav" + id).attr("onclick", "ajax_unfav(id)")
+                }
+            }
+        });
+    }
+
+</script>
 {% endblock %}
