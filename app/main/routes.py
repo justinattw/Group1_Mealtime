@@ -18,7 +18,7 @@ from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, Nu
 from app.main.search_functions import search_function
 import config
 
-from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
+from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response, jsonify
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
 import datetime
@@ -286,6 +286,12 @@ def add_to_favourites(recipe_id):
 
     print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
     return '', 204  # keeps user on the same page
+
+
+@bp_main.route('/fav_test', methods=['GET', 'POST'])
+@login_required
+def fav_test():
+    return jsonify(status='success')
 
 
 @bp_main.route('/favourites')
