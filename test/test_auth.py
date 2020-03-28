@@ -116,11 +116,16 @@ def test_account_view_accessible_after_login(test_client, user):
 
 def test_edit_password_success(test_client, user):
     old_password = 'cat123'
+    new_password = "dog123"
     assert user.check_password(old_password) is True  # assert old password is 'cat123'
 
     login(test_client, email=user.email, password=old_password)  # login to test user
 
-    new_password = "dog123"
+    ### try to change with incorrect old password
+    incorrect_password = 'elephant999'
+    response = edit_password(test_client, incorrect_password, new_password, new_password)
+    assert b'Incorrect old password' in response.data
+
     response = edit_password(test_client, old_password, new_password, new_password)  # change password to 'dog123'
 
     assert b'Your password has been changed' in response.data

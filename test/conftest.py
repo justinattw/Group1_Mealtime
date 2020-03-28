@@ -52,7 +52,7 @@ def db(app):
 @pytest.fixture(scope='function')
 def user(test_client, db):
     """ Creates a test user. """
-    from app.models import Users
+    from app.models import Users, UserDietPreferences, UserAllergies
     user = Users(first_name='Test',
                  last_name='User',
                  email='user@test.com')
@@ -60,12 +60,22 @@ def user(test_client, db):
 
     # Set random food preferences (diet types and allergies) for test user
     random_diet_type = np.random.randint(1, len(config.DIET_CHOICES))
-    random_allergies = [random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(np.random.randint(1, 5))]
+    random_allergies = list(
+        set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(np.random.randint(1, 5))]))
     edit_preferences(test_client, random_diet_type, random_allergies)
 
     db.session.add(user)
     db.session.commit()
+    user_diet_preferences = UserDietPreferences(user_id=user.id,
+                                                diet_type_id=random_diet_type)
+    db.session.add(user_diet_preferences)
 
+    for allergy in random_allergies:
+        user_allergy = UserAllergies(user_id=user.id,
+                                     allergy_id=allergy)
+        db.session.add(user_allergy)
+
+    db.session.commit()
 
     return user
 
@@ -153,3 +163,32 @@ def edit_preferences(client, DIET_CHOICES, ALLERGY_CHOICES):
         diet_type=DIET_CHOICES,
         allergies=ALLERGY_CHOICES
     ), follow_redirects=True)
+
+
+def search_function(client, test_search):
+    return client.post('/search', data=dict(
+        search_term=test_search,
+    ), follow_redirects=True)
+
+def add_to_favourites(client, recipe_id):
+    url_str = '/add_to_favourites/' + str(recipe_id)
+    return client.post(url_str, data=dict(
+       recipe_id=recipe_id
+    ), follow_redirects=True)
+
+
+def view_recipe(client, recipe):
+    url_str = '/recipe/' + str(recipe)
+    return client.get(url_str, follow_redirects=True)
+
+def view_favourites(client):
+    return client.get('/favourites', follow_redirects=True)
+
+def view_about(client):
+    return client.get('/about',  follow_redirects=True)
+
+def view_mealplanner(client):
+    return client.get('/mealplanner', follow_redirects=True)
+
+def view_create_mealplan(client):
+    return client.get('/create_new_mealplan/', follow_redirects=True)
