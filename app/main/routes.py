@@ -91,9 +91,11 @@ def recipes():
     # This dictionary allows search parameters to be kept in the page, so that they are saved even when navigating to
     # next/ prev urls
 
-    #TODO getting allergy_list this way only returns 1 value, and it converts integer into a string
     args_dict = {'search_term': request.args.get('search_term', ""),
-                 # Parse string allergies into a string, because you can't pass entire lists as parameters
+                 # Parse string allergies into an integer list, because you can't pass entire lists as parameters.
+                 # request.args.get therefore is taking in a string (i.e. not [1, 4], but "14"
+                 # type=list will turn "14" into a list, but they will still be strings. Use map(int, list) to convert
+                 # into integers
                  'allergy_list': list(map(int, request.args.get('allergy_list', [], type=list))),
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
