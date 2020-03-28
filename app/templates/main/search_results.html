@@ -75,24 +75,12 @@
 
 {% block footer %}
 <script>
-    var flashMessage = function(data){
-      html = '';
-      for (i=0; i<data.length; i++) {
-        html += '<div class="alert alert-' + data[i]['type'] + '"><a href="#" class="close" data-dismiss="alert">&times;</a>' + data[i].message + '</div>';
-      }
-      return html;
-    };
-
     function ajax_fav(id) {
-        $.post("/add_to_favourites/" + id, JSON.stringify({'calls': 'whatever'}), function(returnedData) {
-            $('#flashmsg').append(flashMessage(JSON.parse(returnedData)));
-        });
         $.ajax({
-            url: "/add_to_favourites/" + id, success: function (result) {
-                if (result == 'success') {
-                    $("#fav" + id).text("Remove Favourite");
-                    $("#unfav" + id).attr("onclick", "ajax_unfav(id)")
-                }
+            type: 'POST',
+            url: "/fav_test",
+            success: function (result) {
+                alert("Alert test");
             }
         });
     }

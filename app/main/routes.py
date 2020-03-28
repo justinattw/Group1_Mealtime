@@ -285,7 +285,13 @@ def add_to_favourites(recipe_id):
         flash(f"{recipe_name} is already in your favourites!", "warning")
 
     print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
-    return 'success', 200  # keeps user on the same page
+    return '', 204  # keeps user on the same page
+
+
+@bp_main.route('/fav_test', methods=['GET', 'POST'])
+@login_required
+def fav_test():
+    return jsonify(status='success')
 
 
 @bp_main.route('/favourites')
