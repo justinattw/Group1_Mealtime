@@ -22,7 +22,7 @@ from flask import render_template, Blueprint, request, flash, redirect, url_for,
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
 import datetime
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.sql import func
 from markupsafe import escape
 
@@ -279,19 +279,43 @@ def add_to_favourites(recipe_id):
     try:
         db.session.add(UserFavouriteRecipes(user_id=current_user.id, recipe_id=recipe_id))
         db.session.commit()
+
+        print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
+        return 'success', 200  # keeps user on the same page
+
     except IntegrityError:
         db.session.rollback()
-        recipe_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
-        flash(f"{recipe_name} is already in your favourites!", "warning")
+        recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+        #flash(f"{recipe_name} is already in your favourites!", "warning")
 
-    print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
-    return '', 204  # keeps user on the same page
+        print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
+        return 'failure', 200
 
 
-@bp_main.route('/fav_test', methods=['GET', 'POST'])
+@bp_main.route('/remove_from_favourites/<recipe_id>', methods=['GET', 'POST'])
 @login_required
-def fav_test():
-    return jsonify(status='success')
+def remove_from_favourites(recipe_id):
+    """
+    Allows user to remove recipe to favourites.
+
+    :param recipe_id: removes recipe associated with recipe_id from favourites of user with associated user_id
+    :return: stays on same page
+    """
+    try:
+        del_recipe = db.session.query(UserFavouriteRecipes) \
+            .filter(UserFavouriteRecipes.recipe_id == recipe_id) \
+            .filter(UserFavouriteRecipes.user_id == current_user.id) \
+            .one()
+        db.session.delete(del_recipe)
+        db.session.commit()
+
+        print(f"Removing recipe {recipe_id} from user {current_user.id}'s favourites")
+        return 'success', 200  # keeps user on the same page
+
+    except InvalidRequestError:
+
+        print(f"Failed to remove recipe {recipe_id} from user {current_user.id}'s favourites")
+        return 'failure', 200
 
 
 @bp_main.route('/favourites')

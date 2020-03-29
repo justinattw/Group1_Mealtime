@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Search results{% endblock %}
+
+{% block head %}
+    <link href = "{{ url_for('static', filename='css/toastr.css') }}" rel = "stylesheet">
+{%  endblock %}
+
 {% block content %}
 <form class="form-inline ml-auto simple_search" action="search" method="post">
     <input class="form-control" type="search" placeholder="Search recipes" aria-label="Search"
@@ -34,13 +39,13 @@
 
                     {# Buttons to add to mealplan/ favourites #}
                     {% if current_user.is_authenticated %}
+                    {#
                     <form action="{{ url_for('main.add_to_mealplan', recipe_id=result.recipe_id) }}"
                           method="post">
                         <input type="image" src="{{ url_for('static', filename='img/icons/more.png') }}"
                                alt="Add to Mealplan" height="25" name="addToMealplan" class="btTxt submit"
                                id="saveForm"/>
                     </form>
-                    {#
                     <form action="{{ url_for('main.add_to_favourites', recipe_id=result.recipe_id) }}"
                           method="post">
                         <input type="image" src="{{ url_for('static', filename='img/icons/heart.png') }}"
@@ -48,7 +53,9 @@
                                id="saveForm"/>
                     </form>
                     #}
-                    <button id="fav{{result.recipe_id}}" onclick="ajax_fav('{{result.recipe_id}}')">Add Favourite</button>
+
+                    <button id="fav{{result.recipe_id}}" onclick="ajax_fav('{{result.recipe_id}}', '{{result.recipe_name}}')">Add Favourite</button>
+                    <button id="unfav{{result.recipe_id}}" onclick="ajax_unfav('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove Favourite</button>
 
                     {% endif %}
                 </div>
@@ -74,16 +81,43 @@
 {% endblock %}
 
 {% block footer %}
-<script>
-    function ajax_fav(id) {
-        $.ajax({
-            type: 'POST',
-            url: "/fav_test",
-            success: function (result) {
-                alert("Alert test");
-            }
-        });
-    }
+    <script src="{{ url_for('static', filename='js/toastr.js') }}"></script>
+    <script>
+        function ajax_fav(id, name) {
+            $.ajax({
+                url: "/add_to_favourites/" + id, success: function (result) {
+                    if (result == 'success') {
 
-</script>
+                        //$("#fav" + id).text("Remove Favourite");
+                        //$("#unfav" + id).attr("onclick", "ajax_unfav(id, name)")
+
+                        /* Use Toastr lib to display quick alerts
+                        Toastr is by Hans Fjällemark, John Papa & Tim Ferrell
+                        https://codeseven.github.io/toastr/ */
+                        toastr.success('Added ' + name + ' to favourites!')
+                    }
+
+                    else {
+                        toastr.error(name + ' is already in your favourites!')
+                    }
+                }
+            });
+        }
+
+        function ajax_unfav(id, name) {
+            $.ajax({
+                url: "/remove_from_favourites/" + id, success: function (result) {
+                    if (result == 'success') {
+
+                        toastr.warning('Removed ' + name + ' from your favourites!')
+                    }
+
+                    else{
+                        toastr.error(name + ' cannot be removed as it is not in your favourites!')
+                    }
+                }
+            });
+        }
+
+    </script>
 {% endblock %}
