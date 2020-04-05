@@ -3,26 +3,20 @@
 """
 test/test_main.py:
 
-Pytests tests for main methods (relating to files in app/main/)
+Pytests tests for main views and methods (relating to files in app/main/)
 """
-import random
-import string
-import numpy as np
-import pytest
-import re
-from sqlalchemy.orm.exc import ObjectDeletedError
-
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, \
-    view_about, view_mealplanner, view_create_mealplan
+from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
+    view_mealplanner, view_create_mealplan
 
+import pytest
+import random
+from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.sql import func
-
-regex = re.compile('[^a-zA-Z]')
 
 
 def test_index_page_valid(test_client):
@@ -69,7 +63,7 @@ def test_add_to_favourite(test_client, user, db):
     # This query assumes that there are no empty recipe_ids up to the highest id. If we ever add a feature where users
     # can upload + delete their uploaded recipes, this will need to be changed.
 
-    rand_favourite = np.random.randint(1, number_of_recipes)  # generate a random favourite recipe_id to test
+    rand_favourite = random.randint(1, number_of_recipes)  # generate a random favourite recipe_id to test
     response = add_to_favourites(test_client, rand_favourite)  # add random favourite recipe to favourites
     assert response.status_code == 200
 
@@ -94,8 +88,7 @@ def test_add_to_favourite(test_client, user, db):
         response = add_to_favourites(test_client, rand_favourite)
 
     print(response.data)  # Because we are using Javascript to display errors, there is no 'response' because page
-    # isn't refreshed
-
+    # isn't refreshed. Javascript uses AJAX requests
     # assert b'is already in your favourites!' in response.data
 
 
@@ -109,7 +102,7 @@ def test_view_recipe(test_client, db):
 
     number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
 
-    rand_recipe = np.random.randint(1, number_of_recipes)  # Query the highest recipe_id,
+    rand_recipe = random.randint(1, number_of_recipes)  # Query the highest recipe_id,
     # indicating how many recipes there are.
     # This query assumes that there are no empty recipe_ids up to the highest id. If we ever add a feature where users
     # can upload + delete their uploaded recipes, this will need to be changed.
@@ -156,7 +149,7 @@ def test_add_to_favourites_and_view_favourites(test_client, user, db):
     # This query assumes that there are no empty recipe_ids up to the highest id. If we ever add a feature where users
     # can upload + delete their uploaded recipes, this will need to be changed.
 
-    favourite = np.random.randint(1, number_of_recipes)
+    favourite = random.randint(1, number_of_recipes)
     response = add_to_favourites(test_client, favourite)
     assert response.status_code == 200
 

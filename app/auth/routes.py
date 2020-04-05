@@ -152,6 +152,7 @@ def edit_preferences():
         user_id = current_user.id
 
         # Turn allergy list into integers
+        print(form.diet_type.data)
         allergy_list = list(map(int, form.allergies.data))
         diet_type_id = int(form.diet_type.data)
 
