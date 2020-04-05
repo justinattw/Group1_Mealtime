@@ -151,8 +151,8 @@ def search():
             user_id = current_user.id
             diet_type, diet_name = db.session.query(UserDietPreferences) \
                 .join(DietTypes) \
-                .filter(UserDietPreferences.user_id == user_id)\
-                .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name)\
+                .filter(UserDietPreferences.user_id == user_id) \
+                .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name) \
                 .first()
             allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
 
@@ -286,7 +286,7 @@ def add_to_favourites(recipe_id):
     except IntegrityError:
         db.session.rollback()
         recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
-        #flash(f"{recipe_name} is already in your favourites!", "warning")
+        # flash(f"{recipe_name} is already in your favourites!", "warning")
 
         print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'failure', 200
