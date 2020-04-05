@@ -10,8 +10,9 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
+import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, view_create_mealplan
+    view_mealplanner, view_create_mealplan, login_test_user, login_vegan_test_user
 
 import pytest
 import random
@@ -19,23 +20,14 @@ from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.sql import func
 
 
-def test_index_page_valid(test_client):
+def test_index_page_valid_and_content(test_client):
     """
     GIVEN a Flask application
     WHEN the '/' home page is requested (GET)
-    THEN check the response is valid
+    THEN check the response is valid and correct content is in response data
     """
     response = test_client.get('/')
     assert response.status_code == 200
-
-
-def test_index_content(test_client):
-    """
-    GIVEN a Flask application
-    WHEN the '/' home page is requested
-    THEN check the response contains "Welcome!"
-    """
-    response = test_client.get('/')
     assert b'Meal planning made easy' in response.data
 
 
@@ -50,15 +42,35 @@ def test_search_without_login(test_client):
     assert b'vegan' in response.data
 
 
-def test_search_with_login(test_client):
+def test_search_with_login(test_client, vegan_user, db):
     """
     GIVEN a Flask application, user is logged in and has previously set diet_type and allergy_choices
     WHEN a simple search is performed with the search parameter
     THEN check that the search term is included in the response
     """
+    from app.models import UserDietPreferences, UserAllergies
+
+    login_vegan_test_user(test_client)
+
     response = search_function(test_client, 'vegan')
+
+    diet_type, = db.session.query(UserDietPreferences.diet_type_id) \
+        .filter(UserDietPreferences.user_id == vegan_user.id).first()
+    allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=vegan_user.id).all()
+    allergy_list = [value for value, in allergy_query]
+
+    diet_name = str((config.DIET_CHOICES[diet_type - 1])[1])
+    allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]) for i in allergy_list]
+
+
     assert response.status_code == 200
     assert b'vegan' in response.data
+    assert b'Based on saved user preferences,' in response.data
+
+    # TODO assert diet and allergies are in response data
+    # assert diet_name.encode in response.data
+    # for allergy in allergy_names:
+    #     assert allergy.encode in response.data
 
 
 def test_add_to_favourite(test_client, user, db):
@@ -94,7 +106,6 @@ def test_add_to_favourite(test_client, user, db):
     WHEN user adds a (random) recipe to favourites that has already been added
     THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
     """
-
     with pytest.raises(ObjectDeletedError):
         # Although in the routes we expect IntegrityError, for some reasonObjectDeletedError is raised
         response = add_to_favourites(test_client, rand_favourite)
