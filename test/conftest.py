@@ -158,10 +158,10 @@ def edit_password(client, old_password, new_password, confirm_password):
     ), follow_redirects=True)
 
 
-def edit_preferences(client, DIET_CHOICES, ALLERGY_CHOICES):
+def edit_preferences(client, diet_choice, allergy_choices):
     return client.post('/edit_preferences/', data=dict(
-        diet_type=DIET_CHOICES,
-        allergies=ALLERGY_CHOICES
+        diet_type=diet_choice,
+        allergies=allergy_choices
     ), follow_redirects=True)
 
 
@@ -170,10 +170,11 @@ def search_function(client, test_search):
         search_term=test_search,
     ), follow_redirects=True)
 
+
 def add_to_favourites(client, recipe_id):
     url_str = '/add_to_favourites/' + str(recipe_id)
     return client.post(url_str, data=dict(
-       recipe_id=recipe_id
+        recipe_id=recipe_id
     ), follow_redirects=True)
 
 
@@ -181,14 +182,18 @@ def view_recipe(client, recipe):
     url_str = '/recipe/' + str(recipe)
     return client.get(url_str, follow_redirects=True)
 
+
 def view_favourites(client):
     return client.get('/favourites', follow_redirects=True)
 
+
 def view_about(client):
-    return client.get('/about',  follow_redirects=True)
+    return client.get('/about', follow_redirects=True)
+
 
 def view_mealplanner(client):
     return client.get('/mealplanner', follow_redirects=True)
+
 
 def view_create_mealplan(client):
     return client.get('/create_new_mealplan/', follow_redirects=True)

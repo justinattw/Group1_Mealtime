@@ -149,14 +149,12 @@ def test_edit_preferences_response_and_database(test_client, user, db):
     """
     from app.models import UserDietPreferences, UserAllergies
 
-    login_test_user(test_client)
-
     # random_diet = np.random.randint(1, len(config.DIET_CHOICES))
     # random_allergy = np.random.randint(1, len(config.ALLERGY_CHOICES))
     random_diet = 1
     random_allergy = [1, 3, 5]
 
-    response = edit_preferences(test_client, DIET_CHOICES=random_diet, ALLERGY_CHOICES=random_allergy)
+    response = edit_preferences(test_client, diet_choice=random_diet, allergy_choices=random_allergy)
     assert b'Your food preferences have been updated' in response.data
     assert response.status_code == 200
 

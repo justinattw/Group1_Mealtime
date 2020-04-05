@@ -60,10 +60,11 @@ class Config(object):
 
 class ProdConfig(Config):
     """
-    This configuration contains fictitious details for a MySQL server database. In the future if Mealtime wants to scale up,
+    This configuration contains fictitious details for a MySQL server database.
+    We are currently using SQLite, but in the future if Mealtime wants to scale up and transition to MySQL (which
+    Mealtime is better suited for), the syntax/ configuration is here.
     """
-    # The following are fictitious details for a MySQL server database! We are not hosting the database on a server,
-    # but this
+
     DB_SERVER = '192.168.19.32'
     SQLALCHEMY_DATABASE_URI = 'sqlite://user@{}/foo'.format(DB_SERVER)
     DEBUG = False
@@ -78,9 +79,9 @@ class TestConfig(Config):
 
     # Create a duplicate of the current database
     from shutil import copy
-    src = join(CWD, 'db/mealtime.db') # current working db
-    dst = join(CWD, 'db/mealtime_testing.sqlite') # destination for test db
-    copy(src, dst) # copy (and overwrite) working db to test db
+    src = join(CWD, 'db/mealtime.db')  # current working db
+    dst = join(CWD, 'db/mealtime_testing.sqlite')  # destination for test db
+    copy(src, dst)  # copy (and overwrite) working db to test db
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + dst
     SQLALCHEMY_TRACK_MODIFICATIONS = False
