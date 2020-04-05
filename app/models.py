@@ -16,9 +16,6 @@ from app import db
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from time import time
-import jwt
-
 
 
 class Users(db.Model, UserMixin):
@@ -27,25 +24,18 @@ class Users(db.Model, UserMixin):
     def __repr__(self):
         return f'<User id {self.id} email {self.email}>'
 
+    @property
+    def serialize(self):
+        return {'user_id': self.id,
+                'first_name': self.first_name,
+                'last_name': self.last_name,
+                'email': self.email}
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
-
-    # def get_reset_password_token(self, expires_in=600):
-    #     return jwt.encode(
-    #         {'reset_password': self.id, 'exp': time() + expires_in},
-    #         app.config['SECRET_KEY'], algorithm='HS256').encode('utf-8')
-    #
-    # @staticmethod
-    # def verify_reset_password_token(token):
-    #     try:
-    #         id = jwt.decode(token, app.config['SECRET_KEY'],
-    #                         algorithms=['HS256'])['reset_password']
-    #     except:
-    #         return
-    #     return Users.query.get(id)
 
 
 class DietTypes(db.Model):
@@ -67,17 +57,45 @@ class UserAllergies(db.Model):
 class Recipes(db.Model):
     __table__ = db.Model.metadata.tables['Recipes']
 
+    @property
+    def serialize(self):
+        return {'recipe_id': self.recipe_id,
+                'recipe_name': self.recipe_name}
+
 
 class RecipeIngredients(db.Model):
     __table__ = db.Model.metadata.tables['RecipeIngredients']
+
+    @property
+    def serialize(self):
+        return {'recipe_id': self.recipe_id,
+                'ingredient_name': self.ingredient}
 
 
 class RecipeInstructions(db.Model):
     __table__ = db.Model.metadata.tables['RecipeInstructions']
 
+    @property
+    def serialize(self):
+        return {'recipe_id': self.recipe_id,
+                'step_num': self.step_num,
+                'step_description': self.step_description}
+
 
 class NutritionValues(db.Model):
     __table__ = db.Model.metadata.tables['NutritionValues']
+
+    @property
+    def serialize(self):
+        return {'recipe_id': self.recipe_id,
+                'calories': self.calories,
+                'fats': self.fats,
+                'saturates': self.saturates,
+                'carbs': self.carbs,
+                'sugars': self.sugars,
+                'fibres': self.fibres,
+                'proteins': self.proteins,
+                'salts': self.salts}
 
 
 class MealPlans(db.Model):
@@ -91,9 +109,20 @@ class MealPlanRecipes(db.Model):
 class RecipeAllergies(db.Model):
     __table__ = db.Model.metadata.tables['RecipeAllergies']
 
+    @property
+    def serialize(self):
+        return {'recipe_id': self.recipe_id,
+                'allergy_id': self.allergy_id}
+
 
 class RecipeDietTypes(db.Model):
     __table__ = db.Model.metadata.tables['RecipeDietTypes']
+
+    @property
+    def serialize(self):
+        return {'recipe_id': self.recipe_id,
+                'diet_type_id': self.diet_type_id}
+
 
 class UserFavouriteRecipes(db.Model):
     __table__ = db.Model.metadata.tables['UserFavouriteRecipes']

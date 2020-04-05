@@ -21,7 +21,7 @@ import config
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response, jsonify
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
-import datetime
+from datetime import datetime
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.sql import func
 from markupsafe import escape
@@ -199,8 +199,8 @@ def advanced_search():
         args_dict = {'search_term': form.search_term.data,
                      'allergy_list': ''.join(form.allergies.data),
                      'diet_type': int(form.diet_type.data),
-                     'min_cal': float(range[0]),
-                     'max_cal': float(range[1])
+                     'min_cal': int(range[0]),
+                     'max_cal': int(range[1])
                      }
 
         return redirect(url_for('main.recipes', **args_dict))

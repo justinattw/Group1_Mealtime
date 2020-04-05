@@ -72,4 +72,7 @@ def create_app(config_class=DevConfig):
     from app.auth.routes import bp_auth
     app.register_blueprint(bp_auth)
 
+    # from app.api.routes import bp_api
+    # app.register_blueprint(bp_api)
+
     return app

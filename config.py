@@ -34,8 +34,6 @@ ALLERGY_CHOICES = [(1, 'Dairy-free'),
                    (11, 'Celery-free')]
 
 
-
-
 class Config(object):
     """Set Flask base configuration"""
     SECRET_KEY = 'dfdQbTOExternjy5xmCNaA'
@@ -61,7 +59,11 @@ class Config(object):
 
 
 class ProdConfig(Config):
-    # The following are fictitious details for a MySQL server database! Included to illustrate the syntax.
+    """
+    This configuration contains fictitious details for a MySQL server database. In the future if Mealtime wants to scale up,
+    """
+    # The following are fictitious details for a MySQL server database! We are not hosting the database on a server,
+    # but this
     DB_SERVER = '192.168.19.32'
     SQLALCHEMY_DATABASE_URI = 'sqlite://user@{}/foo'.format(DB_SERVER)
     DEBUG = False
