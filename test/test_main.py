@@ -12,7 +12,7 @@ __status__ = "Development"
 
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, view_create_mealplan, login_test_user, login_vegan_test_user
+    view_mealplanner, login_vegan_test_user
 
 import pytest
 import random
@@ -208,14 +208,4 @@ def test_view_mealplanner(test_client):
     THEN response is valid
     """
     response = view_mealplanner(test_client)
-    assert response.status_code == 200
-
-
-def test_create_mealplan(test_client):
-    """
-    GIVEN a Flask application
-    WHEN user creates a new mealplan
-    THEN response is valid
-    """
-    response = view_create_mealplan(test_client)
     assert response.status_code == 200

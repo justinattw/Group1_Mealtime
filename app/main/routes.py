@@ -216,9 +216,8 @@ def add_to_favourites(recipe_id):
     constraint in SQLite database)
 
     :param recipe_id: adds recipe associated with recipe_id to favourites of user with associated user_id
-    :return: stays on same page
+    :return: 'success' or 'failure' message, stays on same page
     """
-
     try:
         db.session.add(UserFavouriteRecipes(user_id=current_user.id, recipe_id=recipe_id))
         db.session.commit()
@@ -228,8 +227,8 @@ def add_to_favourites(recipe_id):
 
     except IntegrityError:
         db.session.rollback()
-        recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
-        # flash(f"{recipe_name} is already in your favourites!", "warning")
+        # recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+        # # flash(f"{recipe_name} is already in your favourites!", "warning")
 
         print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'failure', 200
@@ -242,7 +241,7 @@ def remove_from_favourites(recipe_id):
     Allows user to remove recipe to favourites.
 
     :param recipe_id: removes recipe associated with recipe_id from favourites of user with associated user_id
-    :return: stays on same page
+    :return: 'success' or 'failure' message, stays on same page
     """
     try:
         del_recipe = db.session.query(UserFavouriteRecipes) \
@@ -256,7 +255,6 @@ def remove_from_favourites(recipe_id):
         return 'success', 200  # keeps user on the same page
 
     except InvalidRequestError:
-
         print(f"Failed to remove recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'failure', 200
 
@@ -289,17 +287,21 @@ def favourites():
 @bp_main.route('/mealplanner', methods=['POST', 'GET'])
 @login_required
 def mealplanner():
-    '''
-        most_recent_mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-            .filter(MealPlans.user_id == current_user.id).first()
-        most_recent_mealplan_is_used = db.session.query(MealPlanRecipes) \
-            .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
+    """
 
-        if not most_recent_mealplan_is_used:
-            print("Failure. User already has new meal plan")
-            return "failure", 200
-    '''
-    mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id).all()
+    :return:
+    """
+    # most_recent_mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
+    #     .filter(MealPlans.user_id == current_user.id).first()
+    # most_recent_mealplan_is_used = db.session.query(MealPlanRecipes) \
+    #     .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
+    #
+    # if not most_recent_mealplan_is_used:
+    #     print("Failure. User already has new meal plan")
+    #     return "failure", 200
+
+    mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id) \
+        .order_by(MealPlans.mealplan_id.desc()).all()  # Show mealplans by most recent
 
     if request.method == 'POST':
         try:
@@ -378,6 +380,27 @@ def add_to_mealplan(recipe_id):
 
     print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
     return '', 204  # keeps user on the same page
+
+
+@bp_main.route('/mealplans_history', methods=['GET', 'POST'])
+@login_required
+def mealplans_history():
+    mealplans = db.session.query(MealPlans) \
+        .filter(MealPlans.user_id == current_user.id) \
+        .order_by(MealPlans.mealplan_id.desc()) \
+        .all()  # Use order by to show mealplans by most recent
+
+    return render_template('main/mealplans_history.html', mealplans=mealplans)
+
+
+@bp_main.route('/view_mealplan/<mealplan_id>', methods=['GET', 'POST'])
+@login_required
+def view_mealplan(mealplan_id):
+    mealplan = db.session.query(MealPlanRecipes) \
+        .filter(MealPlanRecipes.mealplan_id == mealplan_id).all()
+
+    # mealplan_recipes = db.session.query(Recipes).join(mealplan)
+
 
 
 @bp_main.route('/about', methods=['POST', 'GET'])

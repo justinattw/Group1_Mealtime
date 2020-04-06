@@ -233,7 +233,3 @@ def view_about(client):
 
 def view_mealplanner(client):
     return client.get('/mealplanner', follow_redirects=True)
-
-
-def view_create_mealplan(client):
-    return client.get('/create_new_mealplan/', follow_redirects=True)

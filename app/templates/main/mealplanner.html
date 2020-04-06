@@ -2,71 +2,80 @@
 {% block title %}Meal Planner{% endblock %}
 
 {% block content %}
-    <h3>Meal Planner</h3>
-    <p>Use the Meal Planner to organise your meals for the week. You can also favourite recipes to make them easier to
-        find in the future.</p>
-    <ol id="meal_planner_list">
-        <li>
-            <p>
-                <b>Create a new mealplan</b>
-            </p>
-            <form class="form-inline ml-auto" method="post">
-                <button class="btn btn-primary btn-outline-light">Create</button>
-            </form>
-            <br>
-            <br>
-            <p>
-                <b>Or select an existing one:</b>
-            </p>
-            {% if mealplans|length %}
-            <table class="table">
-                <thead class="thead-dark">
-                <tr>
-                    <th scope="col">No.</th>
-                    <th scope="col">Date & Time created</th>
-                    <th scopw="col"></th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for mealplan in mealplans %}
-                <tr>
-                    <td>{{ mealplan.mealplan_id }}</td>
-                    <td>{{ mealplan.created_at }}</td>
-                    <td><a href="{{ url_for('main.delete_mealplan', mealplan_id=mealplan.mealplan_id) }}">Delete</a></td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>Sorry, you do not currently have any mealplans</p>
-            {% endif %}
-        </li>
-        <li>
-            <p>
-                <b>Search for recipes</b>
-                <br>
-                Use the search bar to find and add recipes to your meal plan
-            </p>
-            <form class="form-inline ml-auto simple_search" action="search" method="post">
-                <input class="form-control" type="search" placeholder="Search recipes" aria-label="Search"
-                       name="search_term">
-                <button class="btn btn-primary btn-outline-light" type="submit">Search</button>
-            </form>
-            <a href="{{ url_for("main.advanced_search") }}" class="simple_search">Advanced Search</a>
-        </li>
-        <li>
-            <p>
-                <b>Mealplan</b>
-                <br>
+<h3>Meal Planner</h3>
+<p>Use the Meal Planner to organise your meals for the week. You can also favourite recipes to make them easier to
+    find in the future.</p>
+{#    {% if mealplan_active %}#}
+{#        <p>View your current mealplan here!</p>#}
+{#    {% endif %}#}
 
-                {% if temp == 'l' %}
-                You have a mealplan
+<h4>Choosing and editing a mealplan</h4>
+<ol id="meal_planner_list">
+    <li>
+        {#        {% if mealplan_active %}#}
+        {#            <p><b>Continue with your current mealplan</b></p>#}
+        {#            <br><br>#}
+        {#        {% endif %}#}
+        <p><b>Continue with your current mealplan (do nothing and continue to step 2!)</b></p>
+        <p><b>Or create a new mealplan</b></p>
+        <form class="form-inline ml-auto" method="post">
+            <button class="btn btn-primary btn-outline-light">Create</button>
+        </form>
+        <br>
+        <br>
+        <p>
+            <b>Or select an existing one:</b>
+        </p>
+        {% if mealplans|length %}
+        <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">No.</th>
+                <th scope="col">Date & Time created</th>
+                <th scopw="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for mealplan in mealplans %}
+            <tr>
+                <td>{{ mealplan.mealplan_id }}</td>
+                <td>{{ mealplan.created_at }}</td>
+                <td><a href="{{ url_for('main.delete_mealplan', mealplan_id=mealplan.mealplan_id) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        
+        {% else %}
+        <p>Sorry, you do not currently have any mealplans</p>
+        {% endif %}
+    </li>
+    <li>
+        <p>
+            <b>Add recipes to mealplan</b>
+            <br>
+            Use the search bar to find and add recipes to your meal plan
+        </p>
+        <form class="form-inline ml-auto simple_search" action="search" method="post">
+            <input class="form-control" type="search" placeholder="Search recipes" aria-label="Search"
+                   name="search_term">
+            <button class="btn btn-primary btn-outline-light" type="submit">Search</button>
+        </form>
+        <a href="{{ url_for('main.advanced_search') }}" class="simple_search">Advanced Search</a>
+    </li>
+    <li>
+        <p>
+            <b>Mealplan</b>
+            <br>
 
-                {% else %}
-                No mealplans to show
-                {% endif %}
-            </p>
-        </li>
-    </ol>
+            {% if temp == 'l' %}
+            You have a mealplan
+
+            {% else %}
+            No mealplans to show
+            {% endif %}
+        </p>
+    </li>
+</ol>
 {% endblock %}
 
