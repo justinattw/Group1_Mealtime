@@ -1,7 +1,6 @@
 from selenium.webdriver.common.keys import Keys
 
-def test_login_user(browser):
-    pass
+def test_driver_setup(browser):
 
     URL = 'https://www.duckduckgo.com'
     PHRASE = 'panda'
