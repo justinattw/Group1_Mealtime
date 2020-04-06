@@ -90,7 +90,7 @@ def vegan_user(test_client, db):
     user.set_password('GoVegan')
 
     # Set random food preferences (diet types and allergies) for test user
-    random_diet_type = 4 # set user to be vegan
+    random_diet_type = 4  # set user to be vegan
     random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))
     # random_allergies = list(
     #     set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
@@ -159,23 +159,19 @@ def user_data():
 # Date: 2019
 # Availability: https://blog.testproject.io/2019/07/16/test-automation-goals-with-web-ui-testing/
 # Accessed: 6 April 2020
-
-import pytest
 from selenium import webdriver
 
 @pytest.fixture
 def browser():
     # Chromedriver stored in chromedrivers directory, not in system path.
 
-    # path = "test/chromedrivers/chromedriver"  # Mac
-    path = "test/chromedrivers/chromedriver.exe" # Windows
+    path = "test/chromedrivers/chromedriver"  # Mac
+    # path = "test/chromedrivers/chromedriver.exe"  # Windows
 
     driver = webdriver.Chrome(executable_path=path)
     driver.implicitly_wait(10)
     yield driver
     driver.quit
-
-
 
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
