@@ -11,10 +11,11 @@ __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
 from app import db
-from app.models import Users, Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, MealPlanRecipes, \
-    RecipeIngredients
+from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans
 
+from flask import flash, render_template, request, redirect, url_for
 from flask_login import current_user
+from functools import wraps
 from sqlalchemy import and_
 from sqlalchemy.sql import func
 
@@ -65,18 +66,50 @@ def get_most_recent_mealplan_id():
     return mealplan_id
 
 
-def user_owns_mealplan(user_id, mealplan_id):
-    """
-    Check whether the mealplan requested belongs to the user.
+# def check_user_owns_mealplan(func):
+#     """
+#     If you decorate this a view with this, it will ensure that the mealplan belongs to the current_user. This is to
+#     protect users from being able to see other users' mealplans
+#
+#     :param mealplan_id:
+#     :return:
+#     """
+#     @wraps(func)
+#     def decorated_function(*args, **kwargs):
+#         mealplan_id = request.args.get('mealplan_id')
+#
+#         user_owns_mealplan = db.session.query(MealPlans) \
+#             .filter(MealPlans.user_id == current_user.id) \
+#             .filter(MealPlans.mealplan_id == mealplan_id) \
+#             .first()
+#         print(mealplan_id)
+#
+#         print(user_owns_mealplan)
+#
+#         if user_owns_mealplan:
+#             return func(*args, **kwargs)
+#         else:
+#             flash('Sorry, you do not have access to this meal plan', 'warning')
+#             return redirect(url_for('main.mealplans_history'))
+#     return decorated_function
 
-    :param user_id: for which user are we interested in finding the mealplan for?
-    :param mealplan_id: for which mealplan do we want to match with user?
-    :return: Returns a query, if query returns None then user does not own mealplan, else user does
-    """
 
-    user_owns_mealplan = db.session.query(MealPlans) \
-        .filter(MealPlans.user_id == user_id) \
-        .filter(MealPlans.mealplan_id == mealplan_id) \
-        .first()
 
-    return user_owns_mealplan
+def check_user_owns_mealplan(mealplan_id):
+
+    def decorator(func):
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            user_owns_mealplan = db.session.query(MealPlans) \
+                .filter(MealPlans.user_id == current_user.id) \
+                .filter(MealPlans.mealplan_id == mealplan_id) \
+                .first()
+
+            if user_owns_mealplan:
+                return func(*args, **kwargs)
+            else:
+                flash('Sorry, you do not have access to this meal plan', 'warning')
+                return redirect(url_for('main.mealplans_history'))
+
+        return decorated_view
+    return decorator

@@ -15,7 +15,7 @@ from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
     Allergies, UserDietPreferences, UserAllergies, UserFavouriteRecipes, MealPlanRecipes, MealPlans, DietTypes
-from app.main.main_functions import search_function, get_most_recent_mealplan_id
+from app.main.main_functions import search_function, check_user_owns_mealplan
 import config
 
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response, jsonify
@@ -399,6 +399,7 @@ def mealplans_history():
 
 @bp_main.route('/view_mealplan/<mealplan_id>', methods=['GET', 'POST'])
 @login_required
+# @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def view_mealplan(mealplan_id):
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
@@ -421,6 +422,7 @@ def view_mealplan(mealplan_id):
 
 @bp_main.route('/grocery_list/<mealplan_id>', methods=['POST', 'GET'])
 @login_required
+# @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def grocery_list(mealplan_id):
 
     user = Users.query.filter_by(id=current_user.id).first_or_404(
