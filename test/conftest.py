@@ -165,10 +165,12 @@ from selenium import webdriver
 def browser():
     # Chromedriver stored in chromedrivers directory, not in system path.
 
-    # path = "test/chromedrivers/chromedriver"  # Mac
-    path = "test/chromedrivers/chromedriver.exe"  # Windows
+    # # path = "test/chromedrivers/chromedriver"  # Mac
+    # path = "test/chromedrivers/chromedriver.exe"  # Windows
+    # driver = webdriver.Chrome(executable_path=path)
 
-    driver = webdriver.Chrome(executable_path=path)
+    driver = webdriver.Chrome() # CircleCI. Activate this when committing to GitHub.
+
     driver.implicitly_wait(10)
     yield driver
     driver.quit
