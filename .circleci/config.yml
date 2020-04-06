@@ -14,7 +14,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+      # use `-browsers` suffix for selenium tests, e.g. `3.6.1-browsers`
       - image: circleci/python:3.7.4-stretch-browsers
 #        environment:
 #          FLASK_CONFIG: testing
@@ -44,6 +44,7 @@ jobs:
             . venv/bin/activate
             pip install -r requirements.txt
 
+      # For browser testing
       - run:
           name: Download Selenium
           command: curl -O http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar
@@ -57,7 +58,6 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      # run tests!
       # https://pytest.org
       # https://nose.readthedocs.io
       - run:
@@ -65,8 +65,6 @@ jobs:
           command: |
             . venv/bin/activate
             python -m pytest test
-#            python3 -m pytest test/test_auth.py
-#            pytest test/test_main.py  # run test_main only
 
       - store_test_results:
           path: test-results
@@ -74,7 +72,6 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-
 
 
 
@@ -88,7 +85,7 @@ jobs:
 #          command: |
 #            cd app/
 #            git push heroku master
-
+#
 #orbs:
 #  heroku: circleci/heroku@0.0.10
 #workflows:

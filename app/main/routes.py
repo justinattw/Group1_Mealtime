@@ -90,7 +90,6 @@ def recipes():
 
     # This dictionary allows search parameters to be kept in the page, so that they are saved even when navigating to
     # next/ prev urls
-
     args_dict = {'search_term': request.args.get('search_term', ""),
                  # Parse string allergies into an integer list, because you can't pass entire lists as parameters.
                  # request.args.get therefore is taking in a string (i.e. not [1, 4], but "14"
