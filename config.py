@@ -21,6 +21,8 @@ DIET_CHOICES = [(1, 'Classic'),
                 (2, 'Pescatarian'),
                 (3, 'Vegetarian'),
                 (4, 'Vegan')]
+# DIET_CHOICES should ideally be dynamically updated from db. However, because this is in configuration, at this stage
+# in the Flask application, the db is not yet set up.
 ALLERGY_CHOICES = [(1, 'Dairy-free'),
                    (2, 'Gluten-free'),
                    (3, 'Seafood-free'),

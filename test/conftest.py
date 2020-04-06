@@ -59,9 +59,42 @@ def user(test_client, db):
     user.set_password('cat123')
 
     # Set random food preferences (diet types and allergies) for test user
-    random_diet_type = np.random.randint(1, len(config.DIET_CHOICES))
+    random_diet_type = random.randint(1, len(config.DIET_CHOICES))
     random_allergies = list(
-        set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(np.random.randint(1, 5))]))
+        set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
+    edit_preferences(test_client, random_diet_type, random_allergies)
+
+    db.session.add(user)
+    db.session.commit()
+    user_diet_preferences = UserDietPreferences(user_id=user.id,
+                                                diet_type_id=random_diet_type)
+    db.session.add(user_diet_preferences)
+
+    for allergy in random_allergies:
+        user_allergy = UserAllergies(user_id=user.id,
+                                     allergy_id=allergy)
+        db.session.add(user_allergy)
+
+    db.session.commit()
+
+    return user
+
+
+@pytest.fixture(scope='function')
+def vegan_user(test_client, db):
+    """ Creates a test user who is vegan."""
+    from app.models import Users, UserDietPreferences, UserAllergies
+    user = Users(first_name='Vegan',
+                 last_name='User',
+                 email='veganuser@test.com')
+    user.set_password('GoVegan')
+
+    # Set random food preferences (diet types and allergies) for test user
+    random_diet_type = 4 # set user to be vegan
+    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))
+    # random_allergies = list(
+    #     set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
+    print(random_allergies)
     edit_preferences(test_client, random_diet_type, random_allergies)
 
     db.session.add(user)
@@ -146,6 +179,13 @@ def login_test_user(client):
     ), follow_redirects=True)
 
 
+def login_vegan_test_user(client):
+    return client.post('/login/', data=dict(
+        email="veganuser@test.com",
+        password="GoVegan"
+    ), follow_redirects=True)
+
+
 def logout(client):
     return client.get('/logout/', follow_redirects=True)
 
@@ -165,9 +205,9 @@ def edit_preferences(client, diet_choice, allergy_choices):
     ), follow_redirects=True)
 
 
-def search_function(client, test_search):
+def search_function(client, search_term):
     return client.post('/search', data=dict(
-        search_term=test_search,
+        search_term=search_term,
     ), follow_redirects=True)
 
 

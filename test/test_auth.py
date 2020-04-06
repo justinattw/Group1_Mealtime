@@ -3,7 +3,13 @@
 """
 test/test_auth.py:
 
-Pytests tests for authentication methods (relating to files in app/auth/)
+Pytests tests for authentication views and methods (relating to files in app/auth/).
+
+app/auth COVERAGE: 90%
+
+We achieve 90% coverage of the app/auth directory, but the uncovered sections seem to be code that we cannot trigger
+deliberately through the routes (such as IntegrityError for signing up), because there are form validations and route
+validations that prevent them from occurring.
 """
 
 __authors__ = "Danny Wallis, Justin Wong"
@@ -14,7 +20,7 @@ __status__ = "Development"
 import config
 from test.conftest import login, login_test_user, logout, edit_password, edit_preferences, session
 
-import numpy as np
+import random
 
 
 def test_login_fails_with_invalid_input(test_client, user):
@@ -114,84 +120,133 @@ def test_account_view_accessible_after_login(test_client, user):
     assert response.status_code == 200
 
 
-def test_edit_password_success(test_client, user):
+def test_edit_password_with_valid_and_invalid_inputs(test_client, user):
+    """
+    GIVEN a flask app and a registered user
+    WHEN database checks for old password
+    THEN old password is correct
+    """
     old_password = 'cat123'
-    new_password = "dog123"
     assert user.check_password(old_password) is True  # assert old password is 'cat123'
 
-    login(test_client, email=user.email, password=old_password)  # login to test user
-
-    ### try to change with incorrect old password
-    incorrect_password = 'elephant999'
-    response = edit_password(test_client, incorrect_password, new_password, new_password)
+    """
+    GIVEN a flask app and user is logged in
+    WHEN user tries to change password to a new password, but enters an incorrect old password
+    THEN an appropriate error message is flashed, and the password change is not made
+    """
+    incorrect_old_password = 'elephant999'
+    new_password = 'dog123'
+    response = edit_password(test_client, incorrect_old_password, new_password, new_password)
     assert b'Incorrect old password' in response.data
+    assert user.check_password(new_password) is False
 
+    """
+    GIVEN a flask app and user is logged in
+    WHEN user tries to change password to a new password WITH a correct old_password
+    THEN an appropriate success message is flashed, and new password is set in the database
+    """
     response = edit_password(test_client, old_password, new_password, new_password)  # change password to 'dog123'
-
     assert b'Your password has been changed' in response.data
     assert user.check_password(new_password) is True  # assert password is changed
-    logout(test_client)
 
-    response = login(test_client, email=user.email, password=new_password)  # login to test user with test password
-    assert response.status_code == 200
-
-    # Assert that old login doesn't work anymore, because password has been changed
+    """
+    GIVEN a flask app
+    WHEN user tries to log in with the old password (now it is incorrect)
+    THEN an appropriate error message is flashed and login fails, because the password has been changed
+    """
     response = login_test_user(test_client)
     assert b'Incorrect password.' in response.data
+
+    """
+    GIVEN a flask app
+    WHEN user tries to log in with the new password (which is correct)
+    THEN an appropriate success message is flashed and user is logged in
+    """
+    response = login(test_client, email=user.email, password=new_password)  # login to test user with test password
+    assert response.status_code == 200
+    assert b'Logged in successfully. Welcome, ' in response.data
+
+
+def test_edit_preferences_view_requires_login(test_client):
+    """
+    GIVEN a flask app
+    WHEN /edit_preferences is requested without login
+    THEN response is invalid
+    """
+    response = test_client.get('/edit_preferences/')
+    assert response.status_code == 302  # Method not allowed
+
+
+def test_edit_preferences_view_accessible_after_login(test_client, user):
+    """
+    GIVEN a flask app and user is logged in
+    WHEN /edit_preferences is requested
+    THEN response is invalid
+    """
+    response = test_client.get('/edit_preferences/')
+    assert b'Edit preferences' in response.data
+    assert response.status_code == 200
 
 
 
 def test_edit_preferences_response_and_database(test_client, user, db):
     """
     GIVEN a flask app and user is logged in
-    WHEN /edit_preferences is requested and user has input some random diet preference and allergy
-    THEN response is valid
+    WHEN /edit_preferences is posted and user has input some random diet preference and allergy
+    THEN response is valid and appropriate response message flashes
     """
     from app.models import UserDietPreferences, UserAllergies
 
-    # random_diet = np.random.randint(1, len(config.DIET_CHOICES))
-    # random_allergy = np.random.randint(1, len(config.ALLERGY_CHOICES))
-    random_diet = 1
-    random_allergy = [1, 3, 5]
+    random_diet = random.randint(2, len(config.DIET_CHOICES) + 1)  # set diet type to random diet NOT classic
+    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))  # Give user a
+    # random set of allergies, ranging from having between 2 to 6 allergies (an arbitrary number)
 
-    response = edit_preferences(test_client, diet_choice=random_diet, allergy_choices=random_allergy)
-    assert b'Your food preferences have been updated' in response.data
+    response = edit_preferences(test_client, diet_choice=random_diet, allergy_choices=random_allergies)
     assert response.status_code == 200
+    assert b'Your food preferences have been updated' in response.data
 
     """
     GIVEN a flask app and user is logged in
-    WHEN /edit_preferences is requested and user has input some random diet preference and allergy
-    THEN the database is updated accordingly with newly selected diet type
+    WHEN /edit_preferences is posted and user has input some random diet preference and allergy
+    THEN inputted diet_type/ allergies are added to db, and non-inputted diet_types/ allergies are not in db 
     """
-    diet_query = db.session.query(UserDietPreferences) \
-        .filter(UserDietPreferences.user_id == user.id) \
-        .filter(UserDietPreferences.diet_type_id == random_diet) \
-        .first()
-    # allergy_query = db.session.query(UserAllergies) \
-    #     .filter(UserAllergies.user_id == user.id) \
-    #     .filter(UserAllergies.allergy_id == random_allergy) \
-    #     .first()
+    all_diet_choices = range(1, len(config.DIET_CHOICES) + 1)  # A list of all diet_choice ids
+    all_allergy_choices = range(1, len(config.ALLERGY_CHOICES) + 1)  # A list of all allergy_choice ids
 
-    assert diet_query is not None
-    # assert allergy_query is not None
+    for diet in all_diet_choices:
+        diet_query = db.session.query(UserDietPreferences) \
+            .filter(UserDietPreferences.user_id == user.id) \
+            .filter(UserDietPreferences.diet_type_id == diet) \
+            .first()
+        if diet == random_diet:  # 1) if diet type is the one set previously, then query should not be None
+            assert diet_query is not None
+        else:  # 2) if diet_type is NOT set previously, then query should be None
+            assert diet_query is None
 
+    for allergy in all_allergy_choices:
+        allergy_query = db.session.query(UserAllergies) \
+            .filter(UserAllergies.user_id == user.id) \
+            .filter(UserAllergies.allergy_id == allergy) \
+            .first()
+        if allergy in random_allergies:  # 1) if allergy is one selected previously, then query should not be None
+            assert allergy_query is not None
+        else:  # 2) if allergy is NOT set previously, then query should be None
+            assert allergy_query is None
+
+
+def test_edit_preferences_response_with_invalid_duplicate_allergies(test_client, user, db):
     """
     GIVEN a flask app and user is logged in
-    WHEN /edit_preferences is requested and user has input some random diet preference and allergy
-    THEN the database is updated and old diet type/ incorrect type type is not kept in database
+    WHEN /edit_preferences is posted but with an invalid input where there are duplicate allergies
+    THEN unique constraint on the composite key in UserAllergies will fail, IntegrityError will occur in SQLAlchemy.
+        An error message should flash, though the allergy may still be added on the first occurrence, so a success
+        message will also flash.
     """
-    random_wrong_diet = 2
-    random_wrong_allergy = 2
+    login_test_user(test_client)
+    select_diet = 1
+    invalid_allergy_choices = [2, 2]  # Duplicate allergies,
 
-    diet_query = db.session.query(UserDietPreferences) \
-        .filter(UserDietPreferences.user_id == user.id) \
-        .filter(UserDietPreferences.diet_type_id == random_wrong_diet) \
-        .first()
+    response = edit_preferences(test_client, diet_choice=select_diet, allergy_choices=invalid_allergy_choices)
+    assert b'ERROR! Unable to make preference changes.' in response.data
+    assert b'Your food preferences have been updated' in response.data
 
-    # allergy_query = db.session.query(UserDietPreferences) \
-    #     .filter(UserDietPreferences.user_id == user.id) \
-    #     .filter(UserDietPreferences.diet_type_id == random_wrong_allergy) \
-    #     .first()
-
-    assert diet_query is None
-    # assert allergy_query is None

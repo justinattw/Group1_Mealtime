@@ -3,57 +3,74 @@
 """
 test/test_main.py:
 
-Pytests tests for main methods (relating to files in app/main/)
+Pytests tests for main views and methods (relating to files in app/main/)
 """
-import random
-import string
-import numpy as np
-import pytest
-import re
-from sqlalchemy.orm.exc import ObjectDeletedError
-
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, \
-    view_about, view_mealplanner, view_create_mealplan
+import config
+from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
+    view_mealplanner, view_create_mealplan, login_test_user, login_vegan_test_user
 
+import pytest
+import random
+from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.sql import func
 
-regex = re.compile('[^a-zA-Z]')
 
-
-def test_index_page_valid(test_client):
+def test_index_page_valid_and_content(test_client):
     """
     GIVEN a Flask application
     WHEN the '/' home page is requested (GET)
-    THEN check the response is valid
+    THEN check the response is valid and correct content is in response data
     """
     response = test_client.get('/')
     assert response.status_code == 200
-
-
-def test_index_content(test_client):
-    """
-    GIVEN a Flask application
-    WHEN the '/' home page is requested
-    THEN check the response contains "Welcome!"
-    """
-    response = test_client.get('/')
     assert b'Meal planning made easy' in response.data
 
 
-def test_search_function(test_client):
+def test_search_without_login(test_client):
     """
     GIVEN a Flask application
-    WHEN a simple search is performed with the search parameter of search term 'veg'
+    WHEN a simple search is performed with the search parameter of search term
     THEN check that the search term is included in the response
     """
     response = search_function(test_client, 'vegan')
     assert response.status_code == 200
     assert b'vegan' in response.data
+
+
+def test_search_with_login(test_client, vegan_user, db):
+    """
+    GIVEN a Flask application, user is logged in and has previously set diet_type and allergy_choices
+    WHEN a simple search is performed with the search parameter
+    THEN check that the search term is included in the response
+    """
+    from app.models import UserDietPreferences, UserAllergies
+
+    login_vegan_test_user(test_client)
+
+    response = search_function(test_client, 'vegan')
+
+    diet_type, = db.session.query(UserDietPreferences.diet_type_id) \
+        .filter(UserDietPreferences.user_id == vegan_user.id).first()
+    allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=vegan_user.id).all()
+    allergy_list = [value for value, in allergy_query]
+
+    diet_name = str((config.DIET_CHOICES[diet_type - 1])[1])
+    allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]) for i in allergy_list]
+
+
+    assert response.status_code == 200
+    assert b'vegan' in response.data
+    assert b'Based on saved user preferences,' in response.data
+
+    # TODO assert diet and allergies are in response data
+    # assert diet_name.encode in response.data
+    # for allergy in allergy_names:
+    #     assert allergy.encode in response.data
 
 
 def test_add_to_favourite(test_client, user, db):
@@ -69,7 +86,7 @@ def test_add_to_favourite(test_client, user, db):
     # This query assumes that there are no empty recipe_ids up to the highest id. If we ever add a feature where users
     # can upload + delete their uploaded recipes, this will need to be changed.
 
-    rand_favourite = np.random.randint(1, number_of_recipes)  # generate a random favourite recipe_id to test
+    rand_favourite = random.randint(1, number_of_recipes)  # generate a random favourite recipe_id to test
     response = add_to_favourites(test_client, rand_favourite)  # add random favourite recipe to favourites
     assert response.status_code == 200
 
@@ -89,13 +106,12 @@ def test_add_to_favourite(test_client, user, db):
     WHEN user adds a (random) recipe to favourites that has already been added
     THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
     """
-
     with pytest.raises(ObjectDeletedError):
+        # Although in the routes we expect IntegrityError, for some reasonObjectDeletedError is raised
         response = add_to_favourites(test_client, rand_favourite)
 
     print(response.data)  # Because we are using Javascript to display errors, there is no 'response' because page
-    # isn't refreshed
-
+    # isn't refreshed. Javascript uses AJAX requests
     # assert b'is already in your favourites!' in response.data
 
 
@@ -109,8 +125,8 @@ def test_view_recipe(test_client, db):
 
     number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
 
-    rand_recipe = np.random.randint(1, number_of_recipes)  # Query the highest recipe_id,
-    # indicating how many recipes there are.
+    rand_recipe = random.randint(1, number_of_recipes)  # Query the highest recipe_id, indicating how many recipes
+    # there are.
     # This query assumes that there are no empty recipe_ids up to the highest id. If we ever add a feature where users
     # can upload + delete their uploaded recipes, this will need to be changed.
 
@@ -156,7 +172,7 @@ def test_add_to_favourites_and_view_favourites(test_client, user, db):
     # This query assumes that there are no empty recipe_ids up to the highest id. If we ever add a feature where users
     # can upload + delete their uploaded recipes, this will need to be changed.
 
-    favourite = np.random.randint(1, number_of_recipes)
+    favourite = random.randint(1, number_of_recipes)
     response = add_to_favourites(test_client, favourite)
     assert response.status_code == 200
 
@@ -166,7 +182,7 @@ def test_add_to_favourites_and_view_favourites(test_client, user, db):
     response = view_favourites(test_client)
     assert response.status_code == 200
 
-    # Could not successfully convert string containing apostrophes to binary using encode, so the string had to be split
+    # Could not convert string containing apostrophes to binary using encode, so the string had to be split
     for part in fav_list:
         if "'" in part:  # If apostrophe ' is in the name, then split the string by the '
             part = part.split("'")[0]
