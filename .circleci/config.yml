@@ -57,7 +57,8 @@ jobs:
           command: |
             . venv/bin/activate
 #            python -m pytest test
-            python3 -m pytest test/test_auth.py
+#            python3 -m pytest test/test_auth.py
+            py.test test/test_auth.py test/test_main.py
 #            pytest test/test_main.py  # run test_main only
 
       - store_test_results:
