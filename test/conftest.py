@@ -163,12 +163,13 @@ from selenium import webdriver
 
 @pytest.fixture
 def browser():
-    # Chromedriver stored in chromedrivers directory, not in system path.
-
+    # (NOT RECOMMENDED) Use following driver if chromedriver is in PATH.
     # # path = "test/chromedrivers/chromedriver"  # Mac
-    # path = "test/chromedrivers/chromedriver.exe"  # Windows
+    # # path = "test/chromedrivers/chromedriver.exe"  # Windows
     # driver = webdriver.Chrome(executable_path=path)
 
+    # (RECOMMENDED) Use following driver if chromedriver is in PATH.
+    # To move chromedriver to PATH, just copy the chromedriver from test/chromedriver to venv/bin
     driver = webdriver.Chrome() # CircleCI. Activate this when committing to GitHub.
 
     driver.implicitly_wait(10)
