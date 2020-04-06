@@ -56,8 +56,8 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python -m pytest test --ignore=test_browser.py
-#            pytest test/test_auth.py  # run test_auth only
+#            python -m pytest test
+            python3 -m pytest test/test_auth.py
 #            pytest test/test_main.py  # run test_main only
 
       - store_test_results:
