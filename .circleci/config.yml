@@ -5,7 +5,8 @@
 # Title: Configuring a Python Application on CircleCI
 # Author: CircleCI
 # Date: 2020
-# Availability: https://circleci.com/docs/2.0/language-python/ [Accessed 16 March 2020]
+# Availability: https://circleci.com/docs/2.0/language-python/
+# Accessed: 16 March 2020
 
 version: 2
 
@@ -55,7 +56,9 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python -m pytest test
+#            python -m pytest test # run all tests
+            pytest test_auth.py  # run test_auth only
+            pytest test_main.py  # run test_main only
 
       - store_test_results:
           path: test-results
