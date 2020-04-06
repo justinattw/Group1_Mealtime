@@ -167,8 +167,8 @@ from selenium import webdriver
 def browser():
     # Chromedriver stored in chromedrivers directory, not in system path.
 
-    path = "test/chromedrivers/chromedriver"  # Mac
-    # path = "test/chromedrivers/chromedriver.exe" # Windows
+    # path = "test/chromedrivers/chromedriver"  # Mac
+    path = "test/chromedrivers/chromedriver.exe" # Windows
 
     driver = webdriver.Chrome(executable_path=path)
     driver.implicitly_wait(10)
