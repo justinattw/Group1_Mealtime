@@ -396,11 +396,22 @@ def mealplans_history():
 @bp_main.route('/view_mealplan/<mealplan_id>', methods=['GET', 'POST'])
 @login_required
 def view_mealplan(mealplan_id):
-    mealplan = db.session.query(MealPlanRecipes) \
-        .filter(MealPlanRecipes.mealplan_id == mealplan_id).all()
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
 
-    # mealplan_recipes = db.session.query(Recipes).join(mealplan)
+    mealplan = db.session.query(MealPlans)\
+        .filter(MealPlans.user_id == current_user.id) \
+        .filter(MealPlans.mealplan_id == mealplan_id).all()
 
+    mealplan_recipes = db.session.query(MealPlanRecipes.recipe_id) \
+        .filter(MealPlanRecipes.mealplan_id == mealplan_id)\
+        .distinct().subquery()  # Get recipes ids from specified mealplan as subquery
+
+    recipes = db.session.query(Recipes) \
+        .join(mealplan_recipes, Recipes.recipe_id == mealplan_recipes.c.recipe_id) \
+        .all()  # Join on recipe ids from subquery (recipes present in meal plan)
+
+    return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=user)
 
 
 @bp_main.route('/about', methods=['POST', 'GET'])

@@ -67,6 +67,10 @@ class EditPasswordForm(FlaskForm):
                                                                      message='The passwords do not match.')])
     confirm_password = PasswordField('Confirm password')
 
+    def validate_old_and_new_passwords_different(self, old_password, new_password):
+        if old_password == new_password:
+            raise ValidationError("You can't set your new password to the same password.")
+
 
 class EditPreferencesForm(FlaskForm):
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)

@@ -17,10 +17,13 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
+import pytest
+
 import config
 from test.conftest import login, login_test_user, logout, edit_password, edit_preferences, session
 
 import random
+from wtforms.validators import ValidationError
 
 
 def test_login_fails_with_invalid_input(test_client, user):
@@ -87,6 +90,8 @@ def test_duplicate_register_error(test_client, user):
     WHEN user registers new account with pre-registered email
     THEN appropriate validation error is raised
     """
+    # with pytest.raises(ValidationError):  # Not sure hot to trigger validation error in forms
+
     response = test_client.post('/signup/', data=dict(
         first_name="Test",
         last_name="Name",
@@ -95,7 +100,8 @@ def test_duplicate_register_error(test_client, user):
         confirm="cat123"
     ), follow_redirects=True)
     assert response.status_code == 200
-    assert b'An account is already registered with this email.' in response.data
+    assert b'An account is already registered with this email.' in response.data  # Error message associated with
+    # ValidationError
 
 
 def test_account_view_requires_login(test_client):
@@ -188,7 +194,6 @@ def test_edit_preferences_view_accessible_after_login(test_client, user):
     assert response.status_code == 200
 
 
-
 def test_edit_preferences_response_and_database(test_client, user, db):
     """
     GIVEN a flask app and user is logged in
@@ -249,4 +254,3 @@ def test_edit_preferences_response_with_invalid_duplicate_allergies(test_client,
     response = edit_preferences(test_client, diet_choice=select_diet, allergy_choices=invalid_allergy_choices)
     assert b'ERROR! Unable to make preference changes.' in response.data
     assert b'Your food preferences have been updated' in response.data
-
