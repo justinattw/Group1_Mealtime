@@ -1,6 +1,6 @@
 from selenium.webdriver.common.keys import Keys
 
-MEALTIME_URL = 'http://http://127.0.0.1:5000'
+MEALTIME_LOCALHOST_URL = 'http://http://127.0.0.1:5000'
 
 
 def test_driver_setup(browser):
@@ -24,7 +24,8 @@ def test_driver_setup(browser):
     assert search_input.get_attribute('value') == PHRASE
 
 
-def test_mealtime_index(browser):
+def test_mealtime_index(test_client, browser):
 
-    browser.get(MEALTIME_URL)
+    browser.get(MEALTIME_LOCALHOST_URL)
+    # browser.implicitly_wait(100000000)
     pass
