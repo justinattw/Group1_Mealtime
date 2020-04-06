@@ -208,63 +208,6 @@ def advanced_search():
     return render_template('main/advanced_search.html', form=form)
 
 
-@bp_main.route('/add_to_mealplan/<recipe_id>', methods=['GET', 'POST'])
-@login_required
-def add_to_mealplan(recipe_id):
-    """
-    Allows user to add recipe to the most recent mealplan
-
-    :param recipe_id: adds recipe associated with recipe_id to mealplan
-    :return: stays on same page
-    """
-
-    # Get the most recent mealplan by taking max(mealplan_id). We will add recipe to this mealplan.
-    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
-        .filter(MealPlans.user_id == current_user.id).first()
-
-    if mealplan_id is None:
-        flash("Please create a meal plan first!", "warning")
-
-    else:
-        try:
-            db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            recipe_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
-            flash(f"{recipe_name} is already in your meal plan!", "warning")
-
-    print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
-    return '', 204  # keeps user on the same page
-
-
-@bp_main.route('/create_new_mealplan/', methods=['GET', 'POST'])
-@login_required
-def create_new_mealplan():
-    # Users cannot create a new mealplan if their current mealplan is empty
-    most_recent_mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
-        .filter(MealPlans.user_id == current_user.id).first()
-    most_recent_mealplan_is_used = db.session.query(MealPlanRecipes) \
-        .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
-
-    if not most_recent_mealplan_is_used:
-        print("You already have a fresh new meal plan!")
-
-    else:
-        try:
-            d = datetime.datetime.now()
-            created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
-
-            db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
-            db.session.commit()
-            print(f"Adding new mealplan for user {current_user.id}")
-        except IntegrityError:
-            db.session.rollback()
-            flash(f"ERROR! Meal plan could not be created, please try again.", "danger")
-
-    return '', 204  # keeps user on the same page
-
-
 @bp_main.route('/add_to_favourites/<recipe_id>', methods=['GET', 'POST'])
 @login_required
 def add_to_favourites(recipe_id):
@@ -344,11 +287,97 @@ def favourites():
 
 
 @bp_main.route('/mealplanner', methods=['POST', 'GET'])
+@login_required
 def mealplanner():
-    if request.method == 'POST':
-        None
+    '''
+        most_recent_mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
+            .filter(MealPlans.user_id == current_user.id).first()
+        most_recent_mealplan_is_used = db.session.query(MealPlanRecipes) \
+            .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
 
-    return render_template('main/mealplanner.html')
+        if not most_recent_mealplan_is_used:
+            print("Failure. User already has new meal plan")
+            return "failure", 200
+    '''
+    mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id).all()
+
+    if request.method == 'POST':
+        try:
+            d = datetime.now()
+            created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
+
+            db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
+            db.session.commit()
+
+            print(f"Adding new mealplan for user {current_user.id}")
+            flash(f"Success, new meal plan created!", "success")
+
+            return redirect(url_for('main.mealplanner'))
+
+        except IntegrityError:
+            db.session.rollback()
+
+            print(f"Failed to add new mealplan for user {current_user.id}")
+            flash(f"Error, could not create new meal plan! Please try again", "danger")
+
+            return redirect(url_for('main.mealplanner'))
+
+    return render_template('main/mealplanner.html', mealplans=mealplans)
+
+
+@bp_main.route('/del_mealplan/<mealplan_id>', methods=['POST', 'GET'])
+@login_required
+def delete_mealplan(mealplan_id):
+    try:
+
+        del_mealplan = db.session.query(MealPlans) \
+            .filter(MealPlans.mealplan_id == mealplan_id) \
+            .filter(MealPlans.user_id == current_user.id) \
+            .one()
+        db.session.delete(del_mealplan)
+        db.session.commit()
+
+        print(f"Removing mealplan {mealplan_id} from user {current_user.id}'s mealplans")
+        flash(f"Mealplan {mealplan_id} deleted!", "warning")
+
+        return redirect(url_for('main.mealplanner'))
+
+    except InvalidRequestError:
+
+        print(f"Failed to remove mealplan {mealplan_id} from user {current_user.id}'s mealplans")
+        flash(f"Error! Mealplan {mealplan_id} could not be deleted!", "danger")
+
+        return redirect(url_for('main.mealplanner'))
+
+
+@bp_main.route('/add_to_mealplan/<recipe_id>', methods=['GET', 'POST'])
+@login_required
+def add_to_mealplan(recipe_id):
+    """
+    Allows user to add recipe to the most recent mealplan
+
+    :param recipe_id: adds recipe associated with recipe_id to mealplan
+    :return: stays on same page
+    """
+
+    # Get the most recent mealplan by taking max(mealplan_id). We will add recipe to this mealplan.
+    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
+        .filter(MealPlans.user_id == current_user.id).first()
+
+    if mealplan_id is None:
+        flash("Please create a meal plan first!", "warning")
+
+    else:
+        try:
+            db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            recipe_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+            flash(f"{recipe_name} is already in your meal plan!", "warning")
+
+    print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
+    return '', 204  # keeps user on the same page
 
 
 @bp_main.route('/about', methods=['POST', 'GET'])

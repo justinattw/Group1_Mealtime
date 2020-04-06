@@ -10,7 +10,36 @@
             <p>
                 <b>Create a new mealplan</b>
             </p>
-            <button class="btn btn-primary btn-outline-light">Create</button>
+            <form class="form-inline ml-auto" method="post">
+                <button class="btn btn-primary btn-outline-light">Create</button>
+            </form>
+            <br>
+            <br>
+            <p>
+                <b>Or select an existing one:</b>
+            </p>
+            {% if mealplans|length %}
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">Date & Time created</th>
+                    <th scopw="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for mealplan in mealplans %}
+                <tr>
+                    <td>{{ mealplan.mealplan_id }}</td>
+                    <td>{{ mealplan.created_at }}</td>
+                    <td><a href="{{ url_for('main.delete_mealplan', mealplan_id=mealplan.mealplan_id) }}">Delete</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>Sorry, you do not currently have any mealplans</p>
+            {% endif %}
         </li>
         <li>
             <p>
@@ -27,12 +56,17 @@
         </li>
         <li>
             <p>
-                <b>Recipes in mealplan</b>
+                <b>Mealplan</b>
                 <br>
-                Use the search bar to find and add recipes to your meal plan
+
+                {% if temp == 'l' %}
+                You have a mealplan
+
+                {% else %}
+                No mealplans to show
+                {% endif %}
             </p>
         </li>
     </ol>
 {% endblock %}
-
 
