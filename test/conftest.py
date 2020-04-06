@@ -153,14 +153,28 @@ def user_data():
     return user_data
 
 
-# Test browser configurations
+# Test browser configuration. The following code is adapted from a tutorial
+# Title: Set Your Test Automation Goals with Web UI Testing
+# Author: AutomationPanda
+# Date: 2019
+# Availability: https://blog.testproject.io/2019/07/16/test-automation-goals-with-web-ui-testing/
+# Accessed: 6 April 2020
+
 import pytest
 from selenium import webdriver
 
-# @pytest.fixture
-# def driver():
-#     driver = webdriver.Chrome()
-#     return driver
+@pytest.fixture
+def browser():
+    # Chromedriver stored in chromedrivers directory, not in system path.
+    chromedriver = "./chromedrivers/chromedriver"  # Mac
+    # chromedriver = "chromedrivers/chromedriver.exe" # Windows
+
+    driver = webdriver.Chrome(chromedriver)
+    driver.implicitly_wait(10)
+    yield driver
+    driver.quit
+
+
 
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/

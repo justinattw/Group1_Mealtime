@@ -4,6 +4,8 @@
 test/test_main.py:
 
 Pytests tests for main views and methods (relating to files in app/main/)
+
+Parameterised testing: https://blog.testproject.io/2019/07/16/python-test-automation-project-using-pytest/
 """
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
@@ -61,7 +63,6 @@ def test_search_with_login(test_client, vegan_user, db):
 
     diet_name = str((config.DIET_CHOICES[diet_type - 1])[1])
     allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]) for i in allergy_list]
-
 
     assert response.status_code == 200
     assert b'vegan' in response.data
@@ -158,6 +159,7 @@ def test_view_favourites(test_client, user):
     response = view_favourites(test_client)
     assert response.status_code == 200
     assert b"'s favourite recipes" in response.data
+
 
 def test_add_to_favourites_and_view_favourites(test_client, user, db):
     """
