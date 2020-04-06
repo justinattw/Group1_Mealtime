@@ -157,11 +157,10 @@ def user_data():
 import pytest
 from selenium import webdriver
 
-
-@pytest.fixture
-def driver():
-    driver = webdriver.Chrome()
-    return driver
+# @pytest.fixture
+# def driver():
+#     driver = webdriver.Chrome()
+#     return driver
 
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
