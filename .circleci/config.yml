@@ -27,6 +27,12 @@ jobs:
 
     working_directory: ~/repo
 
+    dependencies:
+      post:
+        - wget https://selenium-release.storage.googleapis.com/2.44/selenium-server-standalone-2.44.0.jar
+        - java -jar selenium-server-standalone-2.44.0.jar:
+            background: true
+
     steps:
       - checkout
       - run: mkdir test-reports
@@ -56,9 +62,9 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-#            python -m pytest test # run all tests
-            pytest test/test_auth.py  # run test_auth only
-            pytest test/test_main.py  # run test_main only
+            python -m pytest test
+#            pytest test/test_auth.py  # run test_auth only
+#            pytest test/test_main.py  # run test_main only
 
       - store_test_results:
           path: test-results
@@ -66,6 +72,8 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
+
+
 
 
 #      - run:
