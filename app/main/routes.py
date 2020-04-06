@@ -15,7 +15,7 @@ from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
     Allergies, UserDietPreferences, UserAllergies, UserFavouriteRecipes, MealPlanRecipes, MealPlans, DietTypes
-from app.main.search_functions import search_function
+from app.main.main_functions import search_function, get_most_recent_mealplan_id
 import config
 
 from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response, jsonify
@@ -332,31 +332,6 @@ def mealplanner():
     return render_template('main/mealplanner.html', mealplans=mealplans)
 
 
-@bp_main.route('/del_mealplan/<mealplan_id>', methods=['POST', 'GET'])
-@login_required
-def delete_mealplan(mealplan_id):
-    try:
-
-        del_mealplan = db.session.query(MealPlans) \
-            .filter(MealPlans.mealplan_id == mealplan_id) \
-            .filter(MealPlans.user_id == current_user.id) \
-            .one()
-        db.session.delete(del_mealplan)
-        db.session.commit()
-
-        print(f"Removing mealplan {mealplan_id} from user {current_user.id}'s mealplans")
-        flash(f"Mealplan {mealplan_id} deleted!", "warning")
-
-        return redirect(url_for('main.mealplanner'))
-
-    except InvalidRequestError:
-
-        print(f"Failed to remove mealplan {mealplan_id} from user {current_user.id}'s mealplans")
-        flash(f"Error! Mealplan {mealplan_id} could not be deleted!", "danger")
-
-        return redirect(url_for('main.mealplanner'))
-
-
 @bp_main.route('/add_to_mealplan/<recipe_id>', methods=['GET', 'POST'])
 @login_required
 def add_to_mealplan(recipe_id):
@@ -366,7 +341,6 @@ def add_to_mealplan(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to mealplan
     :return: stays on same page
     """
-
     # Get the most recent mealplan by taking max(mealplan_id). We will add recipe to this mealplan.
     mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
         .filter(MealPlans.user_id == current_user.id).first()
@@ -385,6 +359,31 @@ def add_to_mealplan(recipe_id):
 
     print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
     return '', 204  # keeps user on the same page
+
+
+@bp_main.route('/del_mealplan/<mealplan_id>', methods=['POST', 'GET'])
+@login_required
+def delete_mealplan(mealplan_id):
+    try:
+
+        del_mealplan = db.session.query(MealPlans) \
+            .filter(MealPlans.mealplan_id == mealplan_id) \
+            .filter(MealPlans.user_id == current_user.id) \
+            .one()
+        db.session.delete(del_mealplan)
+        db.session.commit()
+
+        print(f"Removing mealplan {mealplan_id} from user {current_user.id}'s mealplans")
+        flash(f"Mealplan {mealplan_id} deleted!", "warning")
+
+        return redirect(url_for('main.mealplans_history'))
+
+    except InvalidRequestError:
+
+        print(f"Failed to remove mealplan {mealplan_id} from user {current_user.id}'s mealplans")
+        flash(f"Error! Mealplan {mealplan_id} could not be deleted!", "danger")
+
+        return redirect(url_for('main.mealplans_history'))
 
 
 @bp_main.route('/mealplans_history', methods=['GET', 'POST'])
@@ -406,7 +405,8 @@ def view_mealplan(mealplan_id):
 
     mealplan = db.session.query(MealPlans)\
         .filter(MealPlans.user_id == current_user.id) \
-        .filter(MealPlans.mealplan_id == mealplan_id).all()
+        .filter(MealPlans.mealplan_id == mealplan_id) \
+        .first()
 
     mealplan_recipes = db.session.query(MealPlanRecipes.recipe_id) \
         .filter(MealPlanRecipes.mealplan_id == mealplan_id)\
@@ -417,6 +417,30 @@ def view_mealplan(mealplan_id):
         .all()  # Join on recipe ids from subquery (recipes present in meal plan)
 
     return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=user)
+
+
+@bp_main.route('/grocery_list/<mealplan_id>', methods=['POST', 'GET'])
+@login_required
+def grocery_list(mealplan_id):
+
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
+
+    mealplan = db.session.query(MealPlans) \
+        .filter(MealPlans.user_id == current_user.id) \
+        .filter(MealPlans.mealplan_id == mealplan_id) \
+        .first()
+
+    grocery_list = db.session.query(RecipeIngredients) \
+        .join(MealPlanRecipes, RecipeIngredients.recipe_id == MealPlanRecipes.recipe_id) \
+        .join(MealPlans, MealPlanRecipes.mealplan_id == MealPlans.mealplan_id) \
+        .filter(MealPlans.mealplan_id == mealplan_id) \
+        .filter(MealPlans.user_id == current_user.id) \
+        .all()
+
+    print(grocery_list)
+
+    return render_template('main/grocery_list.html', grocery_list=grocery_list, mealplan=mealplan, user=user)
 
 
 @bp_main.route('/about', methods=['POST', 'GET'])

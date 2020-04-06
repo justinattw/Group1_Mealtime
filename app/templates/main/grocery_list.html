@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Favourites{% endblock %}
+
+{% block content %}
+
+<h3>{{ user.first_name }}'s meal plan {{ mealplan.mealplan_id }} grocery list!</h3>
+
+{% if grocery_list|length %}
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th scope="col">Ingredient</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in grocery_list %}
+    <tr>
+        <td>{{ item.ingredient }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+{% else %}
+<p>There are no recipes in this meal plan! Check out the <a href="{{ url_for('main.mealplanner') }}">mealplanner</a> to
+    start adding to your meal plan.</p>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}

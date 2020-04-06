@@ -1,10 +1,9 @@
 #!usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-app/auth/routes.py:
+app/auth/main_functions.py:
 
-This document includes WTForms for authentication methods.
-Authentication methods include signup, login, edit account details and log out.
+This document includes functions that assists the main routes.
 """
 __authors__ = "Danny Wallis and Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
@@ -15,12 +14,16 @@ from app import db
 from app.models import Users, Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, MealPlanRecipes, \
     RecipeIngredients
 
-from sqlalchemy import and_, desc
+from flask_login import current_user
+from sqlalchemy import and_
+from sqlalchemy.sql import func
 
 
 def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, max_time=99999):
     """
     This function accepts 5 parameters to find appropriate recipes according to user input (or default values)
+
+    The search function is used by view_all_recipes, a simple search, and advanced_search.
 
     :param search_term: search term for recipe name
     :param diet_type: specified diet type
@@ -30,8 +33,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
     :param max_time: maximum time that user wants to prep+cook for
     :return: an SQLAlchemy query of recipes matching the above parameters
     """
-
-    # Subquery: blacklist recipes if user have certain allergies
+    # Subquery: blacklist recipes if user has certain allergies
     blacklist = db.session.query(RecipeAllergies.recipe_id) \
         .filter(RecipeAllergies.allergy_id.in_(allergy_list)).distinct().subquery()
 
@@ -50,22 +52,31 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
     return results
 
 
-def generate_groceries_list(user_id, mealplan_id=None):
+def get_most_recent_mealplan_id():
+    """
+    Get the most recent mealplan for currently active user.
+
+    :return: mealplan_id
+    """
+    # Get the most recent mealplan by taking max(mealplan_id)
+    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
+        .filter(MealPlans.user_id == current_user.id).first()
+
+    return mealplan_id
+
+
+def user_owns_mealplan(user_id, mealplan_id):
+    """
+    Check whether the mealplan requested belongs to the user.
+
+    :param user_id: for which user are we interested in finding the mealplan for?
+    :param mealplan_id: for which mealplan do we want to match with user?
+    :return: Returns a query, if query returns None then user does not own mealplan, else user does
     """
 
-    :param user_id: user details for which the grocery list should be generated
-    :return:
-    """
-    if not mealplan_id:
-        mealplan_id = db.session.Query(Users) \
-            .join(MealPlans, Users.id == MealPlanRecipes.user_id) \
-            .filter(Users.id == user_id) \
-            .order_by(desc(MealPlans.mealplan_id)) \
-            .limit(1) \
-            .mealplan_id
+    user_owns_mealplan = db.session.query(MealPlans) \
+        .filter(MealPlans.user_id == user_id) \
+        .filter(MealPlans.mealplan_id == mealplan_id) \
+        .first()
 
-    results = db.session.Query(Users) \
-        .join(MealPlans, Users.id == MealPlanRecipes.user_id) \
-        .join(MealPlanRecipes, MealPlans.mealplan_id == MealPlanRecipes.mealplan_id) \
-        .join(RecipeIngredients, MealPlanRecipes.recipe_id == RecipeIngredients.recipe_id) \
-        .filter(MealPlans.mealplan_id == mealplan_id)
+    return user_owns_mealplan

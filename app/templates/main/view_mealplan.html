@@ -3,9 +3,12 @@
 
 {% block content %}
 
-<h3>{{ user.first_name }}'s meal plan {{ mealplan.id }}</h3>
+<h3>{{ user.first_name }}'s meal plan {{ mealplan.mealplan_id }}</h3>
 
 {% if results|length %}
+
+<p><a href="{{ url_for('main.grocery_list', mealplan_id=mealplan.mealplan_id) }}">Generate grocery list</a></p>
+
 <div class="container">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
         {% for result in results %}
