@@ -291,19 +291,24 @@ def mealplanner():
 
     :return:
     """
-    # most_recent_mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-    #     .filter(MealPlans.user_id == current_user.id).first()
-    # most_recent_mealplan_is_used = db.session.query(MealPlanRecipes) \
-    #     .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
-    #
-    # if not most_recent_mealplan_is_used:
-    #     print("Failure. User already has new meal plan")
-    #     return "failure", 200
-
     mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()).all()  # Show mealplans by most recent
 
     if request.method == 'POST':
+        # IF most recent (hence current) mealplan is empty, then user cannot create a new mealplan until they have added
+        # recipes to current mealplan
+
+        # most_recent_mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
+        #     .filter(MealPlans.user_id == current_user.id).first()
+        # most_recent_mealplan_has_recipes = db.session.query(MealPlanRecipes) \
+        #     .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
+        #
+        # if not most_recent_mealplan_has_recipes:  # is most recent mealplan has no recipes
+        #     print("Failure. You must add recipes to your new mealplan first!")
+        #     return "failure", 200
+        #
+        # else:  # put try and except into this 'else' command
+
         try:
             d = datetime.now()
             created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
