@@ -322,8 +322,15 @@ def mealplanner():
 
     :return: mealplanner html page
     """
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
+
+    mealplans = user.mealplans
+    print(mealplans)
+
     mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()).all()  # Show mealplans by most recent
+    print(mealplans)
 
     # Set a variable for the most recent meal plan
     most_recent = db.session.query(MealPlans) \
@@ -337,7 +344,10 @@ def mealplanner():
             d = datetime.now()
             created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
 
-            db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
+            add_mealplan = MealPlans(created_at=created_at)
+            user.mealplans.append(add_mealplan)
+
+            # db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
             db.session.commit()
 
             new = db.session.query(MealPlans) \
@@ -434,7 +444,7 @@ def mealplans_history():
 
 @bp_main.route('/view_mealplan/<mealplan_id>', methods=['GET', 'POST'])
 @login_required
-# @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
+@check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def view_mealplan(mealplan_id):
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
@@ -457,7 +467,7 @@ def view_mealplan(mealplan_id):
 
 @bp_main.route('/grocery_list/<mealplan_id>', methods=['POST', 'GET'])
 @login_required
-# @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
+@check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def grocery_list(mealplan_id):
 
     user = Users.query.filter_by(id=current_user.id).first_or_404(
