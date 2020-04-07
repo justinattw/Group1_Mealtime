@@ -1,3 +1,19 @@
+#!usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+test/test_browser.py:
+
+Pytests UI and browser testing.
+
+Before running browser tests, ensure that the Selenium Chromedriver is placed in PATH (copy from test/chromedrivers to
+venv/bin).
+"""
+
+__authors__ = "Danny Wallis, Justin Wong"
+__email__ = "justin.wong.17@ucl.ac.uk"
+__credits__ = ["Danny Wallis", "Justin Wong"]
+__status__ = "Development"
+
 from selenium.webdriver.common.keys import Keys
 
 MEALTIME_LOCALHOST_URL = 'http://http://127.0.0.1:5000'
