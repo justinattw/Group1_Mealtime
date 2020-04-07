@@ -434,8 +434,13 @@ def mealplans_history():
 
     :return: mealplans history html page
     """
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
+
+    mealplans = user.mealplans
+
     mealplans = db.session.query(MealPlans) \
-        .filter(MealPlans.user_id == current_user.id) \
+        .filter(MealPlans.user_id == user.id) \
         .order_by(MealPlans.mealplan_id.desc()) \
         .all()  # Use order by to show mealplans by most recent
 
@@ -454,6 +459,10 @@ def view_mealplan(mealplan_id):
         .filter(MealPlans.mealplan_id == mealplan_id) \
         .first()
 
+    # # This does not have 'length' in html view.
+    # mealplan_recipes = [i.recipe for i in mealplan.mealplan_recipes]
+    # print(mealplan_recipes)
+
     mealplan_recipes = db.session.query(MealPlanRecipes.recipe_id) \
         .filter(MealPlanRecipes.mealplan_id == mealplan_id)\
         .distinct().subquery()  # Get recipes ids from specified mealplan as subquery
@@ -461,6 +470,9 @@ def view_mealplan(mealplan_id):
     recipes = db.session.query(Recipes) \
         .join(mealplan_recipes, Recipes.recipe_id == mealplan_recipes.c.recipe_id) \
         .all()  # Join on recipe ids from subquery (recipes present in meal plan)
+
+    print(recipes)
+
 
     return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=user)
 

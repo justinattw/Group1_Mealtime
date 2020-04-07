@@ -73,7 +73,6 @@ class Recipes(db.Model):
     nutrition_values = relationship("NutritionValues", backref=backref("recipes", lazy="joined"), uselist=False)
     allergies = relationship("RecipeAllergies", backref=backref("recipes", lazy="joined"))
     diet_type = relationship("RecipeDietTypes", backref=backref("recipes", lazy="joined"))
-    mealplan_recipes = relationship("MealPlanRecipes", backref=backref("recipes", lazy="joined"))
 
     @property
     def serialize(self):
@@ -138,9 +137,10 @@ class NutritionValues(db.Model):
 
 class MealPlans(db.Model):
     __table__ = db.Model.metadata.tables['MealPlans']
-    recipes = relationship("MealPlanRecipes", backref=backref("mealplans", lazy="joined"))
+    mealplan_recipes = relationship("MealPlanRecipes", backref=backref("mealplans", lazy="joined"))
 
 
 class MealPlanRecipes(db.Model):
     __table__ = db.Model.metadata.tables['MealPlanRecipes']
+    recipe = relationship("Recipes", backref=backref("mealplanrecipes", lazy="joined"))
 
