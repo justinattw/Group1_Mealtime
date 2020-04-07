@@ -58,7 +58,7 @@
 <p>Please note that this recipe may contain:</p>
 <ul>
     {% for a in allergies %}
-    <li>{{ a.Allergies.allergy_name }}</li>
+    <li>{{ a.allergy.allergy_name }}</li>
     {% endfor %}
 </ul>
 {% else %}

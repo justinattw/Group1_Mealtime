@@ -61,19 +61,25 @@ def view_recipe(recipe_id):
     """
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == recipe_id).one()
 
-    allergies = db.session.query(Allergies, RecipeAllergies) \
-        .join(RecipeAllergies) \
-        .filter(RecipeAllergies.recipe_id == recipe_id) \
-        .all()
-    ingredients = db.session.query(RecipeIngredients) \
-        .filter(RecipeIngredients.recipe_id == recipe_id) \
-        .all()
-    steps = db.session.query(RecipeInstructions) \
-        .filter(RecipeInstructions.recipe_id == recipe_id) \
-        .all()
-    nutrition = db.session.query(NutritionValues) \
-        .filter(NutritionValues.recipe_id == recipe_id) \
-        .one()
+    allergies = recipe.allergies
+    ingredients = recipe.ingredients
+    steps = recipe.instructions
+    nutrition = recipe.nutrition_values
+
+    # allergies = db.session.query(Allergies, RecipeAllergies) \
+    #     .join(RecipeAllergies) \
+    #     .filter(RecipeAllergies.recipe_id == recipe_id) \
+    #     .all()
+    # ingredients = db.session.query(RecipeIngredients) \
+    #     .filter(RecipeIngredients.recipe_id == recipe_id) \
+    #     .all()
+    # steps = db.session.query(RecipeInstructions) \
+    #     .filter(RecipeInstructions.recipe_id == recipe_id) \
+    #     .all()
+    # nutrition = db.session.query(NutritionValues) \
+    #     .filter(NutritionValues.recipe_id == recipe_id) \
+    #     .one()
+
     return render_template("main/view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps,
                            nutrition=nutrition, allergies=allergies)
 
@@ -147,15 +153,25 @@ def search():
         search_term = request.form['search_term']
 
         if current_user.is_authenticated:
-            user_id = current_user.id
-            diet_type, diet_name = db.session.query(UserDietPreferences) \
-                .join(DietTypes) \
-                .filter(UserDietPreferences.user_id == user_id) \
-                .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name) \
-                .first()
-            allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user_id).all()
 
-            allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
+            user = Users.query.filter_by(id=current_user.id).first()
+
+            # ## NOT USING INHERITANCE
+            # diet_type, diet_name = db.session.query(UserDietPreferences) \
+            #     .join(DietTypes) \
+            #     .filter(UserDietPreferences.user_id == user.id) \
+            #     .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name) \
+            #     .first()
+            #
+            # allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user.id).all()
+            # allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
+            # # Return list of allergies strings corresponding to allergy id, through config
+            # allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
+
+            ## USING INHERITANCE
+            diet_type = user.diet_preferences[0].diet_type_id
+            diet_name = user.diet_preferences[0].diet_type.diet_name
+            allergy_list = [allergy.allergy_id for allergy in user.allergies]
             # Return list of allergies strings corresponding to allergy id, through config
             allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
 
@@ -217,8 +233,13 @@ def add_to_favourites(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to favourites of user with associated user_id
     :return: 'success' or 'failure' message, stays on same page
     """
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
+
     try:
-        db.session.add(UserFavouriteRecipes(user_id=current_user.id, recipe_id=recipe_id))
+        fav_recipe = UserFavouriteRecipes(recipe_id=recipe_id)
+        user.favourite_recipes.append(fav_recipe)
+
         db.session.commit()
 
         print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
@@ -242,11 +263,19 @@ def remove_from_favourites(recipe_id):
     :param recipe_id: removes recipe associated with recipe_id from favourites of user with associated user_id
     :return: 'success' or 'failure' message, stays on same page
     """
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
+
     try:
         del_recipe = db.session.query(UserFavouriteRecipes) \
             .filter(UserFavouriteRecipes.recipe_id == recipe_id) \
-            .filter(UserFavouriteRecipes.user_id == current_user.id) \
+            .filter(UserFavouriteRecipes.user_id == user.id) \
             .one()
+
+        # # Convert this 'delete' command to Object?
+        # del_recipe = UserFavouriteRecipes(user_id=user.id, recipe_id=recipe_id)
+        # user.favourite_recipes.remove(del_recipe)
+
         db.session.delete(del_recipe)
         db.session.commit()
 
@@ -269,6 +298,8 @@ def favourites():
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
 
+    # Query user favourite recipes. Command is in traditional query form so that we can paginate it (we cannot paginate
+    # an InstrumentedList object, which is what user.favourite_recipes returns.
     query = db.session.query(Recipes) \
         .join(UserFavouriteRecipes, Recipes.recipe_id == UserFavouriteRecipes.recipe_id) \
         .filter(UserFavouriteRecipes.user_id == current_user.id)

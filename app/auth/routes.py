@@ -34,7 +34,11 @@ def login():
     form = LoginForm()
 
     if request.method == 'POST' and form.validate():
+
+        # Check if email has already been previously registered
+        # at the moment we don't turn email to lower case, so mis-matched cases will not be verified
         user = Users.query.filter_by(email=form.email.data).first()
+
         if user is None:
             flash('No account has been registered with this email.', 'warning')
             return redirect(url_for('auth.login'))
@@ -75,9 +79,13 @@ def signup():
             db.session.add(user)
 
             # Set user diet preference to classic upon signing up
-            user_query = db.session.query(Users).filter_by(email=form.email.data).first()
-            diet_preference = UserDietPreferences(user_id=user_query.id, diet_type_id=1)
-            db.session.add(diet_preference)
+            # user_query = db.session.query(Users).filter_by(email=form.email.data).first()
+            # diet_preference = UserDietPreferences(user_id=user.id, diet_type_id=1)
+
+            diet_preference = UserDietPreferences(diet_type_id=1)
+            user.diet_preferences.append(diet_preference)
+
+            # db.session.add(diet_preference)
             db.session.commit()
 
             login_user(user)  # User is logged in upon signing up
@@ -107,6 +115,7 @@ def account():
     """
     user = Users.query.filter_by(id=current_user.id).first_or_404(
         description='There is no user {}'.format(current_user.id))
+
     return render_template('auth/account.html', user=user)
 
 
@@ -148,21 +157,32 @@ def edit_password():
 def edit_preferences():
     form = EditPreferencesForm()
 
+    user = Users.query.filter_by(id=current_user.id).first_or_404(
+        description='There is no user {}'.format(current_user.id))
+
     if request.method == 'POST':
-        user_id = current_user.id
 
         allergy_list = list(map(int, form.allergies.data))  # Turn form's allergy list from strings to ints
         diet_type_id = int(form.diet_type.data)
 
         try:
-            # Remove all diet preferences for user
-            UserDietPreferences.query.filter_by(user_id=user_id).delete()
-            UserAllergies.query.filter_by(user_id=user_id).delete()
+            # Remove all diet preferences for user to overwrite pre-existing settings
+            UserDietPreferences.query.filter_by(user_id=user.id).delete()
+            UserAllergies.query.filter_by(user_id=user.id).delete()
 
-            # Re-add diet_preference and allergies
-            db.session.add(UserDietPreferences(user_id=user_id, diet_type_id=diet_type_id))
+            # # WITHOUT OBJECT INHERITANCE
+            # # Re-add diet_preference and allergies
+            # db.session.add(UserDietPreferences(user_id=user.id, diet_type_id=diet_type_id))
+            # for allergy_id in allergy_list:
+            #     db.session.add(UserAllergies(user_id=user.id, allergy_id=allergy_id))
+
+            # Add newly set diet preferences and allergies to current user
+            diet_type = UserDietPreferences(diet_type_id=diet_type_id)
+            user.diet_preferences.append(diet_type)
+
             for allergy_id in allergy_list:
-                db.session.add(UserAllergies(user_id=user_id, allergy_id=allergy_id))
+                allergy = UserAllergies(allergy_id=allergy_id)
+                user.allergies.append(allergy)
 
             db.session.commit()
 
