@@ -9,17 +9,20 @@
 <table class="table">
     <thead class="thead-dark">
     <tr>
-        <th scope="col">ID</th>
+        <th scope="col">Meal plan ID</th>
         <th scope="col">Date & Time created</th>
-        <th scopw="col"></th>
+        <th scope="col">Actions</th>
     </tr>
     </thead>
     <tbody>
     {% for mealplan in mealplans %}
     <tr>
         <td>{{ mealplan.mealplan_id }}</td>
-        <td><a href="{{ url_for('main.view_mealplan', mealplan_id=mealplan.mealplan_id) }}">{{ mealplan.created_at }}</a></td>
-        <td><a href="{{ url_for('main.delete_mealplan', mealplan_id=mealplan.mealplan_id) }}">Delete</a></td>
+        <td>{{ mealplan.created_at }}</td>
+        <td>
+            <a href="{{ url_for('main.view_mealplan', mealplan_id=mealplan.mealplan_id) }}">Edit&nbsp</a>
+            <a href="{{ url_for('main.delete_mealplan', mealplan_id=mealplan.mealplan_id) }}">Delete</a>
+        </td>
     </tr>
     {% endfor %}
     </tbody>
