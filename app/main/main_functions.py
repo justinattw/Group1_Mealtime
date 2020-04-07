@@ -69,10 +69,10 @@ def get_most_recent_mealplan_id():
 def check_user_owns_mealplan(func):
     """
     If you decorate this a view with this, it will ensure that the mealplan belongs to the current_user. This is to
-    protect users from being able to see other users' mealplans
+    protect users from being able to see other users' mealplans.
 
-    :param mealplan_id:
-    :return:
+    :return: if user does not own mealplan, redirect user to mealplanner page with appropriate warning message. Else,
+        continue to view
     """
     @wraps(func)
     def decorated_function(*args, **kwargs):
@@ -88,4 +88,5 @@ def check_user_owns_mealplan(func):
         else:
             flash('Sorry, you do not have access to this meal plan', 'warning')
             return redirect(url_for('main.mealplans_history'))
+
     return decorated_function
