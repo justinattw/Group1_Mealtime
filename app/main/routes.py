@@ -318,27 +318,21 @@ def favourites():
 @login_required
 def mealplanner():
     """
+    Guides the user through creating and editing meal plans
 
-    :return:
+    :return: mealplanner html page
     """
     mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()).all()  # Show mealplans by most recent
 
+    # Set a variable for the most recent meal plan
+    most_recent = db.session.query(MealPlans) \
+                    .filter(MealPlans.user_id == current_user.id) \
+                    .order_by(MealPlans.mealplan_id.desc()) \
+                    .first()
+
+    # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
-        # IF most recent (hence current) mealplan is empty, then user cannot create a new mealplan until they have added
-        # recipes to current mealplan
-
-        # most_recent_mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-        #     .filter(MealPlans.user_id == current_user.id).first()
-        # most_recent_mealplan_has_recipes = db.session.query(MealPlanRecipes) \
-        #     .filter(MealPlanRecipes.mealplan_id == most_recent_mealplan_id).first()
-        #
-        # if not most_recent_mealplan_has_recipes:  # is most recent mealplan has no recipes
-        #     print("Failure. You must add recipes to your new mealplan first!")
-        #     return "failure", 200
-        #
-        # else:  # put try and except into this 'else' command
-
         try:
             d = datetime.now()
             created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
@@ -346,8 +340,13 @@ def mealplanner():
             db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
             db.session.commit()
 
+            new = db.session.query(MealPlans) \
+                    .filter(MealPlans.user_id == current_user.id) \
+                    .order_by(MealPlans.mealplan_id.desc()) \
+                    .first()
+
             print(f"Adding new mealplan for user {current_user.id}")
-            flash(f"Success, new meal plan created!", "success")
+            flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
 
             return redirect(url_for('main.mealplanner'))
 
@@ -359,7 +358,7 @@ def mealplanner():
 
             return redirect(url_for('main.mealplanner'))
 
-    return render_template('main/mealplanner.html', mealplans=mealplans)
+    return render_template('main/mealplanner.html', mealplans=mealplans, most_recent=most_recent)
 
 
 @bp_main.route('/add_to_mealplan/<recipe_id>', methods=['GET', 'POST'])
@@ -382,9 +381,10 @@ def add_to_mealplan(recipe_id):
         try:
             db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
             db.session.commit()
+
         except IntegrityError:
             db.session.rollback()
-            recipe_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+            recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
             flash(f"{recipe_name} is already in your meal plan!", "warning")
 
     print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
@@ -419,6 +419,11 @@ def delete_mealplan(mealplan_id):
 @bp_main.route('/mealplans_history', methods=['GET', 'POST'])
 @login_required
 def mealplans_history():
+    """
+    Allows user to view past meal plans
+
+    :return: mealplans history html page
+    """
     mealplans = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()) \

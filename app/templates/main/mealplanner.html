@@ -5,28 +5,42 @@
 <h3>Meal Planner</h3>
 <p>Use the Meal Planner to organise your meals for the week. You can also favourite recipes to make them easier to
     find in the future.</p>
-    <p>View your <a href="{{ url_for('main.mealplans_history') }}">old mealplans</a> if you want something familiar.</p>
+    <p>View your <a href="{{ url_for('main.mealplans_history') }}">old meal plans</a> if you want something familiar.</p>
 {#    {% if mealplan_active %}#}
 {#        <p>View your current mealplan here!</p>#}
 {#    {% endif %}#}
 
-<h4>Choosing and editing a mealplan</h4>
+<h4>Choosing and editing a meal plan</h4>
 <ol id="meal_planner_list">
     <li>
-        {#        {% if mealplan_active %}#}
-        {#            <p><b>Continue with your current mealplan</b></p>#}
-        {#            <br><br>#}
-        {#        {% endif %}#}
-        <p><b>Continue with your current mealplan (do nothing and continue to step 2!)</b></p>
-        <p><b>Or create a new mealplan</b></p>
+        <p><b>Continue with your most recent meal plan</b></p>
+        {% if most_recent != None %}
+        <p>Your active meal plan is:</p>
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Meal plan ID</th>
+                    <th scopw="col">Date & Time created</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ most_recent.mealplan_id }}</td>
+                    <td>{{ most_recent.created_at }}</td>
+                    <td><a href="{{ url_for('main.view_mealplan', mealplan_id=most_recent.mealplan_id) }}">Edit&nbsp</a>
+                        <a href="{{ url_for('main.delete_mealplan', mealplan_id=most_recent.mealplan_id) }}">Delete</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <p>You don't have any meal plans</p>
+        {% endif %}
+        <p><b>Or create a new meal plan</b></p>
         <form class="form-inline ml-auto" method="post">
             <button class="btn btn-primary btn-outline-light">Create</button>
         </form>
-        <br>
-        <br>
-        <p>
-            <b>Or select an existing one:</b>
-        </p>
     </li>
     <li>
         <p>
@@ -40,19 +54,8 @@
             <button class="btn btn-primary btn-outline-light" type="submit">Search</button>
         </form>
         <a href="{{ url_for('main.advanced_search') }}" class="simple_search">Advanced Search</a>
-    </li>
-    <li>
-        <p>
-            <b>Mealplan</b>
-            <br>
-
-            {% if temp == 'l' %}
-            You have a mealplan
-
-            {% else %}
-            No mealplans to show
-            {% endif %}
-        </p>
+        <br><br>
+        <p>Or browse your <a href="{{ url_for('main.favourites') }}">favourites</a> to find recipes</p>
     </li>
 </ol>
 {% endblock %}
