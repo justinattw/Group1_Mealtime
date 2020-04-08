@@ -16,8 +16,8 @@ __status__ = "Development"
 
 from selenium.webdriver.common.keys import Keys
 
-# MEALTIME_LOCALHOST_URL = 'localhost:5000'
-MEALTIME_LOCALHOST_URL = 'https://comp0034-mealtime.herokuapp.com'
+MEALTIME_URL = 'localhost:5000'
+# MEALTIME_URL = 'https://comp0034-mealtime.herokuapp.com'
 
 #
 # def test_driver_setup(browser):
@@ -43,7 +43,7 @@ MEALTIME_LOCALHOST_URL = 'https://comp0034-mealtime.herokuapp.com'
 
 def test_driver_setup(test_client, browser):
 
-    URL = MEALTIME_LOCALHOST_URL
+    URL = MEALTIME_URL
     PHRASE = 'recipe'
 
     browser.get(URL)
@@ -65,6 +65,6 @@ def test_driver_setup(test_client, browser):
 
 def test_mealtime_index(test_client, browser):
 
-    browser.get(MEALTIME_LOCALHOST_URL)
+    browser.get(MEALTIME_URL)
     # browser.implicitly_wait(100000000)
     pass
