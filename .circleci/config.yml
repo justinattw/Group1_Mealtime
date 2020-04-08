@@ -41,11 +41,9 @@ jobs:
             bin/sc -u justinattw -k bb48374a-dc11-478a-88fa-64fd06ab831e
             wget --retry-connrefused --no-check-certificate -T 60 localhost:4445
           # wait for app to be ready
-#          environment:
-#            SELENIUM_PORT:5000
 
-#      - run: # base image is python, so we run `nosetests`, an extension of `unittest`
-#          command: nosetests
+        environment:
+          SELENIUM_PORT:5000
 
 #        environment:
 #          FLASK_CONFIG: testing
