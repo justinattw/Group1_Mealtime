@@ -166,7 +166,7 @@ def browser():
     """ Sets up driver for Selenium browser testing """
     # (NOT RECOMMENDED) Use following driver if chromedriver is in PATH.
     # # path = "join(os.getcwd() + 'chromedriver/chromedriver')"  # Mac
-    # # path = "join(os.getcwd() + 'chromedriver/chromedriver.exe')"  # Windows
+    # path = "join(os.getcwd() + 'chromedriver/chromedriver.exe')"  # Windows
     # driver = webdriver.Chrome(executable_path=path)
 
     # (RECOMMENDED) Use following driver if chromedriver is in PATH.

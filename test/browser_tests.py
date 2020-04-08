@@ -47,6 +47,7 @@ class TestBase(LiveServerTestCase):
 
     def test_server_is_up_and_running(self):
         response = urllib.request.urlopen(self.get_server_url())
+        print(self.get_server_url())
         self.assertEqual(response.code, 200)
 
 class CreateObjects(object):
@@ -69,7 +70,7 @@ class TestRegistration(TestBase):
         """
 
         # Click signup menu link
-        self.driver.find_element_by_id("signup").click()
+        self.driver.find_element_by_id("auth.signup").click()
         time.sleep(1)
 
         # Test person
