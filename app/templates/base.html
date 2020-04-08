@@ -33,31 +33,31 @@
     <div class="collapse navbar-nav navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li>
-                <a class="nav-link" href="{{ url_for('main.view_all_recipes') }}">Recipes</a>
+                <a class="nav-link" id=recipes-link href="{{ url_for('main.view_all_recipes') }}">Recipes</a>
             </li>
 
             {% if current_user.is_anonymous %}
                 <li>
-                    <a class="nav-link" href="{{ url_for("main.about") }}">About</a>
+                    <a class="nav-link" id=about-link href="{{ url_for("main.about") }}">About</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="{{ url_for("auth.signup") }}">Sign up</a>
+                    <a class="nav-link" id=signup-link href="{{ url_for("auth.signup") }}">Sign up</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="{{ url_for("auth.login") }}">Log in</a>
+                    <a class="nav-link" id= login-link href="{{ url_for("auth.login") }}">Log in</a>
                 </li>
             {% else %}
                 <li>
-                    <a class="nav-link" href="{{ url_for('main.mealplanner') }}">Meal Plans</a>
+                    <a class="nav-link" id=mealplan-link href="{{ url_for('main.mealplanner') }}">Meal Plans</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="{{ url_for('main.favourites') }}">Favourites</a>
+                    <a class="nav-link" id=favourites-link href="{{ url_for('main.favourites') }}">Favourites</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
+                    <a class="nav-link" id=account-link href="{{ url_for('auth.account') }}">Account</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="{{ url_for("auth.logout") }}">Log out</a>
+                    <a class="nav-link" id=logout-link href="{{ url_for("auth.logout") }}">Log out</a>
                 </li>
                 </ul>
             {% endif %}

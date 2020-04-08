@@ -47,6 +47,7 @@ class TestBase(LiveServerTestCase):
 
     def test_server_is_up_and_running(self):
         response = urllib.request.urlopen(self.get_server_url())
+        print(self.get_server_url())
         self.assertEqual(response.code, 200)
 
 class CreateObjects(object):

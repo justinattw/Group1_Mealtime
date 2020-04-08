@@ -16,28 +16,50 @@ __status__ = "Development"
 
 from selenium.webdriver.common.keys import Keys
 
-MEALTIME_LOCALHOST_URL = 'http://http://127.0.0.1:5000'
+MEALTIME_LOCALHOST_URL = 'http://127.0.0.1:5000'
+
+#
+# def test_driver_setup(browser):
+#
+#     URL = 'https://www.duckduckgo.com'
+#     PHRASE = 'panda'
+#
+#     browser.get(URL)
+#
+#     search_input = browser.find_element_by_id('search_form_input_homepage')
+#     search_input.send_keys(PHRASE + Keys.RETURN)
+#
+#     link_divs = browser.find_elements_by_css_selector('#links > div')
+#     assert len(link_divs) > 0
+#
+#     xpath = f"//div[@id='links']//*[contains(text(), '{PHRASE}')]"
+#     results = browser.find_elements_by_xpath(xpath)
+#     assert len(results) > 0
+#
+#     search_input = browser.find_element_by_id('search_form_input')
+#     assert search_input.get_attribute('value') == PHRASE
 
 
-def test_driver_setup(browser):
+def test_driver_setup(test_client, browser):
 
-    URL = 'https://www.duckduckgo.com'
-    PHRASE = 'panda'
+    URL = MEALTIME_LOCALHOST_URL
+    PHRASE = 'recipe'
 
     browser.get(URL)
 
-    search_input = browser.find_element_by_id('search_form_input_homepage')
-    search_input.send_keys(PHRASE + Keys.RETURN)
+    signup_link = browser.find_element_by_id('signup-link')
+    print(signup_link.text)
+    #search_input.send_keys(PHRASE + Keys.RETURN)
 
-    link_divs = browser.find_elements_by_css_selector('#links > div')
-    assert len(link_divs) > 0
+    # link_divs = browser.find_elements_by_css_selector('#links > div')
+    # assert len(link_divs) > 0
 
-    xpath = f"//div[@id='links']//*[contains(text(), '{PHRASE}')]"
-    results = browser.find_elements_by_xpath(xpath)
-    assert len(results) > 0
-
-    search_input = browser.find_element_by_id('search_form_input')
-    assert search_input.get_attribute('value') == PHRASE
+    #xpath = f"//div[@id='links']//*[contains(text(), '{PHRASE}')]"
+    #results = browser.find_elements_by_xpath(xpath)
+    #assert len(results) > 0
+    #
+    # search_input = browser.find_element_by_id('search_form_input')
+    # assert search_input.get_attribute('value') == PHRASE
 
 
 def test_mealtime_index(test_client, browser):
