@@ -69,7 +69,7 @@ class TestRegistration(TestBase):
         """
 
         # Click signup menu link
-        self.driver.find_element_by_id("signup").click()
+        self.driver.find_element_by_id("auth.signup").click()
         time.sleep(1)
 
         # Test person
