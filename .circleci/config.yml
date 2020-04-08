@@ -20,14 +20,36 @@ jobs:
 
     working_directory: ~/repo
 
-    dependencies:
-      post:
-        - wget https://saucelabs.com/downloads/sc-latest-linux.tar.gz
-        - tar -xzf sc-latest-linux.tar.gz
-
     steps:
       - checkout
+      - run:
+          # Expose CircleCI container to Sauce Labs to connect to localhost url for browser testing
 
+          # The following code is adapted from CircleCI documentation.
+          #
+          # Title: Browser Testing - Sauce Labs
+          # Author: CircleCI
+          # Date: 2020
+          # Availability: https://circleci.com/docs/2.0/browser-testing/#sauce-labs
+          # Accessed: 8 April 2020
+          name: Install Sauce Labs and Set Up Tunnel
+          background: true
+          command: |
+            curl https://saucelabs.com/downloads/sc-4.5.4-linux.tar.gz -o saucelabs.tar.gz
+            tar -xzf saucelabs.tar.gz
+            cd sc-*
+            bin/sc -u justinattw -k bb48374a-dc11-478a-88fa-64fd06ab831e
+            wget --retry-connrefused --no-check-certificate -T 60 localhost:5000
+          # wait for app to be ready
+
+#        environment:
+#          FLASK_CONFIG: testing
+#          TEST_DATABASE_URL: 'sqlite:///db/mealtime_testing.sqlite'
+
+
+#      - checkout
+      - run: mkdir test-reports
+      - run: mkdir test-results
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
@@ -46,28 +68,23 @@ jobs:
           name: Download Selenium
           command: curl -O http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar
 
+#      - run:
+#          name: Start Selenium
+#          command: java -jar selenium-server-standalone-3.5.3.jar -log test-reports/selenium.log
+#          background: true
 
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      test:
-        override:
-          - cd sc-*-linux && ./bin/sc --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY --readyfile ~/sauce_is_ready:
-              background: true
-          # Wait for tunnel to be ready
-          - while [ ! -e ~/sauce_is_ready ]; do sleep 1; done
-          - python -m hello.hello_app:
-              background: true
-          # Wait for app to be ready
-          - curl --retry 10 --retry-delay 2 -v http://localhost:5000
-          # Run selenium tests
-          - . venv/bin/activate
+      # https://pytest.org
+      # https://nose.readthedocs.io
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
             python -m pytest test
-
-        post:
-          - killall --wait sc  # wait for Sauce Connect to close the tunnel
 
       - store_test_results:
           path: test-results
@@ -82,4 +99,22 @@ jobs:
             kill -9 `cat /tmp/sc_client.pid`
 
 
+
+#      - run:
+#          name: Setup Heroku
+#          command: |
+#            chmod +x .circleci/setup-heroku.sh
+#            .circleci/setup-heroku.sh
+#      - run:
+#          name: Deploy to Heroku
+#          command: |
+#            cd app/
+#            git push heroku master
+#
+#orbs:
+#  heroku: circleci/heroku@0.0.10
+#workflows:
+#  heroku_deploy:
+#    jobs:
+#      - heroku/deploy-via-git
 
