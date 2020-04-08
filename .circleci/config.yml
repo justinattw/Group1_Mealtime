@@ -85,6 +85,7 @@ jobs:
           command: |
             . venv/bin/activate
             python -m pytest -v test/test_auth.py
+            python -m pytest -v test/test_main.py
 #            python -m pytest test
 
 
