@@ -47,7 +47,7 @@ def test_driver_setup(test_client, browser):
 
     browser.get(URL)
 
-    search_input = browser.find_element_by_id('signup-link')
+    #search_input = browser.find_element_by_id('signup-link')
     #search_input.send_keys(PHRASE + Keys.RETURN)
 
     # link_divs = browser.find_elements_by_css_selector('#links > div')
