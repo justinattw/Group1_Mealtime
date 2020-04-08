@@ -10,7 +10,16 @@
 
 version: 2
 
+orbs:
+  sauce-connect: saucelabs/sauce-connect@1.0.1
+
 jobs:
+  - sauce-connect/with_proxy:
+      name: Chrome Tests
+      steps:
+        - run: mvn verify -B -Dsauce.browser=chrome  -Dsauce.tunnel="chrome"
+      tunnel_identifier: chrome
+
   build:
     docker:
       # specify the version you desire here
@@ -45,7 +54,7 @@ jobs:
       # - image: circleci/postgres:9.4
 
 #    steps:
-      - checkout
+#      - checkout
       - run: mkdir test-reports
       - run: mkdir test-results
       - restore_cache:
