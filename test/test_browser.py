@@ -16,9 +16,8 @@ __status__ = "Development"
 
 from selenium.webdriver.common.keys import Keys
 
-# MEALTIME_LOCALHOST_URL = 'http://127.0.0.1:5000'
-MEALTIME_LOCALHOST_URL = 'localhost:5000'
-# MEALTIME_LOCALHOST_URL = 'https://comp0034-mealtime.herokuapp.com'
+# MEALTIME_LOCALHOST_URL = 'localhost:5000'
+MEALTIME_LOCALHOST_URL = 'https://comp0034-mealtime.herokuapp.com'
 
 #
 # def test_driver_setup(browser):
