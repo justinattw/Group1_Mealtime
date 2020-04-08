@@ -84,8 +84,9 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-#            python -m pytest test
             python -m pytest -k test.test_auth.py
+#            python -m pytest test
+
 
       - store_test_results:
           path: test-results
