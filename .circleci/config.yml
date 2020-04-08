@@ -23,6 +23,7 @@ jobs:
     steps:
       - checkout
       - run:
+          # Expose CircleCI container to Sauce Labs to connect to localhost url for browser testing
           name: Install Sauce Labs and Set Up Tunnel
           background: true
           command: |
@@ -31,12 +32,8 @@ jobs:
             cd sc-*
             bin/sc -u ${SAUCELABS_USER} -k ${SAUCELABS_KEY}
             wget --retry-connrefused --no-check-certificate -T 60 localhost:4445  # wait for app to be ready
-      - run: # base image is python, so we run `nosetests`, an extension of `unittest`
-          command: nosetests
-      - run:
-          name: Shut Down Sauce Connect Tunnel
-          command: |
-            kill -9 `cat /tmp/sc_client.pid`
+#      - run: # base image is python, so we run `nosetests`, an extension of `unittest`
+#          command: nosetests
 
 #        environment:
 #          FLASK_CONFIG: testing
@@ -92,6 +89,11 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
+
+      - run:
+          name: Shut Down Sauce Connect Tunnel
+          command: |
+            kill -9 `cat /tmp/sc_client.pid`
 
 
 
