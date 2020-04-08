@@ -77,8 +77,6 @@ class TestConfig(Config):
     DEBUG = True
     TESTING = True
 
-    # SERVER_NAME="localhost:4445"
-
     CWD = dirname(abspath(__file__))
 
     # Create a duplicate of the current database
