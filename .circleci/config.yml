@@ -22,16 +22,16 @@ jobs:
 
     steps:
       - checkout
-      - run:
-          # Expose CircleCI container to Sauce Labs to connect to localhost url for browser testing
-
-          # The following code is adapted from CircleCI documentation.
-          #
-          # Title: Browser Testing - Sauce Labs
-          # Author: CircleCI
-          # Date: 2020
-          # Availability: https://circleci.com/docs/2.0/browser-testing/#sauce-labs
-          # Accessed: 8 April 2020
+#      - run:
+#          # Expose CircleCI container to Sauce Labs to connect to localhost url for browser testing
+#
+#          # The following code is adapted from CircleCI documentation.
+#          #
+#          # Title: Browser Testing - Sauce Labs
+#          # Author: CircleCI
+#          # Date: 2020
+#          # Availability: https://circleci.com/docs/2.0/browser-testing/#sauce-labs
+#          # Accessed: 8 April 2020
 #          name: Install Sauce Labs and Set Up Tunnel
 #          background: true
 #          command: |
