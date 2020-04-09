@@ -1,4 +1,4 @@
-CircleCI Build status: [![CircleCI](https://circleci.com/gh/justinattw/Group1_Mealtime.svg?style=svg)](https://circleci.com/gh/justinattw/Group1_Mealtime)
+CI testing status: [![CircleCI](https://circleci.com/gh/justinattw/Group1_Mealtime.svg?style=shield)](https://circleci.com/gh/justinattw/Group1_Mealtime)
 
 # Mealtime
 
