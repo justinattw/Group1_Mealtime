@@ -22,9 +22,9 @@ jobs:
 
     steps:
       - checkout
-#      - run:
+
 #          # Expose CircleCI container to Sauce Labs to connect to localhost url for browser testing
-#
+#      - run:
 #          # The following code is adapted from CircleCI documentation.
 #          #
 #          # Title: Browser Testing - Sauce Labs
@@ -40,7 +40,7 @@ jobs:
 #            cd sc-*
 #            bin/sc -u justinattw -k bb48374a-dc11-478a-88fa-64fd06ab831e
 #            wget --retry-connrefused --no-check-certificate -T 60 localhost:5000
-          # wait for app to be ready
+#          # wait for app to be ready
 
       - run: mkdir test-reports
       - run: mkdir test-results
@@ -72,7 +72,9 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python -m pytest test
+            coverage pytest test
+            coverage report
+#            python -m pytest test
 #            python -m pytest test --ignore test/test_browser.py
 #            python -m pytest -v test/test_auth.py
 #            python -m pytest -v test/test_main.py
