@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/justinattw/Group1_Mealtime.svg?style=shield)](https://circleci.com/gh/justinattw/Group1_Mealtime)
+
 # Mealtime
 
 **Personal meal-planning and cooking assistant**

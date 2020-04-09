@@ -22,9 +22,9 @@ jobs:
 
     steps:
       - checkout
-#      - run:
+
 #          # Expose CircleCI container to Sauce Labs to connect to localhost url for browser testing
-#
+#      - run:
 #          # The following code is adapted from CircleCI documentation.
 #          #
 #          # Title: Browser Testing - Sauce Labs
@@ -40,15 +40,8 @@ jobs:
 #            cd sc-*
 #            bin/sc -u justinattw -k bb48374a-dc11-478a-88fa-64fd06ab831e
 #            wget --retry-connrefused --no-check-certificate -T 60 localhost:5000
+#          # wait for app to be ready
 
-          # wait for app to be ready
-
-#        environment:
-#          FLASK_CONFIG: testing
-#          TEST_DATABASE_URL: 'sqlite:///db/mealtime_testing.sqlite'
-
-
-#      - checkout
       - run: mkdir test-reports
       - run: mkdir test-results
       - restore_cache:
@@ -69,18 +62,12 @@ jobs:
           name: Download Selenium
           command: curl -O http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar
 
-#      - run:
-#          name: Start Selenium
-#          command: java -jar selenium-server-standalone-3.5.3.jar -log test-reports/selenium.log
-#          background: true
-
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       # https://pytest.org
-      # https://nose.readthedocs.io
       - run:
           name: run tests
           command: |
@@ -100,28 +87,7 @@ jobs:
           path: test-reports
           destination: test-reports
 
-      - run:
-          name: Shut Down Sauce Connect Tunnel
-          command: |
-            kill -9 `cat /tmp/sc_client.pid`
-
-
-
 #      - run:
-#          name: Setup Heroku
+#          name: Shut Down Sauce Connect Tunnel
 #          command: |
-#            chmod +x .circleci/setup-heroku.sh
-#            .circleci/setup-heroku.sh
-#      - run:
-#          name: Deploy to Heroku
-#          command: |
-#            cd app/
-#            git push heroku master
-#
-#orbs:
-#  heroku: circleci/heroku@0.0.10
-#workflows:
-#  heroku_deploy:
-#    jobs:
-#      - heroku/deploy-via-git
-
+#            kill -9 `cat /tmp/sc_client.pid`
