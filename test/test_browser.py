@@ -52,19 +52,17 @@ class TestBase(LiveServerTestCase):
     def test_driver_setup(self, browser):
 
         URL = MEALTIME_LOCALHOST_URL
-        browser.get(URL)
-
+        self.browser.get(URL)
 
     def test_homepage_link_texts(self, browser):
         URL = MEALTIME_LOCALHOST_URL
-        browser.get(URL)
-        signup_link = browser.find_element_by_id('signup-link')
+        self.browser.get(URL)
+        signup_link = self.browser.find_element_by_id('signup-link')
         assert signup_link.text == 'Sign up'
-        about_link = browser.find_element_by_id(('about-link'))
+        about_link = self.browser.find_element_by_id(('about-link'))
         assert about_link.text == 'About'
-        login_link = browser.find_element_by_id('login-link')
+        login_link = self.browser.find_element_by_id('login-link')
         assert login_link.text == 'Log in'
-
 
 
 
@@ -93,45 +91,45 @@ class TestBase(LiveServerTestCase):
     #                         linker.append(link.get_attribute('href'))
     #                 linker = list(set(linker))
 
-
-    def test_simple_search(self, browser):  #checks that the value searched is in the url
-        URL = MEALTIME_LOCALHOST_URL
-        browser.get(URL)
-        search_text = browser.find_element_by_css_selector('input')
-        assert search_text.get_attribute('aria-label') == "Search"
-        search_button = browser.find_element_by_css_selector('.btn.btn-primary.btn-outline-light')
-        assert search_button.text == 'Search'
-        search_text.send_keys('cabbage')
-        search_button.click()
-
-    def test_user_login(browser):
-        URL = MEALTIME_LOCALHOST_URL
-        signup = 'http://127.0.0.1:5000/signup/'
-        browser.get(signup)
-        form_first_name = browser.find_element_by_id('signup_first_name')
-        form_last_name = browser.find_element_by_id('signup_last_name')
-        form_email = browser.find_element_by_id('signup_email')
-        form_password = browser.find_element_by_id('signup_password')
-        form_confirm = browser.find_element_by_id('signup_confirm')
-        form_submit = browser.find_element_by_id("submit_button")
-
-        test_user_first_name = "A"
-        test_user_last_name = "A"
-        test_user_email = "A@email.com"
-        test_user_password = "test12334"
-
-        form_first_name.send_keys(test_user_first_name)
-        form_last_name.send_keys(test_user_last_name)
-        form_email.send_keys(test_user_email)
-        form_password.send_keys(test_user_password)
-        form_confirm.send_keys(test_user_password)
-        form_submit.click()
-
-        browser.get(URL)
-        links = browser.find_elements_by_css_selector('a')
-        print(browser.current_url)
-        for link in links:
-            print(link.text)
+    #
+    # def test_simple_search(self, browser):  #checks that the value searched is in the url
+    #     URL = MEALTIME_LOCALHOST_URL
+    #     browser.get(URL)
+    #     search_text = browser.find_element_by_css_selector('input')
+    #     assert search_text.get_attribute('aria-label') == "Search"
+    #     search_button = browser.find_element_by_css_selector('.btn.btn-primary.btn-outline-light')
+    #     assert search_button.text == 'Search'
+    #     search_text.send_keys('cabbage')
+    #     search_button.click()
+    #
+    # def test_user_login(self, browser):
+    #     URL = MEALTIME_LOCALHOST_URL
+    #     signup = 'http://127.0.0.1:5000/signup/'
+    #     browser.get(signup)
+    #     form_first_name = browser.find_element_by_id('signup_first_name')
+    #     form_last_name = browser.find_element_by_id('signup_last_name')
+    #     form_email = browser.find_element_by_id('signup_email')
+    #     form_password = browser.find_element_by_id('signup_password')
+    #     form_confirm = browser.find_element_by_id('signup_confirm')
+    #     form_submit = browser.find_element_by_id("submit_button")
+    #
+    #     test_user_first_name = "A"
+    #     test_user_last_name = "A"
+    #     test_user_email = "A@email.com"
+    #     test_user_password = "test12334"
+    #
+    #     form_first_name.send_keys(test_user_first_name)
+    #     form_last_name.send_keys(test_user_last_name)
+    #     form_email.send_keys(test_user_email)
+    #     form_password.send_keys(test_user_password)
+    #     form_confirm.send_keys(test_user_password)
+    #     form_submit.click()
+    #
+    #     browser.get(URL)
+    #     links = browser.find_elements_by_css_selector('a')
+    #     print(browser.current_url)
+    #     for link in links:
+    #         print(link.text)
 
         # search_input.send_keys(PHRASE + Keys.RETURN)
 
