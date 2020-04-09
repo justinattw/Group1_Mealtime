@@ -9,6 +9,10 @@ Before running browser tests, ensure that the Selenium Chromedriver is placed in
 venv/bin).
 """
 from flask_testing import LiveServerTestCase
+from flask import url_for
+
+from urllib.request import urlopen
+import urllib3
 
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
@@ -18,7 +22,8 @@ __status__ = "Development"
 from selenium.webdriver.common.keys import Keys
 
 
-MEALTIME_LOCALHOST_URL = 'http://127.0.0.1:5000'
+
+MEALTIME_URL = 'localhost:5000'
 
 #
 # def test_driver_setup(browser):
@@ -42,27 +47,18 @@ MEALTIME_LOCALHOST_URL = 'http://127.0.0.1:5000'
 #     assert search_input.get_attribute('value') == PHRASE
 
 
-class TestBase(LiveServerTestCase):
 
-    def create_app(self):
-        from app import create_app
-        app = create_app('config.TestConfig')
-        return app
 
-    def test_driver_setup(self, browser):
+def test_homepage_link_texts(test_client, browser, live_server):
 
-        URL = MEALTIME_LOCALHOST_URL
-        self.browser.get(URL)
+    browser.get(url_for('main.index', _external=True))
 
-    def test_homepage_link_texts(self, browser):
-        URL = MEALTIME_LOCALHOST_URL
-        self.browser.get(URL)
-        signup_link = self.browser.find_element_by_id('signup-link')
-        assert signup_link.text == 'Sign up'
-        about_link = self.browser.find_element_by_id(('about-link'))
-        assert about_link.text == 'About'
-        login_link = self.browser.find_element_by_id('login-link')
-        assert login_link.text == 'Log in'
+    signup_link = browser.find_element_by_id('signup-link')
+    assert signup_link.text == 'Sign up'
+    about_link = browser.find_element_by_id(('about-link'))
+    assert about_link.text == 'About'
+    login_link = browser.find_element_by_id('login-link')
+    assert login_link.text == 'Log in'
 
 
 

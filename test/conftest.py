@@ -11,14 +11,25 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
+import signal
+
 from app import create_app
 from app import db as _db
 import config
 
 from flask_login import login_user, logout_user
+import logging
+import multiprocessing
 import numpy as np
-import random
+import os
 import pytest
+
+import random
+import time
+import urllib
+# import urllib2
+from urllib.error import URLError
+from urllib.request import urlopen
 
 
 @pytest.yield_fixture(scope='session')
@@ -163,8 +174,6 @@ from selenium import webdriver
 
 from flask import url_for
 
-
-
 @pytest.fixture
 def browser():
     """ Sets up driver for Selenium browser testing """
@@ -180,6 +189,15 @@ def browser():
     driver.implicitly_wait(10)
     yield driver
     driver.close()
+
+
+@pytest.mark.usefixtures('live_server')
+class TestLiveServer:
+
+    def test_server_is_up_and_running(self):
+        res = urlopen(url_for('index', _external=True))
+        assert b'OK' in res.read()
+        assert res.code == 200
 
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
