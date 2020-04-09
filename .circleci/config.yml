@@ -91,24 +91,3 @@ jobs:
           name: Shut Down Sauce Connect Tunnel
           command: |
             kill -9 `cat /tmp/sc_client.pid`
-
-
-
-#      - run:
-#          name: Setup Heroku
-#          command: |
-#            chmod +x .circleci/setup-heroku.sh
-#            .circleci/setup-heroku.sh
-#      - run:
-#          name: Deploy to Heroku
-#          command: |
-#            cd app/
-#            git push heroku master
-#
-#orbs:
-#  heroku: circleci/heroku@0.0.10
-#workflows:
-#  heroku_deploy:
-#    jobs:
-#      - heroku/deploy-via-git
-
