@@ -161,6 +161,10 @@ def user_data():
 # Accessed: 6 April 2020
 from selenium import webdriver
 
+from flask import url_for
+
+
+
 @pytest.fixture
 def browser():
     """ Sets up driver for Selenium browser testing """
@@ -175,7 +179,7 @@ def browser():
 
     driver.implicitly_wait(10)
     yield driver
-    driver.quit
+    driver.close()
 
 
 # Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
