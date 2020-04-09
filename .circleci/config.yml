@@ -40,6 +40,7 @@ jobs:
 #            cd sc-*
 #            bin/sc -u justinattw -k bb48374a-dc11-478a-88fa-64fd06ab831e
 #            wget --retry-connrefused --no-check-certificate -T 60 localhost:5000
+
           # wait for app to be ready
 
 #        environment:
