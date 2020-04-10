@@ -93,15 +93,13 @@ def recipes():
 
     :return:
     """
-
     # This dictionary allows search parameters to be kept in the page, so that they are saved even when navigating to
     # next/ prev urls
     args_dict = {'search_term': request.args.get('search_term', ""),
                  # Parse string allergies into an integer list, because you can't pass entire lists as parameters.
-                 # request.args.get therefore is taking in a string (i.e. not [1, 4], but "14"
-                 # type=list will turn "14" into a list, but they will still be strings. Use map(int, list) to convert
-                 # into integers
-                 'allergy_list': list(map(int, request.args.get('allergy_list', [], type=list))),
+                 # request.args.get therefore is taking in a string (i.e. not [1, 4, 10], but "1,4,10")
+                 # Split this string by ",", then map the values into integers and turn this into a list
+                 'allergy_list': list(map(int, request.args.get('allergy_list').split(","))),
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
                  'max_cal': request.args.get('max_cal', 1000, type=int),
@@ -114,7 +112,6 @@ def recipes():
     # Date: 2018
     # Availability: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ix-pagination
     # Accessed: 25 March 2020
-
     query = search_function(**args_dict)
     page = request.args.get('page', 1, type=int)  # Get current page of results
     recipes = query.paginate(page, config.RECIPES_PER_PAGE, False)
@@ -122,10 +119,8 @@ def recipes():
     next_url = url_for('main.recipes', **args_dict, page=recipes.next_num) if recipes.has_next else None
     prev_url = url_for('main.recipes', **args_dict, page=recipes.prev_num) if recipes.has_prev else None
 
-    return render_template("main/search_results.html",
-                           results=recipes.items,
-                           **args_dict,
-                           next_url=next_url, prev_url=prev_url)
+    return render_template("main/search_results.html", results=recipes.items, **args_dict, next_url=next_url,
+                           prev_url=prev_url)
 
 
 @bp_main.route('/view_all_recipes', methods=['GET'])
@@ -154,8 +149,6 @@ def search():
 
         if current_user.is_authenticated:
 
-            user = Users.query.filter_by(id=current_user.id).first()
-
             # ## NOT USING INHERITANCE
             # diet_type, diet_name = db.session.query(UserDietPreferences) \
             #     .join(DietTypes) \
@@ -169,16 +162,17 @@ def search():
             # allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
 
             ## USING INHERITANCE
-            diet_type = user.diet_preferences[0].diet_type_id
-            diet_name = user.diet_preferences[0].diet_type.diet_name
-            allergy_list = [allergy.allergy_id for allergy in user.allergies]
+            diet_type = current_user.diet_preferences[0].diet_type_id
+            diet_name = current_user.diet_preferences[0].diet_type.diet_name
+
+            allergy_list = [allergy.allergy_id for allergy in current_user.allergies]
             # Return list of allergies strings corresponding to allergy id, through config
             allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
 
             flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
             flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
                             f"Diet type: {diet_name}\n" \
-                            f"Allergies: {flash_allergies}"
+                            f"Allergies: {flash_allergies.lower()}"
 
             # To show flash messages on new line, implement:
             # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
@@ -187,7 +181,7 @@ def search():
             # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
             # request.args.get in recipes route can
             allergy_id_str = map(str, allergy_list)
-            allergies = ''.join(allergy_id_str)
+            allergies = ','.join(allergy_id_str)
 
             return redirect(
                 url_for('main.recipes', search_term=search_term, diet_type=diet_type, allergy_list=allergies))
@@ -212,14 +206,12 @@ def advanced_search():
         range = form.hidden.data.split(',')
 
         args_dict = {'search_term': form.search_term.data,
-                     'allergy_list': ''.join(form.allergies.data),
+                     'allergy_list': ','.join(form.allergies.data),
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
-                     'max_cal': int(range[1])
-                     }
+                     'max_cal': int(range[1])}
 
         return redirect(url_for('main.recipes', **args_dict))
-
     return render_template('main/advanced_search.html', form=form)
 
 
@@ -233,12 +225,9 @@ def add_to_favourites(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to favourites of user with associated user_id
     :return: 'success' or 'failure' message, stays on same page
     """
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
-
     try:
         fav_recipe = UserFavouriteRecipes(recipe_id=recipe_id)
-        user.favourite_recipes.append(fav_recipe)
+        current_user.favourite_recipes.append(fav_recipe)
 
         db.session.commit()
 
@@ -247,8 +236,6 @@ def add_to_favourites(recipe_id):
 
     except IntegrityError:
         db.session.rollback()
-        # recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
-        # # flash(f"{recipe_name} is already in your favourites!", "warning")
 
         print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'failure', 200
@@ -263,18 +250,11 @@ def remove_from_favourites(recipe_id):
     :param recipe_id: removes recipe associated with recipe_id from favourites of user with associated user_id
     :return: 'success' or 'failure' message, stays on same page
     """
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
-
     try:
         del_recipe = db.session.query(UserFavouriteRecipes) \
             .filter(UserFavouriteRecipes.recipe_id == recipe_id) \
-            .filter(UserFavouriteRecipes.user_id == user.id) \
+            .filter(UserFavouriteRecipes.user_id == current_user.id) \
             .one()
-
-        # # Convert this 'delete' command to Object?
-        # del_recipe = UserFavouriteRecipes(user_id=user.id, recipe_id=recipe_id)
-        # user.favourite_recipes.remove(del_recipe)
 
         db.session.delete(del_recipe)
         db.session.commit()
@@ -295,11 +275,8 @@ def favourites():
 
     :return: favourites html page with corresponding favourite recipes.
     """
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
-
     # Query user favourite recipes. Command is in traditional query form so that we can paginate it (we cannot paginate
-    # an InstrumentedList object, which is what user.favourite_recipes returns.
+    # an InstrumentedList object, which is what current_user.favourite_recipes returns.
     query = db.session.query(Recipes) \
         .join(UserFavouriteRecipes, Recipes.recipe_id == UserFavouriteRecipes.recipe_id) \
         .filter(UserFavouriteRecipes.user_id == current_user.id)
@@ -310,7 +287,7 @@ def favourites():
     next_url = url_for('main.favourites', page=recipes.next_num) if recipes.has_next else None
     prev_url = url_for('main.favourites', page=recipes.prev_num) if recipes.has_prev else None
 
-    return render_template('main/favourites.html', user=user, results=recipes.items, next_url=next_url,
+    return render_template('main/favourites.html', user=current_user, results=recipes.items, next_url=next_url,
                            prev_url=prev_url)
 
 
@@ -322,21 +299,15 @@ def mealplanner():
 
     :return: mealplanner html page
     """
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
+    # # Cannot order mealplans using this method
+    # mealplans = current_user.mealplans
 
-    mealplans = user.mealplans
-    print(mealplans)
+    mealplans = db.session.query(MealPlans) \
+        .filter(MealPlans.user_id == current_user.id) \
+        .order_by(MealPlans.mealplan_id.desc())  # Show mealplans by most recent using order_by
 
-    mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == current_user.id) \
-        .order_by(MealPlans.mealplan_id.desc()).all()  # Show mealplans by most recent
-    print(mealplans)
-
-    # Set a variable for the most recent meal plan
-    most_recent = db.session.query(MealPlans) \
-                    .filter(MealPlans.user_id == current_user.id) \
-                    .order_by(MealPlans.mealplan_id.desc()) \
-                    .first()
+    all_mealplans = mealplans.all()
+    most_recent = mealplans.first()
 
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
@@ -345,15 +316,14 @@ def mealplanner():
             created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
 
             add_mealplan = MealPlans(created_at=created_at)
-            user.mealplans.append(add_mealplan)
+            current_user.mealplans.append(add_mealplan)
 
-            # db.session.add(MealPlans(user_id=current_user.id, created_at=created_at))
             db.session.commit()
 
             new = db.session.query(MealPlans) \
-                    .filter(MealPlans.user_id == current_user.id) \
-                    .order_by(MealPlans.mealplan_id.desc()) \
-                    .first()
+                .filter(MealPlans.user_id == current_user.id) \
+                .order_by(MealPlans.mealplan_id.desc()) \
+                .first()
 
             print(f"Adding new mealplan for user {current_user.id}")
             flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
@@ -368,7 +338,7 @@ def mealplanner():
 
             return redirect(url_for('main.mealplanner'))
 
-    return render_template('main/mealplanner.html', mealplans=mealplans, most_recent=most_recent)
+    return render_template('main/mealplanner.html', mealplans=all_mealplans, most_recent=most_recent)
 
 
 @bp_main.route('/add_to_mealplan/<recipe_id>', methods=['GET', 'POST'])
@@ -380,7 +350,7 @@ def add_to_mealplan(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to mealplan
     :return: stays on same page
     """
-    # Get the most recent mealplan by taking max(mealplan_id). We will add recipe to this mealplan.
+    # Get the most recent mealplan by taking max(mealplan_id). Will add recipe to this mealplan.
     mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
         .filter(MealPlans.user_id == current_user.id).first()
 
@@ -405,7 +375,6 @@ def add_to_mealplan(recipe_id):
 @login_required
 def delete_mealplan(mealplan_id):
     try:
-
         del_mealplan = db.session.query(MealPlans) \
             .filter(MealPlans.mealplan_id == mealplan_id) \
             .filter(MealPlans.user_id == current_user.id) \
@@ -434,13 +403,11 @@ def mealplans_history():
 
     :return: mealplans history html page
     """
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
-
-    mealplans = user.mealplans
+    # # cannot apply order_by through this method
+    # mealplans = current_user.mealplans
 
     mealplans = db.session.query(MealPlans) \
-        .filter(MealPlans.user_id == user.id) \
+        .filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()) \
         .all()  # Use order by to show mealplans by most recent
 
@@ -451,20 +418,13 @@ def mealplans_history():
 @login_required
 @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def view_mealplan(mealplan_id):
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
-
-    mealplan = db.session.query(MealPlans)\
+    mealplan = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .filter(MealPlans.mealplan_id == mealplan_id) \
         .first()
 
-    # # This does not have 'length' in html view.
-    # mealplan_recipes = [i.recipe for i in mealplan.mealplan_recipes]
-    # print(mealplan_recipes)
-
     mealplan_recipes = db.session.query(MealPlanRecipes.recipe_id) \
-        .filter(MealPlanRecipes.mealplan_id == mealplan_id)\
+        .filter(MealPlanRecipes.mealplan_id == mealplan_id) \
         .distinct().subquery()  # Get recipes ids from specified mealplan as subquery
 
     recipes = db.session.query(Recipes) \
@@ -473,7 +433,6 @@ def view_mealplan(mealplan_id):
 
     print(recipes)
 
-
     return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=user)
 
 
@@ -481,10 +440,6 @@ def view_mealplan(mealplan_id):
 @login_required
 @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def grocery_list(mealplan_id):
-
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
-
     mealplan = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .filter(MealPlans.mealplan_id == mealplan_id) \
@@ -499,7 +454,7 @@ def grocery_list(mealplan_id):
 
     print(grocery_list)
 
-    return render_template('main/grocery_list.html', grocery_list=grocery_list, mealplan=mealplan, user=user)
+    return render_template('main/grocery_list.html', grocery_list=grocery_list, mealplan=mealplan, user=current_user)
 
 
 @bp_main.route('/about', methods=['POST', 'GET'])

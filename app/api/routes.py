@@ -11,8 +11,7 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Justin Wong"]
 __status__ = "Development"
 
-from app import db
-from app.models import Recipes, Users
+from app.models import Recipes
 
 from flask import Blueprint, jsonify, request, make_response
 from flask_httpauth import HTTPBasicAuth
@@ -41,6 +40,11 @@ def not_found():
 
 @bp_api.route('/recipes', methods=['GET'])
 def read_recipes():
+    """
+    API call for ALL recipes in Mealtime database
+
+    :return: a JSON object
+    """
     recipes = Recipes.query.all()
     json = jsonify(recipes=[r.serialize for r in recipes])
     return make_response(json, 200)
@@ -48,6 +52,11 @@ def read_recipes():
 
 @bp_api.route('/recipes/<int:recipe_id>', methods=['GET'])
 def read_recipe(recipe_id):
+    """
+    API call for a given recipe in Mealtime database, given by recipe id
+
+    :return: a JSON object
+    """
     recipe = Recipes.query.filter_by(recipe_id=recipe_id).first_or_404()
     json = jsonify(recipe=recipe.serialize)
     return make_response(json, 200)

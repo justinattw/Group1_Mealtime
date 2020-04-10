@@ -35,70 +35,64 @@ test_user_email = test_user_last_name + '@email.com'
 test_user_password = 'cat1234'
 
 
-# INDEX_URL = "localhost:5000"
+def test_homepage_link_texts(test_client, browser, live_server):
 
-# def test_homepage_link_texts(db, test_client, browser, live_server):
-#
-#     INDEX_URL = url_for('main.index', _external=True)
-#
-#     browser.get(INDEX_URL)
-#     signup_link = browser.find_element_by_id('signup-link')
-#     assert signup_link.text == 'Sign up'
-#     about_link = browser.find_element_by_id(('about-link'))
-#     assert about_link.text == 'About'
-#     login_link = browser.find_element_by_id('login-link')
-#     assert login_link.text == 'Log in'
-#
-#
-# def test_simple_search(test_client, browser, live_server):  # checks that the value searched is in the url
-#
-#     INDEX_URL = url_for('main.index', _external=True)
-#
-#     browser.get(INDEX_URL)
-#     search_text = browser.find_element_by_css_selector('input')
-#     assert search_text.get_attribute('aria-label') == "Search"
-#     search_button = browser.find_element_by_css_selector('.btn.btn-primary.btn-outline-light')
-#     assert search_button.text == 'Search'
-#     search_text.send_keys('cabbage')
-#     search_button.click()
-#
-#
-# def test_user_signup(test_client, browser, live_server):
-#
-#     # signup_url = INDEX_URL + '/signup/'
-#
-#     INDEX_URL = url_for('main.index', _external=True)
-#     signup_url = url_for('auth.signup', _external=True)
-#     print(signup_url)
-#
-#
-#     browser.get(signup_url)
-#     form_first_name = browser.find_element_by_id('signup_first_name')
-#     form_last_name = browser.find_element_by_id('signup_last_name')
-#     form_email = browser.find_element_by_id('signup_email')
-#     form_password = browser.find_element_by_id('signup_password')
-#     form_confirm = browser.find_element_by_id('signup_confirm')
-#     form_submit = browser.find_element_by_id("submit_button")
-#
-#     form_first_name.send_keys(test_user_first_name)
-#     form_last_name.send_keys(test_user_last_name)
-#     form_email.send_keys(test_user_email)
-#     form_password.send_keys(test_user_password)
-#     form_confirm.send_keys(test_user_password)
-#     form_submit.click()
-#
-#     assert browser.find_element_by_css_selector(
-#         '.alert.alert-success.list-unstyled').text == '×\nYou are now a registered user!'
-#     browser.get(INDEX_URL)
-#     links = browser.find_elements_by_css_selector('a')
-#     loggedin = False
-#     for link in links:
-#         if link.text == 'Account':
-#             loggedin = True
-#         else:
-#             pass
-#     assert loggedin == True
+    index_url = url_for('main.index', _external=True)
 
+    browser.get(index_url)
+    signup_link = browser.find_element_by_id('signup-link')
+    assert signup_link.text == 'Sign up'
+    about_link = browser.find_element_by_id(('about-link'))
+    assert about_link.text == 'About'
+    login_link = browser.find_element_by_id('login-link')
+    assert login_link.text == 'Log in'
+
+
+def test_simple_search(test_client, browser, live_server):  # checks that the value searched is in the url
+
+    index_url = url_for('main.index', _external=True)
+
+    browser.get(index_url)
+    search_text = browser.find_element_by_css_selector('input')
+    assert search_text.get_attribute('aria-label') == "Search"
+    search_button = browser.find_element_by_css_selector('.btn.btn-primary.btn-outline-light')
+    assert search_button.text == 'Search'
+    search_text.send_keys('cabbage')
+    search_button.click()
+
+
+def test_user_signup(test_client, browser, live_server):
+
+    index_url = url_for('main.index', _external=True)
+    signup_url = url_for('auth.signup', _external=True)
+
+    browser.get(signup_url)
+    form_first_name = browser.find_element_by_id('signup_first_name')
+    form_last_name = browser.find_element_by_id('signup_last_name')
+    form_email = browser.find_element_by_id('signup_email')
+    form_password = browser.find_element_by_id('signup_password')
+    form_confirm = browser.find_element_by_id('signup_confirm')
+    form_submit = browser.find_element_by_id("submit_button")
+
+    form_first_name.send_keys(test_user_first_name)
+    form_last_name.send_keys(test_user_last_name)
+    form_email.send_keys(test_user_email)
+    form_password.send_keys(test_user_password)
+    form_confirm.send_keys(test_user_password)
+    form_submit.click()
+
+    assert browser.find_element_by_css_selector(
+        '.alert.alert-success.list-unstyled').text == '×\nYou are now a registered user!'
+
+    browser.get(index_url)
+    links = browser.find_elements_by_css_selector('a')
+    loggedin = False
+    for link in links:
+        if link.text == 'Account':  # Find if 'Account' is in navbar links to assure user is logged in.
+            loggedin = True
+        else:
+            pass
+    assert loggedin == True
 
 # def test_user_signup_fails_if_email_already_registered(db, test_client, browser, live_server):
 #     # URL = MEALTIME_URL

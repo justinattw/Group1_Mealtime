@@ -11,13 +11,12 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from app import db, login_manager #, mail
+from app import db, login_manager
 from app.auth.forms import SignupForm, LoginForm, EditPasswordForm, EditPreferencesForm
 from app.models import Users, UserAllergies, UserDietPreferences
 
 from flask import render_template, Blueprint, request, flash, redirect, url_for, make_response, abort
 from flask_login import login_required, login_user, logout_user, current_user
-# from flask_mail import Message
 from sqlalchemy.exc import IntegrityError
 from urllib.parse import urlparse, urljoin
 

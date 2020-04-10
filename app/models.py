@@ -30,12 +30,12 @@ class Users(db.Model, UserMixin):
     def __repr__(self):
         return f'<User id {self.id}, email {self.email}>'
 
-    @property
-    def serialize(self):
-        return {'user_id': self.id,
-                'first_name': self.first_name,
-                'last_name': self.last_name,
-                'email': self.email}
+    # @property
+    # def serialize(self):
+    #     return {'user_id': self.id,
+    #             'first_name': self.first_name,
+    #             'last_name': self.last_name,
+    #             'email': self.email}
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -117,8 +117,7 @@ class RecipeAllergies(db.Model):
 
     @property
     def serialize(self):
-        return {'allergy_id': self.allergy_id,
-                'allergy_name': self.allergy.serialize}
+        return {'allergy_id': self.allergy_id, 'allergy_name': self.allergy.serialize}
 
 
 class RecipeDietTypes(db.Model):
