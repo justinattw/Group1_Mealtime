@@ -99,7 +99,10 @@ def recipes():
                  # Parse string allergies into an integer list, because you can't pass entire lists as parameters.
                  # request.args.get therefore is taking in a string (i.e. not [1, 4, 10], but "1,4,10")
                  # Split this string by ",", then map the values into integers and turn this into a list
-                 'allergy_list': list(map(int, request.args.get('allergy_list').split(","))),
+                 'allergy_list': [] if (
+                         (request.args.get('allergy_list') is None) or
+                         (request.args.get('allergy_list') == ''))
+                 else list(map(int, request.args.get('allergy_list').split(","))),
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
                  'max_cal': request.args.get('max_cal', 1000, type=int),
