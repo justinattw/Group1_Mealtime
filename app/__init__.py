@@ -18,7 +18,6 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 # from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 
 db = SQLAlchemy()

@@ -9,11 +9,14 @@ coverage==5.0.4
 decorator==4.4.2
 dnspython==1.16.0
 dominate==2.5.1
+easydict==1.9
 Flask==1.1.1
 Flask-Bootstrap==3.3.7.1
 Flask-HTTPAuth==3.3.0
 Flask-Login==0.5.0
 Flask-Mail==0.9.1
+flask-marshmallow==0.11.0
+flask-serialize==1.1.9
 Flask-Session==0.3.1
 Flask-SQLAlchemy==2.4.1
 Flask-Testing==0.8.0
@@ -26,6 +29,8 @@ intervals==0.8.1
 itsdangerous==1.1.0
 Jinja2==2.11.1
 MarkupSafe==1.1.1
+marshmallow==3.5.1
+marshmallow-sqlalchemy==0.22.3
 more-itertools==8.2.0
 mysql-connector-python==8.0.19
 numpy==1.18.2

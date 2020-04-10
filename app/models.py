@@ -12,13 +12,10 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-import app
 from app import db
 
 from flask_login import UserMixin
-from flask_marshmallow import Marshmallow
 from flask_serialize import FlaskSerializeMixin
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -77,7 +74,7 @@ class UserFavouriteRecipes(db.Model):
     __table__ = db.Model.metadata.tables['UserFavouriteRecipes']
 
 
-class Recipes(db.Model, FlaskSerializeMixin):
+class Recipes(db.Model):
     __table__ = db.Model.metadata.tables['Recipes']
     ingredients = relationship("RecipeIngredients", backref=backref("recipes", lazy="joined"))
     instructions = relationship("RecipeInstructions", backref=backref("recipes", lazy="joined"))
