@@ -61,38 +61,38 @@ def test_simple_search(test_client, session, browser, live_server):
     search_button.click()
 
 
-def test_user_signup(test_client, session, browser, live_server):
-
-    index_url = url_for('main.index', _external=True)
-    signup_url = url_for('auth.signup', _external=True)
-
-    browser.get(signup_url)
-    form_first_name = browser.find_element_by_id('signup_first_name')
-    form_last_name = browser.find_element_by_id('signup_last_name')
-    form_email = browser.find_element_by_id('signup_email')
-    form_password = browser.find_element_by_id('signup_password')
-    form_confirm = browser.find_element_by_id('signup_confirm')
-    form_submit = browser.find_element_by_id("submit_button")
-
-    form_first_name.send_keys(test_user_first_name)
-    form_last_name.send_keys(test_user_last_name)
-    form_email.send_keys(test_user_email)
-    form_password.send_keys(test_user_password)
-    form_confirm.send_keys(test_user_password)
-    form_submit.click()
-
-    assert browser.find_element_by_css_selector(
-        '.alert.alert-success.list-unstyled').text == '×\nYou are now a registered user!'
-
-    browser.get(index_url)
-    links = browser.find_elements_by_css_selector('a')
-    loggedin = False
-    for link in links:
-        if link.text == 'Account':  # Find if 'Account' is in navbar links to assure user is logged in.
-            loggedin = True
-        else:
-            pass
-    assert loggedin == True
+# def test_user_signup(test_client, session, browser, live_server):
+#
+#     index_url = url_for('main.index', _external=True)
+#     signup_url = url_for('auth.signup', _external=True)
+#
+#     browser.get(signup_url)
+#     form_first_name = browser.find_element_by_id('signup_first_name')
+#     form_last_name = browser.find_element_by_id('signup_last_name')
+#     form_email = browser.find_element_by_id('signup_email')
+#     form_password = browser.find_element_by_id('signup_password')
+#     form_confirm = browser.find_element_by_id('signup_confirm')
+#     form_submit = browser.find_element_by_id("submit_button")
+#
+#     form_first_name.send_keys(test_user_first_name)
+#     form_last_name.send_keys(test_user_last_name)
+#     form_email.send_keys(test_user_email)
+#     form_password.send_keys(test_user_password)
+#     form_confirm.send_keys(test_user_password)
+#     form_submit.click()
+#
+#     assert browser.find_element_by_css_selector(
+#         '.alert.alert-success.list-unstyled').text == '×\nYou are now a registered user!'
+#
+#     browser.get(index_url)
+#     links = browser.find_elements_by_css_selector('a')
+#     loggedin = False
+#     for link in links:
+#         if link.text == 'Account':  # Find if 'Account' is in navbar links to assure user is logged in.
+#             loggedin = True
+#         else:
+#             pass
+#     assert loggedin == True
 #
 #
 # def test_user_signup_fails_if_email_already_registered(test_client, session, user, browser, live_server):
