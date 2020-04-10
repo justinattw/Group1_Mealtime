@@ -12,12 +12,15 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
+import app
 from app import db
 
 from flask_login import UserMixin
+from flask_marshmallow import Marshmallow
+from flask_serialize import FlaskSerializeMixin
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
-
 
 
 class Users(db.Model, UserMixin):
@@ -47,6 +50,10 @@ class Users(db.Model, UserMixin):
 class DietTypes(db.Model):
     __table__ = db.Model.metadata.tables['DietTypes']
 
+    @property
+    def serialize(self):
+        return self.diet_name
+
 
 class UserDietPreferences(db.Model):
     __table__ = db.Model.metadata.tables['UserDietPreferences']
@@ -55,6 +62,10 @@ class UserDietPreferences(db.Model):
 
 class Allergies(db.Model):
     __table__ = db.Model.metadata.tables['Allergies']
+
+    @property
+    def serialize(self):
+        return self.allergy_name
 
 
 class UserAllergies(db.Model):
@@ -66,7 +77,7 @@ class UserFavouriteRecipes(db.Model):
     __table__ = db.Model.metadata.tables['UserFavouriteRecipes']
 
 
-class Recipes(db.Model):
+class Recipes(db.Model, FlaskSerializeMixin):
     __table__ = db.Model.metadata.tables['Recipes']
     ingredients = relationship("RecipeIngredients", backref=backref("recipes", lazy="joined"))
     instructions = relationship("RecipeInstructions", backref=backref("recipes", lazy="joined"))
@@ -77,15 +88,20 @@ class Recipes(db.Model):
     @property
     def serialize(self):
         return {'recipe_id': self.recipe_id,
-                'recipe_name': self.recipe_name}
+                'recipe_name': self.recipe_name,
+                'recipe_ingredients': [ing.serialize for ing in self.ingredients],
+                'recipe_instructions': [ins.serialize for ins in self.instructions],
+                'nutrition_values': self.nutrition_values.serialize,
+                'recipe_allergies': [all.serialize for all in self.allergies],
+                'diet_type': self.diet_type[0].serialize}
 
 
-class RecipeIngredients(db.Model):
+class RecipeIngredients(db.Model, FlaskSerializeMixin):
     __table__ = db.Model.metadata.tables['RecipeIngredients']
 
     @property
     def serialize(self):
-        return {'recipe_id': self.recipe_id,
+        return {'recipe_ingredient_id': self.recipe_ingredient_id,
                 'ingredient_name': self.ingredient}
 
 
@@ -94,8 +110,7 @@ class RecipeInstructions(db.Model):
 
     @property
     def serialize(self):
-        return {'recipe_id': self.recipe_id,
-                'step_num': self.step_num,
+        return {'step_num': self.step_num,
                 'step_description': self.step_description}
 
 
@@ -103,20 +118,19 @@ class RecipeAllergies(db.Model):
     __table__ = db.Model.metadata.tables['RecipeAllergies']
     allergy = relationship("Allergies", backref=backref("recipeallergies", lazy="joined"))
 
-
     @property
     def serialize(self):
-        return {'recipe_id': self.recipe_id,
-                'allergy_id': self.allergy_id}
+        return {'allergy_id': self.allergy_id,
+                'allergy_name': self.allergy.serialize}
 
 
 class RecipeDietTypes(db.Model):
     __table__ = db.Model.metadata.tables['RecipeDietTypes']
+    diet = relationship("DietTypes", backref=backref("recipediettypes", lazy="joined"))
 
     @property
     def serialize(self):
-        return {'recipe_id': self.recipe_id,
-                'diet_type_id': self.diet_type_id}
+        return self.diet.serialize
 
 
 class NutritionValues(db.Model):
@@ -143,4 +157,3 @@ class MealPlans(db.Model):
 class MealPlanRecipes(db.Model):
     __table__ = db.Model.metadata.tables['MealPlanRecipes']
     recipe = relationship("Recipes", backref=backref("mealplanrecipes", lazy="joined"))
-

@@ -23,12 +23,7 @@ import multiprocessing
 import numpy as np
 import os
 import pytest
-
 import random
-import time
-import urllib
-# import urllib2
-from urllib.error import URLError
 from urllib.request import urlopen
 
 

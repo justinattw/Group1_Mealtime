@@ -15,7 +15,6 @@ from app import db
 from app.models import Recipes, Users
 
 from flask import Blueprint, jsonify, request, make_response
-from flask_login import login_user
 from flask_httpauth import HTTPBasicAuth
 
 bp_api = Blueprint('api', __name__, url_prefix='/api')
@@ -35,16 +34,6 @@ def not_found():
     error = {
         'status': 404,
         'message': 'Not Found: ' + request.url,
-    }
-    response = jsonify(error)
-    return make_response(response, 404)
-
-
-@bp_api.errorhandler(401)
-def not_authorised():
-    error = {
-        'status': 401,
-        'message': 'You must provide username and password to access this resource',
     }
     response = jsonify(error)
     return make_response(response, 404)

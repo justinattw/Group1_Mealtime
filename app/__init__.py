@@ -18,6 +18,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 # from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 
 db = SQLAlchemy()
@@ -72,7 +73,7 @@ def create_app(config_class=DevConfig):
     from app.auth.routes import bp_auth
     app.register_blueprint(bp_auth)
 
-    # from app.api.routes import bp_api
-    # app.register_blueprint(bp_api)
+    from app.api.routes import bp_api
+    app.register_blueprint(bp_api)
 
     return app

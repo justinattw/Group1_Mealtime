@@ -62,9 +62,7 @@ class Config(object):
 
 class ProdConfig(Config):
     """
-    This configuration contains fictitious details for a MySQL server database.
-    We are currently using SQLite, but in the future if Mealtime wants to scale up and transition to MySQL (which
-    Mealtime is better suited for), the syntax/ configuration is here.
+    This configuration contains a fictitious production configuration setup. It is kept in to demonstrate syntax.
     """
 
     DB_SERVER = '192.168.19.32'
