@@ -75,7 +75,7 @@ You can start the mealtime application by running run.py
 
 If everything is working properly you should see
 
-`Runnin on http://0.0.0.0:5000/ (Press CTRL+C to quit`
+`Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)`
 
 This means the app is up and running and serving requests. You should be able to visit the URL to access the application.
 

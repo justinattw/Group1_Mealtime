@@ -80,7 +80,7 @@ class TestConfig(Config):
     # Create a duplicate of the current database
     from shutil import copy
     src = join(CWD, 'db/mealtime.db')  # current working db
-    dst = join(CWD, 'db/mealtime_testing.sqlite')  # destination for test db
+    dst = join(CWD, 'db/mealtime_testing.db')  # destination for test db
     copy(src, dst)  # copy (and overwrite) working db to test db
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + dst
