@@ -48,7 +48,7 @@ def test_homepage_link_texts(test_client, session, browser, live_server):
     assert login_link.text == 'Log in'
 
 
-def test_simple_search(test_client, session, browser, live_server):  # checks that the value searched is in the url
+def test_simple_search(test_client, session, browser, live_server):
 
     index_url = url_for('main.index', _external=True)
 
@@ -93,8 +93,8 @@ def test_user_signup(test_client, session, browser, live_server):
         else:
             pass
     assert loggedin == True
-
-
+#
+#
 # def test_user_signup_fails_if_email_already_registered(test_client, session, user, browser, live_server):
 #     # URL = MEALTIME_URL
 #     # signup_url = URL + '/signup/'
@@ -118,7 +118,7 @@ def test_user_signup(test_client, session, browser, live_server):
 #
 #     assert browser.current_url == signup_url
 #     assert browser.find_element_by_class_name('help-block').text == 'An account is already registered with this email.'
-
+#
 #
 # def test_user_can_add_and_view_favourite_recipes(test_client, db, user, browser, live_server):
 #     ###USER LOGS IN (ESSENTIALLY SAME AS ABOVE METHOD APART FROM LAST TWO LINES)
