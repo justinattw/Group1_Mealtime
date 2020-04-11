@@ -20,7 +20,7 @@
         <td>{{ mealplan.mealplan_id }}</td>
         <td>{{ mealplan.created_at }}</td>
         <td>
-            <a href="{{ url_for('main.view_mealplan', mealplan_id=mealplan.mealplan_id) }}">Edit&nbsp</a>
+            <a href="{{ url_for('main.view_mealplan', mealplan_id=mealplan.mealplan_id) }}">View&nbsp</a>
             <a href="{{ url_for('main.delete_mealplan', mealplan_id=mealplan.mealplan_id) }}">Delete</a>
         </td>
     </tr>

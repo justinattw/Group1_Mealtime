@@ -28,7 +28,7 @@
                 <tr>
                     <td>{{ most_recent.mealplan_id }}</td>
                     <td>{{ most_recent.created_at }}</td>
-                    <td><a href="{{ url_for('main.view_mealplan', mealplan_id=most_recent.mealplan_id) }}">Edit&nbsp</a>
+                    <td><a href="{{ url_for('main.view_mealplan', mealplan_id=most_recent.mealplan_id) }}">View&nbsp</a>
                         <a href="{{ url_for('main.delete_mealplan', mealplan_id=most_recent.mealplan_id) }}">Delete</a>
                     </td>
                 </tr>

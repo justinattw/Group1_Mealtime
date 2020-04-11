@@ -47,8 +47,9 @@
                                id="saveForm"/>
                     </form>
                     #}
-                    <button id="unfav{{result.recipe_id}}"
-                            onclick="ajax_unfav('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove Favourite
+
+                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick="ajax_delplan('{{result.recipe_id}}', '{{result.recipe_name}}')">
+                        Remove from Meal Plan
                     </button>
                     {% endif %}
 
@@ -68,16 +69,16 @@
 {% block footer %}
 <script>
 
-    function ajax_unfav(id, name) {
-        $.ajax({
-            url: "/remove_from_favourites/" + id, success: function (result) {
-                if (result == 'success') {
+    function ajax_delplan(id) {
+            $.ajax({
+                url: "/del_from_mealplan/" + id, success: function (result) {
+                    if (result == 'success') {
 
-                    location.reload();
+                        location.reload()
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
 </script>
 {% endblock %}

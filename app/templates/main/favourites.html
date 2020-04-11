@@ -44,7 +44,7 @@
                                id="saveForm"/>
                     </form>
                     #}
-                    <button id="unfav{{result.recipe_id}}" onclick="ajax_unfav('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove Favourite</button>
+                    <button id="unfav{{result.recipe_id}}" onclick="ajax_unfav('{{result.recipe_id}}')">Remove Favourite</button>
                     {% endif %}
 
                 </div>
@@ -72,7 +72,7 @@
 {% block footer %}
     <script>
 
-        function ajax_unfav(id, name) {
+        function ajax_unfav(id) {
             $.ajax({
                 url: "/remove_from_favourites/" + id, success: function (result) {
                     if (result == 'success') {

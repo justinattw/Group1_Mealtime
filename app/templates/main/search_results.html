@@ -40,6 +40,10 @@
                     {# Buttons to add to mealplan/ favourites #}
                     {% if current_user.is_authenticated %}
 
+                    <button id="addto_mealplan{{result.recipe_id}}" onclick="ajax_addplan('{{result.recipe_id}}', '{{result.recipe_name}}')">Add to Meal Plan</button>
+                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick="ajax_delplan('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove from Meal Plan</button>
+                    <br>
+                    <br>
                     <button id="fav{{result.recipe_id}}" onclick="ajax_fav('{{result.recipe_id}}', '{{result.recipe_name}}')">Add Favourite</button>
                     <button id="unfav{{result.recipe_id}}" onclick="ajax_unfav('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove Favourite</button>
 
@@ -105,5 +109,42 @@
             });
         }
 
+        function ajax_addplan(id, name) {
+            $.ajax({
+                url: "/add_to_mealplan/" + id, success: function (result) {
+                    if (result == 'success') {
+
+                        toastr.success('Added ' + name + ' to your meal plan!')
+                    }
+
+                    else if (result == 'failure') {
+                        toastr.error(name + ' is already in your meal plan!')
+                    }
+
+                    else {
+                        toastr.error('Cannot add recipe. Please create a meal plan first!')
+                    }
+                }
+            });
+        }
+
+        function ajax_delplan(id, name) {
+            $.ajax({
+                url: "/del_from_mealplan/" + id, success: function (result) {
+                    if (result == 'success') {
+
+                        toastr.warning('Removed ' + name + ' from your meal plan!')
+                    }
+
+                    else if (result == 'failure') {
+                        toastr.error(name + ' cannot be removed as it is not in your meal plan!')
+                    }
+
+                    else {
+                        toastr.error('Cannot remove recipe as no meal plan exists. Please create a meal plan first!')
+                    }
+                }
+            });
+        }
     </script>
 {% endblock %}

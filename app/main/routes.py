@@ -365,13 +365,52 @@ def add_to_mealplan(recipe_id):
             db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
             db.session.commit()
 
+            print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
+            return 'success', 200
+
         except IntegrityError:
             db.session.rollback()
             recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
-            flash(f"{recipe_name} is already in your meal plan!", "warning")
 
-    print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
-    return '', 204  # keeps user on the same page
+            print(f"Failed to add recipe {recipe_id} to meal plan {mealplan_id}")
+            return 'failure', 200
+
+
+@bp_main.route('/del_from_mealplan/<recipe_id>', methods=['GET', 'POST'])
+@login_required
+def del_from_mealplan(recipe_id):
+    """
+    Allows user to delete a recipe from the most recent mealplan
+
+    :param recipe_id: deletes recipe associated with recipe_id from mealplan
+    :return: stays on same page
+    """
+    # Get the most recent mealplan by taking max(mealplan_id). Will add recipe to this mealplan.
+    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
+        .filter(MealPlans.user_id == current_user.id).first()
+
+    if mealplan_id is None:
+        return 'mealplan does not exist'
+
+    else:
+        try:
+            del_recipe = db.session.query(MealPlanRecipes) \
+                .filter(MealPlanRecipes.recipe_id == recipe_id) \
+                .filter(MealPlanRecipes.mealplan_id == mealplan_id) \
+                .one()
+
+            db.session.delete(del_recipe)
+            db.session.commit()
+
+            print(f"Removing recipe {recipe_id} from meal plan {mealplan_id}")
+            return 'success', 200
+
+        except IntegrityError:
+            db.session.rollback()
+            recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
+
+            print(f"Failed to remove recipe {recipe_id} from meal plan {mealplan_id}")
+            return 'failure', 200
 
 
 @bp_main.route('/del_mealplan/<mealplan_id>', methods=['POST', 'GET'])
@@ -436,7 +475,7 @@ def view_mealplan(mealplan_id):
 
     print(recipes)
 
-    return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=user)
+    return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=current_user)
 
 
 @bp_main.route('/grocery_list/<mealplan_id>', methods=['POST', 'GET'])
