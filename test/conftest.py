@@ -159,6 +159,19 @@ def user_data():
     return user_data
 
 
+@pytest.fixture(scope='function')
+def browser_user_data():
+    """ Provides the details for a browser user registration"""
+    user_data = {
+        "first_name": "Bowser",
+        "last_name": "User",
+        "email": "bowser@nintendo.com",
+        "password": "killMario",
+        "confirm": "killMario"
+    }
+    return user_data
+
+
 # Test browser configuration. The following code is adapted from a tutorial
 # Title: Set Your Test Automation Goals with Web UI Testing
 # Author: AutomationPanda
@@ -195,7 +208,7 @@ class TestLiveServer:
         assert res.code == 200
 
 
-# Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
+# Client helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
@@ -264,3 +277,23 @@ def view_about(client):
 
 def view_mealplanner(client):
     return client.get('/mealplanner', follow_redirects=True)
+
+
+# Browser helper functions
+def browser_signup(browser, user_data):
+    signup_url = url_for('auth.signup', _external=True)
+
+    browser.get(signup_url)
+    form_first_name = browser.find_element_by_id('signup_first_name')
+    form_last_name = browser.find_element_by_id('signup_last_name')
+    form_email = browser.find_element_by_id('signup_email')
+    form_password = browser.find_element_by_id('signup_password')
+    form_confirm = browser.find_element_by_id('signup_confirm')
+    form_submit = browser.find_element_by_id("submit_button")
+
+    form_first_name.send_keys(user_data['first_name'])
+    form_last_name.send_keys(user_data['last_name'])
+    form_email.send_keys(user_data['email'])
+    form_password.send_keys(user_data['password'])
+    form_confirm.send_keys(user_data['confirm'])
+    form_submit.click()

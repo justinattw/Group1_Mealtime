@@ -312,15 +312,12 @@ def mealplanner():
     all_mealplans = mealplans.all()
     most_recent = mealplans.first()
 
-    recipes_in_recent = db.session.query(MealPlanRecipes)\
-                        .filter(MealPlanRecipes.mealplan_id == most_recent.mealplan_id) \
-                        .all()
-
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
-        if recipes_in_recent == []:
+        if not most_recent.mealplan_recipes:
             flash(
-                f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before creating a new meal plan",
+                f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
+                 creating a new meal plan",
                 "danger")
             return redirect(url_for('main.mealplanner'))
 
@@ -398,7 +395,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
     if mealplan_id == 'x':
         mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-                    .filter(MealPlans.user_id == current_user.id).first()[0]
+            .filter(MealPlans.user_id == current_user.id).first()[0]
 
     if mealplan_id is None:
         return 'no plan'
