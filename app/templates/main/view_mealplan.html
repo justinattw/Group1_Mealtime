@@ -48,7 +48,7 @@
                     </form>
                     #}
 
-                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick="ajax_delplan('{{result.recipe_id}}', '{{result.recipe_name}}')">
+                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick="ajax_delplan('{{ mealplan.mealplan_id }}', '{{result.recipe_id}}')">
                         Remove from Meal Plan
                     </button>
                     {% endif %}
@@ -69,9 +69,9 @@
 {% block footer %}
 <script>
 
-    function ajax_delplan(id) {
+    function ajax_delplan(mealplan_id, recipe_id) {
             $.ajax({
-                url: "/del_from_mealplan/" + id, success: function (result) {
+                url: "/del_from_mealplan/" + mealplan_id + '/' + recipe_id, success: function (result) {
                     if (result == 'success') {
 
                         location.reload()

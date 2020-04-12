@@ -122,8 +122,12 @@ def recipes():
     next_url = url_for('main.recipes', **args_dict, page=recipes.next_num) if recipes.has_next else None
     prev_url = url_for('main.recipes', **args_dict, page=recipes.prev_num) if recipes.has_prev else None
 
+    # Get the most recent mealplan. Will add recipe to this mealplan.
+    mealplan_active = db.session.query(MealPlans) \
+       .filter(MealPlans.user_id == current_user.id).first()
+
     return render_template("main/search_results.html", results=recipes.items, **args_dict, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, mealplan_active=mealplan_active)
 
 
 @bp_main.route('/view_all_recipes', methods=['GET'])
@@ -354,8 +358,8 @@ def add_to_mealplan(recipe_id):
     :return: stays on same page
     """
     # Get the most recent mealplan by taking max(mealplan_id). Will add recipe to this mealplan.
-    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
-        .filter(MealPlans.user_id == current_user.id).first()
+    mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
+        .filter(MealPlans.user_id == current_user.id).first()[0]
 
     if mealplan_id is None:
         return 'no plan'
@@ -375,20 +379,17 @@ def add_to_mealplan(recipe_id):
             return 'failure', 200
 
 
-@bp_main.route('/del_from_mealplan/<recipe_id>', methods=['GET', 'POST'])
+@bp_main.route('/del_from_mealplan/<mealplan_id>/<recipe_id>', methods=['GET', 'POST'])
 @login_required
-def del_from_mealplan(recipe_id):
+def del_from_mealplan(mealplan_id, recipe_id):
     """
-    Allows user to delete a recipe from the most recent mealplan
+    Allows user to delete a recipe from any mealplan
 
     :param recipe_id: deletes recipe associated with recipe_id from mealplan
     :return: stays on same page
     """
-    # Get the most recent mealplan by taking max(mealplan_id). Will add recipe to this mealplan.
-    mealplan_id, = db.session.query(func.max(MealPlans.mealplan_id)) \
-        .filter(MealPlans.user_id == current_user.id).first()
 
-    if mealplan_id is None:
+    if mealplan_id is 'x':
         return 'no plan'
 
     else:
