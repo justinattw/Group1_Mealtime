@@ -17,6 +17,7 @@ __status__ = "Development"
 from test.conftest import browser_signup, browser_login
 
 from flask import url_for
+import pytest
 import random
 
 
@@ -94,6 +95,11 @@ def test_user_signup(test_client, db, session, browser, live_server, browser_use
 
 
 def test_user_can_login_after_registered(test_client, db, session, browser, live_server, browser_user_data):
+    """
+    GIVEN a Flask application and live test server, and user is registered
+    WHEN user logs in with registered details
+    THEN log in succeeds
+    """
 
     index_url = url_for('main.index', _external=True)
     browser.get(index_url)
@@ -109,31 +115,32 @@ def test_user_can_login_after_registered(test_client, db, session, browser, live
                "first_name"] + '!'
 
 
-# def test_user_can_add_and_view_favourite_recipes(test_client, db, user, browser, live_server):
-def test_user_can_add_and_view_favourite_recipes(test_client, db, session, browser, live_server, browser_user_data):
-
+@pytest.mark.parametrize("search_term", [('cabbage'), ('mango')])
+def test_user_can_add_and_view_favourite_recipes(test_client, db, session, browser, live_server, browser_user_data,
+                                                 search_term):
+    """
+    GIVEN a Flask application and live test server, and user is logged in
+    WHEN user logs adds a recipe to favourites
+    THEN recipe is added to favourites
+    """
     index_url = url_for('main.index', _external=True)
-    browser_signup(browser, browser_user_data)
-    # browser_login(browser, browser_user_data)
+    # browser_signup(browser, browser_user_data)
+    browser_login(browser, browser_user_data)
 
-    # USER SEARCHES FOR CABBAGE
-    search_term = 'cabbage'
+    search_term = search_term  # User searches for parameterised searches
+
     search_text = browser.find_element_by_css_selector('input')
     assert search_text.get_attribute('aria-label') == "Search"
     search_button = browser.find_element_by_css_selector('.btn.btn-primary.btn-outline-light')
-    print(browser.current_url)
     assert search_button.text == 'Search'
     search_text.send_keys(search_term)
     search_button.click()
     assert search_term in browser.current_url
 
-    # USER ADDS CABBAGE TO FAVOURITES
-    browser.implicitly_wait(1000)
+    # User adds recipe to favourites
     favourites = browser.find_elements_by_xpath('//button[text()="Add Favourite"]')
-    print("Fav: ", favourites)
-    print("Length: ", len(favourites))
+
     selected = random.randint(0, len(favourites) - 1)
-    print(selected)
     selected_tag = favourites[selected].get_attribute("id")
     selected_id = selected_tag.replace('fav', '')
     element = browser.find_elements_by_xpath('//button[text()="Add Favourite"]')
@@ -141,7 +148,7 @@ def test_user_can_add_and_view_favourite_recipes(test_client, db, session, brows
 
     assert "Added" and "to favourites!" in browser.find_element_by_class_name("toast-message").text
 
-    # USER CHECKS CABBAGE IS IN FAVOURITES
+    # User checks the added recipe is in favourites
     element = browser.find_element_by_id('favourites-link')
     browser.execute_script("arguments[0].click();", element)
 
@@ -157,14 +164,19 @@ def test_user_can_add_and_view_favourite_recipes(test_client, db, session, brows
             added = True
     assert added == True
 
+    """
+    GIVEN a Flask application and live test server, and user is logged in and recipe is added to favourites
+    WHEN user logs unfavourites a recipe
+    THEN recipe is removed from favourites
+    """
+    # User removes added recipe from favourites
     unselected_tag = 'un' + selected_tag
     element = browser.find_element_by_id(unselected_tag)
     browser.execute_script("arguments[0].click();", element)
 
     element = browser.find_element_by_id('favourites-link')
     browser.execute_script("arguments[0].click();", element)
-
-    assert browser.current_url == favourites_url
+    assert browser.current_url == favourites_url  # Checks that browser has navigated to favourites
 
     body = browser.find_element_by_css_selector('body')
     favourite_recipe = body.find_elements_by_css_selector('a')

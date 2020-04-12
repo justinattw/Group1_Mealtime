@@ -226,7 +226,7 @@ def advanced_search():
                      'min_cal': int(range[0]),
                      'max_cal': int(range[1])}
 
-        diet_name = (config.DIET_CHOICES[int(form.diet_type.data)-1])[1]
+        diet_name = (config.DIET_CHOICES[int(form.diet_type.data) - 1])[1]
         allergy_list = list(map(int, form.allergies.data))
         allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
         flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
@@ -338,7 +338,7 @@ def mealplanner():
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
 
-        # If user has no recipes in most recent mealplan, they cannot make a new meal plan
+        # If user has already created a meal plan and no recipes in most recent mealplan, they cannot make a new meal plan
         if all_mealplans and not most_recent.mealplan_recipes:
             flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
                  creating a new meal plan", "danger")
