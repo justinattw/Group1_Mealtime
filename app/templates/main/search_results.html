@@ -87,12 +87,14 @@
             url: "/add_to_favourites/" + id, success: function (result) {
                 if (result == 'success') {
 
-                    //$("#fav" + id).text("Remove Favourite");
-                    //$("#unfav" + id).attr("onclick", "ajax_unfav(id, name)")
-
                     /* Use Toastr lib to display quick alerts
-                    Toastr is by Hans Fjällemark, John Papa & Tim Ferrell
-                    https://codeseven.github.io/toastr/ */
+
+                    Library: Toastr
+                    Authors: Hans Fjällemark, John Papa & Tim Ferrell
+                    Date: 2014
+                    Availability: https://codeseven.github.io/toastr/
+                    Accessed: 12 April 2020 */
+
                     toastr.success('Added ' + name + ' to favourites!')
                 } else {
                     toastr.error(name + ' is already in your favourites!')
