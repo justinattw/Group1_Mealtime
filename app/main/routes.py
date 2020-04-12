@@ -314,6 +314,8 @@ def mealplanner():
 
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
+
+        # If user has no recipes in most recent mealplan, they cannot make a new meal plan
         if not most_recent.mealplan_recipes:
             flash(
                 f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
