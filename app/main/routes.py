@@ -312,34 +312,45 @@ def mealplanner():
     all_mealplans = mealplans.all()
     most_recent = mealplans.first()
 
+    recipes_in_recent = db.session.query(MealPlanRecipes)\
+                        .filter(MealPlanRecipes.mealplan_id == most_recent.mealplan_id) \
+                        .all()
+
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
-        try:
-            d = datetime.now()
-            created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
-
-            add_mealplan = MealPlans(created_at=created_at)
-            current_user.mealplans.append(add_mealplan)
-
-            db.session.commit()
-
-            new = db.session.query(MealPlans) \
-                .filter(MealPlans.user_id == current_user.id) \
-                .order_by(MealPlans.mealplan_id.desc()) \
-                .first()
-
-            print(f"Adding new mealplan for user {current_user.id}")
-            flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
-
+        if recipes_in_recent == []:
+            flash(
+                f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before creating a new meal plan",
+                "danger")
             return redirect(url_for('main.mealplanner'))
 
-        except IntegrityError:
-            db.session.rollback()
+        else:
+            try:
+                d = datetime.now()
+                created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
 
-            print(f"Failed to add new mealplan for user {current_user.id}")
-            flash(f"Error, could not create new meal plan! Please try again", "danger")
+                add_mealplan = MealPlans(created_at=created_at)
+                current_user.mealplans.append(add_mealplan)
 
-            return redirect(url_for('main.mealplanner'))
+                db.session.commit()
+
+                new = db.session.query(MealPlans) \
+                    .filter(MealPlans.user_id == current_user.id) \
+                    .order_by(MealPlans.mealplan_id.desc()) \
+                    .first()
+
+                print(f"Adding new mealplan for user {current_user.id}")
+                flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
+
+                return redirect(url_for('main.mealplanner'))
+
+            except IntegrityError:
+                db.session.rollback()
+
+                print(f"Failed to add new mealplan for user {current_user.id}")
+                flash(f"Error, could not create new meal plan! Please try again", "danger")
+
+                return redirect(url_for('main.mealplanner'))
 
     return render_template('main/mealplanner.html', mealplans=all_mealplans, most_recent=most_recent)
 
