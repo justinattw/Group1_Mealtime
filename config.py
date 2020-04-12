@@ -52,12 +52,12 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'db/mealtime.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # # EMAIL SETTINGS
-    # MAIL_SERVER = 'smtp.gmail.com'
-    # MAIL_PORT = 465
-    # MAIL_USE_SSL = True
-    # MAIL_USERNAME = 'secret_email'
-    # MAIL_PASSWORD = 'secret_password'
+    # EMAIL SETTINGS
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = 'comp0034mealtime@gmail.com'
+    MAIL_PASSWORD = 'BASCsFinest'
 
 
 class ProdConfig(Config):

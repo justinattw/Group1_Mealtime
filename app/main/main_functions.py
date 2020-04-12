@@ -10,12 +10,15 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from app import db
-from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans
+from app import db, mail
+from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, RecipeIngredients, \
+    MealPlanRecipes
+import config
 
-from flask import flash, render_template, request, redirect, url_for
+from flask import flash, redirect, url_for, render_template
 from flask_login import current_user
-from functools import wraps, update_wrapper
+from flask_mail import Message
+from functools import wraps
 from sqlalchemy import and_
 from sqlalchemy.sql import func
 
@@ -64,6 +67,28 @@ def get_most_recent_mealplan_id():
         .filter(MealPlans.user_id == current_user.id).first()
 
     return mealplan_id
+
+
+def send_email(subject, sender, recipients, html_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    # msg.body = text_body
+    msg.html = html_body
+    mail.send(msg)
+
+
+def send_grocery_list_email(mealplan_id):
+    grocery_list = db.session.query(RecipeIngredients) \
+        .join(MealPlanRecipes, RecipeIngredients.recipe_id == MealPlanRecipes.recipe_id) \
+        .join(MealPlans, MealPlanRecipes.mealplan_id == MealPlans.mealplan_id) \
+        .filter(MealPlans.mealplan_id == mealplan_id) \
+        .filter(MealPlans.user_id == current_user.id) \
+        .all()
+
+    send_email(f'[Mealtime] Your grocery shopping list for Mealplan {mealplan_id}',
+               sender=config.config.MAIL_USERNAME,
+               recipients=[current_user.email],
+               html_body=render_template('email/send_grocery_list_email.html',
+                                         user=current_user, mealplan_id=mealplan_id, grocery_list=grocery_list))
 
 
 def check_user_owns_mealplan(func):

@@ -13,18 +13,18 @@ __status__ = "Development"
 
 from app import db
 from app.main.forms import AdvSearchRecipes
-from app.models import Users, Recipes, RecipeIngredients, RecipeInstructions, NutritionValues, RecipeAllergies, \
-    Allergies, UserDietPreferences, UserAllergies, UserFavouriteRecipes, MealPlanRecipes, MealPlans, DietTypes
-from app.main.main_functions import search_function, check_user_owns_mealplan
+from app.models import Recipes, RecipeIngredients, UserFavouriteRecipes, MealPlanRecipes, MealPlans
+from app.main.main_functions import search_function, check_user_owns_mealplan, send_grocery_list_email
 import config
 
-from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response, jsonify
+from datetime import datetime
+from flask import render_template, Blueprint, request, flash, redirect, url_for, session, make_response
 from flask_login import current_user, login_required
 from flask_wtf.csrf import CSRFError
-from datetime import datetime
+from markupsafe import escape
+import random
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.sql import func
-from markupsafe import escape
 
 bp_main = Blueprint('main', __name__)
 
@@ -338,11 +338,12 @@ def mealplanner():
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
 
-        # If user has already created a meal plan and no recipes in most recent mealplan, they cannot make a new meal plan
-        if all_mealplans and not most_recent.mealplan_recipes:
+        # If user has created a meal plan but no recipes in most recent mealplan, they cannot make a new meal plan
+        if most_recent and not most_recent.mealplan_recipes:
             flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
                  creating a new meal plan", "danger")
             return redirect(url_for('main.mealplanner'))
+
 
         else:
             try:
@@ -483,7 +484,7 @@ def mealplans_history():
 
     :return: mealplans history html page
     """
-    # cannot apply order_by through current_user.mealplans, so
+    # cannot apply order_by through current_user.mealplans, so use traditional query
     mealplans = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()) \
@@ -496,6 +497,12 @@ def mealplans_history():
 @login_required
 @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def view_mealplan(mealplan_id):
+    """
+    View for user to see their specified meal plan, and the recipes they have added to the meal plan
+
+    :param mealplan_id: which meal plan is requested by the user
+    :return: view of requested meal plan (view_mealplan.html) and its recipes within
+    """
     mealplan = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .filter(MealPlans.mealplan_id == mealplan_id) \
@@ -509,8 +516,6 @@ def view_mealplan(mealplan_id):
         .join(mealplan_recipes, Recipes.recipe_id == mealplan_recipes.c.recipe_id) \
         .all()  # Join on recipe ids from subquery (recipes present in meal plan)
 
-    print(recipes)
-
     return render_template('main/view_mealplan.html', results=recipes, mealplan=mealplan, user=current_user)
 
 
@@ -518,6 +523,12 @@ def view_mealplan(mealplan_id):
 @login_required
 @check_user_owns_mealplan  # verify mealplan belongs to authenticated user
 def grocery_list(mealplan_id):
+    """
+    Generates a shopping list of all ingredients of the recipts in the requested meal plan id
+
+    :param mealplan_id: meal plan for which to get shopping list for
+    :return: template for grocery list
+    """
     mealplan = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .filter(MealPlans.mealplan_id == mealplan_id) \
@@ -533,14 +544,34 @@ def grocery_list(mealplan_id):
     return render_template('main/grocery_list.html', grocery_list=grocery_list, mealplan=mealplan, user=current_user)
 
 
+@bp_main.route('/send_grocery_list/<mealplan_id>')
+@login_required
+@check_user_owns_mealplan  # verify mealplan belongs to authenticated user
+def email_grocery_list(mealplan_id):
+    """
+    Sends grocery list to user's registered email.
+
+    :param mealplan_id:
+    :return:
+    """
+    try:
+        send_grocery_list_email(mealplan_id)
+        flash(f"Email has been sent!", "success")
+    except:
+        flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
+
+    return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page
+    # return 'done'
+
+
 @bp_main.route('/about', methods=['POST', 'GET'])
 def about():
     """
     A page describing the Mealtime project, its aims, licenses, and contributors.
 
-    :return: the 'About' html page
+    :return: the 'About' html page, with a random recipe to demonstrate API call for specific recipe
     """
-    return render_template('main/about.html')
+    return render_template('main/about.html', random_recipe=str(random.randint(0, 1000)))
 
 
 @bp_main.route('/delete_cookie')

@@ -1,0 +1,15 @@
+<p>Dear {{ user.username }},</p>
+<p>
+    As you have requested the grocery shopping list for mealplan {{ mealplan_id }}, you can view the shopping list
+    below:
+
+    {% if grocery_list|length %}
+    {% for item in grocery_list %}
+<li>{{ item }}</li>
+{% endfor %}
+{% endif %}
+</p>
+
+<p>If you think you have received this email by mistake, please contact us at comp0034mealtime@gmail.com</p>
+<p>Thank you for supporting us,</p>
+<p>Mealtime</p>
