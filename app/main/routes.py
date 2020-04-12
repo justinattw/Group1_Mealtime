@@ -317,10 +317,8 @@ def mealplanner():
 
         # If user has no recipes in most recent mealplan, they cannot make a new meal plan
         if not most_recent.mealplan_recipes:
-            flash(
-                f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
-                 creating a new meal plan",
-                "danger")
+            flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
+                 creating a new meal plan", "danger")
             return redirect(url_for('main.mealplanner'))
 
         else:
@@ -387,6 +385,7 @@ def add_to_mealplan(recipe_id):
 
 @bp_main.route('/del_from_mealplan/<mealplan_id>/<recipe_id>', methods=['GET', 'POST'])
 @login_required
+@check_user_owns_mealplan
 def del_from_mealplan(mealplan_id, recipe_id):
     """
     Allows user to delete a recipe from any mealplan
@@ -424,6 +423,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
 @bp_main.route('/del_mealplan/<mealplan_id>', methods=['POST', 'GET'])
 @login_required
+@check_user_owns_mealplan
 def delete_mealplan(mealplan_id):
     try:
         del_mealplan = db.session.query(MealPlans) \
@@ -460,9 +460,7 @@ def mealplans_history():
 
     :return: mealplans history html page
     """
-    # # cannot apply order_by through this method
-    # mealplans = current_user.mealplans
-
+    # cannot apply order_by through current_user.mealplans, so
     mealplans = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()) \
