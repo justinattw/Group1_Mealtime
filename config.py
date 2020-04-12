@@ -53,11 +53,11 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # EMAIL SETTINGS
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 465
-    MAIL_USE_SSL = True
-    MAIL_USERNAME = 'comp0034mealtime@gmail.com'
-    MAIL_PASSWORD = 'BASCsFinest'
+    # MAIL_SERVER = 'smtp.gmail.com'
+    # MAIL_PORT = 587
+    # MAIL_USE_TSL = True
+    # MAIL_USERNAME = 'comp0034mealtime@gmail.com'
+    # MAIL_PASSWORD = 'BASCsFinest'
 
 
 class ProdConfig(Config):

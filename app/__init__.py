@@ -46,16 +46,26 @@ def create_app(config_class=DevConfig):
     db.init_app(app)
     login_manager.init_app(app)
 
-    mail.init_app(app)
+    # app.config['MAIL_SERVER']='smtp.gmail.com'
+    # app.config['MAIL_PORT']=587
+    # app.config['MAIL_USE_SSL']=True
+    # app.config['MAIL_PORT'] = 587
+    # app.config['MAIL_USE_SSL'] = True
+    # app.config['MAIL_USERNAME']='comp0034mealtime@gmail.com'
+    # app.config['MAIL_PASSWORD'] = 'BASCsFinest'
 
     app.config.update(
         # EMAIL SETTINGS
         MAIL_SERVER='smtp.gmail.com',
         MAIL_PORT=465,
         MAIL_USE_SSL=True,
+        # MAIL_PORT=587,
+        # MAIL_USE_TSL=True
         MAIL_USERNAME='comp0034mealtime@gmail.com',
         MAIL_PASSWORD='BASCsFinest'
     )
+
+    mail.init_app(app)
 
     with app.app_context():
         db.Model.metadata.reflect(db.engine)

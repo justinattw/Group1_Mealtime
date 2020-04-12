@@ -13,7 +13,7 @@ __status__ = "Development"
 from app import db, mail
 from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, RecipeIngredients, \
     MealPlanRecipes
-import config
+import app
 
 from flask import flash, redirect, url_for, render_template
 from flask_login import current_user
@@ -85,7 +85,7 @@ def send_grocery_list_email(mealplan_id):
         .all()
 
     send_email(f'[Mealtime] Your grocery shopping list for Mealplan {mealplan_id}',
-               sender=config.config.MAIL_USERNAME,
+               sender='comp0034mealtime@gmail.com',
                recipients=[current_user.email],
                html_body=render_template('email/send_grocery_list_email.html',
                                          user=current_user, mealplan_id=mealplan_id, grocery_list=grocery_list))
