@@ -386,6 +386,10 @@ def del_from_mealplan(mealplan_id, recipe_id):
     """
 
     if mealplan_id == 'x':
+        mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
+                    .filter(MealPlans.user_id == current_user.id).first()[0]
+
+    if mealplan_id is None:
         return 'no plan'
 
     else:
