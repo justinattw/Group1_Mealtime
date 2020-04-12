@@ -358,7 +358,7 @@ def add_to_mealplan(recipe_id):
         .filter(MealPlans.user_id == current_user.id).first()
 
     if mealplan_id is None:
-        flash("Please create a meal plan first!", "warning")
+        return 'no plan'
 
     else:
         try:
@@ -370,7 +370,6 @@ def add_to_mealplan(recipe_id):
 
         except IntegrityError:
             db.session.rollback()
-            recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
 
             print(f"Failed to add recipe {recipe_id} to meal plan {mealplan_id}")
             return 'failure', 200
@@ -390,7 +389,7 @@ def del_from_mealplan(recipe_id):
         .filter(MealPlans.user_id == current_user.id).first()
 
     if mealplan_id is None:
-        return 'mealplan does not exist'
+        return 'no plan'
 
     else:
         try:
@@ -405,9 +404,8 @@ def del_from_mealplan(recipe_id):
             print(f"Removing recipe {recipe_id} from meal plan {mealplan_id}")
             return 'success', 200
 
-        except IntegrityError:
+        except InvalidRequestError:
             db.session.rollback()
-            recipe_name = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == recipe_id).first()
 
             print(f"Failed to remove recipe {recipe_id} from meal plan {mealplan_id}")
             return 'failure', 200
@@ -421,6 +419,12 @@ def delete_mealplan(mealplan_id):
             .filter(MealPlans.mealplan_id == mealplan_id) \
             .filter(MealPlans.user_id == current_user.id) \
             .one()
+        del_recipes = db.session.query(MealPlanRecipes) \
+            .filter(MealPlanRecipes.mealplan_id == mealplan_id) \
+            .all()
+        for recipe in del_recipes:
+            db.session.delete(recipe)
+
         db.session.delete(del_mealplan)
         db.session.commit()
 
