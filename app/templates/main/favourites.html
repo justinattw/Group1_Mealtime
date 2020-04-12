@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Favourites{% endblock %}
 
+{% block head %}
+<link href="{{ url_for('static', filename='css/toastr.css') }}" rel="stylesheet">
+{%  endblock %}
+
 {% block content %}
 
 <h3>{{ user.first_name }}'s favourite recipes</h3>
@@ -30,20 +34,14 @@
 
                     {# Buttons to add to mealplan/ favourites #}
                     {% if current_user.is_authenticated %}
-                    {#
-                    <form action="{{ url_for('main.add_to_mealplan', recipe_id = result.recipe_id) }}"
-                          method="post">
-                        <input type="image" src="{{ url_for('static', filename='img/icons/more.png') }}"
-                               alt="Add to Mealplan" height="25" name="addToMealplan" class="btTxt submit"
-                               id="saveForm"/>
-                    </form>
-                    <form action="{{ url_for('main.add_to_favourites', recipe_id = result.recipe_id) }}"
-                          method="post">
-                        <input type="image" src="{{ url_for('static', filename='img/icons/heart.png') }}"
-                               alt="Add to Favourites" height="25" name="addToFavourites" class="btTxt submit"
-                               id="saveForm"/>
-                    </form>
-                    #}
+                     <button id="addto_mealplan{{ result.recipe_id }}"
+                            onclick="ajax_addplan('{{result.recipe_id}}', '{{result.recipe_name}}')">Add to Meal Plan
+                    </button>
+                    <button id="delfrom_mealplan{{ result.recipe_id }}"
+                            onclick="ajax_delplan('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove from Meal Plan
+                    </button>
+                    <br>
+                    <br>
                     <button id="unfav{{result.recipe_id}}" onclick="ajax_unfav('{{result.recipe_id}}')">Remove Favourite</button>
                     {% endif %}
 
@@ -70,6 +68,7 @@
 {% endblock %}
 
 {% block footer %}
+    <script src="{{ url_for('static', filename='js/toastr.js') }}"></script>
     <script>
 
         function ajax_unfav(id) {
@@ -82,6 +81,37 @@
                 }
             });
         }
+        function ajax_addplan(id, name) {
+            $.ajax({
+                url: "/add_to_mealplan/" + id, success: function (result) {
+                    if (result == 'success') {
 
+                        toastr.success('Added ' + name + ' to your meal plan!')
+                    } else if (result == 'failure') {
+                        toastr.error(name + ' is already in your meal plan!')
+                    } else {
+                        toastr.error('Cannot add recipe. Please create a meal plan first!')
+                    }
+                }
+            });
+        }
+
+        function ajax_delplan(recipe_id, name) {
+
+            var mealplan_id = 'x';
+
+            $.ajax({
+                url: "/del_from_mealplan/" + mealplan_id + '/' + recipe_id, success: function (result) {
+                    if (result == 'success') {
+
+                        toastr.warning('Removed ' + name + ' from your meal plan!')
+                    } else if (result == 'failure') {
+                        toastr.error(name + ' cannot be removed as it is not in your meal plan!')
+                    } else {
+                        toastr.error('Cannot remove recipe as no meal plan exists. Please create a meal plan first!')
+                    }
+                }
+            });
+        }
     </script>
 {% endblock %}
