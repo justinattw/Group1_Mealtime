@@ -52,7 +52,6 @@ def test_login_success_with_valid_user(test_client, user):
     """
     response = login_test_user(test_client)
     assert response.status_code == 200
-    assert b'Logged in successfully' in response.data
     assert (b'Logged in successfully. Welcome, Test') in response.data
 
 

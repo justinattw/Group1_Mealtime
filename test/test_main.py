@@ -14,7 +14,8 @@ __status__ = "Development"
 
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, login_vegan_test_user
+    view_mealplanner, login_vegan_test_user, view_advanced_search, advanced_search_function, create_mealplan, login, \
+    login_test_user, add_to_mealplan
 
 import pytest
 import random
@@ -203,11 +204,47 @@ def test_view_about(test_client):
     assert response.status_code == 200
 
 
-def test_view_mealplanner(test_client):
+def test_view_create_and_add_to_mealplanner(test_client, user, db):
     """
     GIVEN a Flask application
     WHEN the 'view_mealplanner' page is requested'
     THEN response is valid
     """
+    login_test_user(test_client)
     response = view_mealplanner(test_client)
     assert response.status_code == 200
+    response = create_mealplan(test_client)
+    print(response.data)
+    assert b'Success, new meal plan' in response.data
+    assert response.status_code == 200
+    recipeid = random.randint(0, 1000)
+    response = add_to_mealplan(test_client, recipeid)
+    assert response.status_code == 200
+    print(response.data)
+    assert b'success' in response.data
+
+    #assert (b'Logged in successfully. Welcome, Test') in response.data
+
+def test_view_advanced_search(test_client):
+    """
+        GIVEN a Flask application
+        WHEN the 'view_advanced_search' page is requested'
+        THEN response is valid
+        """
+    response = view_advanced_search(test_client)
+    assert response.status_code == 200
+
+def test_advanced_search_results_correct(test_client):
+    search_term = "cabbage"
+    allergies = ['1','2','5']
+    diet = 3
+    hidden = '100,500'
+    response = advanced_search_function(test_client, search_term, allergies, diet, hidden)
+    assert response.status_code == 200
+   # assert b'lupin' in response.data
+
+
+
+
+
+
