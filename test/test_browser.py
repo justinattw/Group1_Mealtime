@@ -115,7 +115,7 @@ def test_user_can_login_after_registered(test_client, db, session, browser, live
                "first_name"] + '!'
 
 
-@pytest.mark.parametrize("search_term", [('cabbage'), ('mango')])
+@pytest.mark.parametrize("search_term", [('cabbage')]) # ('mango')
 def test_user_can_add_and_view_favourite_recipes(test_client, db, session, browser, live_server, browser_user_data,
                                                  search_term):
     """
