@@ -80,11 +80,12 @@ jobs:
 #            python -m pytest -v test/test_main.py
 
 #            python -m pytest test
-      - run:
-          name: run browser tests
-          command: |
-            . venv/bin/activate
-            python -m pytest -v test/test_browser.py
+
+#      - run:
+#          name: run browser tests
+#          command: |
+#            . venv/bin/activate
+#            python -m pytest -v test/test_browser.py
 
 
       - store_test_results:
