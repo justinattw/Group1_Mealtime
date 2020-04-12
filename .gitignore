@@ -132,3 +132,5 @@ dmypy.json
 
 # PyCharm
 .idea/
+/db/db_backup/
+/db/mealtime.db

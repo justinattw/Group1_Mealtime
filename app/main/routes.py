@@ -108,6 +108,10 @@ def recipes():
                  'max_cal': request.args.get('max_cal', 1000, type=int),
                  'max_time': request.args.get('max_time', 99999, type=int)}
 
+    print(request.args.get('allergy_list'))
+
+    print(list(map(int, request.args.get('allergy_list').split(","))))
+
     # The following code related to pagination is adapted from:
     #
     # Title: The Flask Mega-Tutorial Part IX: Pagination
@@ -133,6 +137,31 @@ def view_all_recipes():
 
     :return: the recipes route, with no search parameters (so that it queries all recipes)
     """
+    if current_user.is_authenticated:
+        diet_type = current_user.diet_preferences[0].diet_type_id
+        diet_name = current_user.diet_preferences[0].diet_type.diet_name
+
+        allergy_list = [allergy.allergy_id for allergy in current_user.allergies]
+        # Return list of allergies strings corresponding to allergy id, through config
+        allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
+
+        flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
+        flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
+                        f"Diet type: {diet_name}\n" \
+                        f"Allergies: {flash_allergies.lower()}"
+
+        # To show flash messages on new line, implement:
+        # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
+        flash(flash_message, "success")
+
+        # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
+        # request.args.get in recipes route can
+        allergy_id_str = map(str, allergy_list)
+        allergies = ','.join(allergy_id_str)
+
+        return redirect(
+            url_for('main.recipes', diet_type=diet_type, allergy_list=allergies))
+
     return redirect(url_for('main.recipes'))
 
 
@@ -152,19 +181,6 @@ def search():
 
         if current_user.is_authenticated:
 
-            # ## NOT USING INHERITANCE
-            # diet_type, diet_name = db.session.query(UserDietPreferences) \
-            #     .join(DietTypes) \
-            #     .filter(UserDietPreferences.user_id == user.id) \
-            #     .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name) \
-            #     .first()
-            #
-            # allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user.id).all()
-            # allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
-            # # Return list of allergies strings corresponding to allergy id, through config
-            # allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
-
-            ## USING INHERITANCE
             diet_type = current_user.diet_preferences[0].diet_type_id
             diet_name = current_user.diet_preferences[0].diet_type.diet_name
 
@@ -213,6 +229,17 @@ def advanced_search():
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
                      'max_cal': int(range[1])}
+
+        diet_name = (config.DIET_CHOICES[int(form.diet_type.data)-1])[1]
+        allergy_list = list(map(int, form.allergies.data))
+        allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
+        flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
+
+        flash_message = f"We have applied the following filters:\n" \
+                        f"Diet type: {diet_name.lower()}\n" \
+                        f"Allergies: {flash_allergies.lower()}"
+
+        flash(flash_message, "success")
 
         return redirect(url_for('main.recipes', **args_dict))
     return render_template('main/advanced_search.html', form=form)
@@ -314,32 +341,40 @@ def mealplanner():
 
     # Create a new meal plan when the "create" button is clicked
     if request.method == 'POST':
-        try:
-            d = datetime.now()
-            created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
 
-            add_mealplan = MealPlans(created_at=created_at)
-            current_user.mealplans.append(add_mealplan)
-
-            db.session.commit()
-
-            new = db.session.query(MealPlans) \
-                .filter(MealPlans.user_id == current_user.id) \
-                .order_by(MealPlans.mealplan_id.desc()) \
-                .first()
-
-            print(f"Adding new mealplan for user {current_user.id}")
-            flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
-
+        # If user has no recipes in most recent mealplan, they cannot make a new meal plan
+        if not most_recent.mealplan_recipes:
+            flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
+                 creating a new meal plan", "danger")
             return redirect(url_for('main.mealplanner'))
 
-        except IntegrityError:
-            db.session.rollback()
+        else:
+            try:
+                d = datetime.now()
+                created_at = '{:%Y-%m-%d %H:%M:%S}'.format(d)
 
-            print(f"Failed to add new mealplan for user {current_user.id}")
-            flash(f"Error, could not create new meal plan! Please try again", "danger")
+                add_mealplan = MealPlans(created_at=created_at)
+                current_user.mealplans.append(add_mealplan)
 
-            return redirect(url_for('main.mealplanner'))
+                db.session.commit()
+
+                new = db.session.query(MealPlans) \
+                    .filter(MealPlans.user_id == current_user.id) \
+                    .order_by(MealPlans.mealplan_id.desc()) \
+                    .first()
+
+                print(f"Adding new mealplan for user {current_user.id}")
+                flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
+
+                return redirect(url_for('main.mealplanner'))
+
+            except IntegrityError:
+                db.session.rollback()
+
+                print(f"Failed to add new mealplan for user {current_user.id}")
+                flash(f"Error, could not create new meal plan! Please try again", "danger")
+
+                return redirect(url_for('main.mealplanner'))
 
     return render_template('main/mealplanner.html', mealplans=all_mealplans, most_recent=most_recent)
 
@@ -377,6 +412,7 @@ def add_to_mealplan(recipe_id):
 
 @bp_main.route('/del_from_mealplan/<mealplan_id>/<recipe_id>', methods=['GET', 'POST'])
 @login_required
+@check_user_owns_mealplan
 def del_from_mealplan(mealplan_id, recipe_id):
     """
     Allows user to delete a recipe from any mealplan
@@ -387,9 +423,9 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
     if mealplan_id == 'x':
         mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-                    .filter(MealPlans.user_id == current_user.id).first()[0]
+            .filter(MealPlans.user_id == current_user.id).first()[0]
 
-    if mealplan_id is None:
+    if mealplan_id == None:
         return 'no plan'
 
     else:
@@ -414,6 +450,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
 @bp_main.route('/del_mealplan/<mealplan_id>', methods=['POST', 'GET'])
 @login_required
+@check_user_owns_mealplan
 def delete_mealplan(mealplan_id):
     try:
         del_mealplan = db.session.query(MealPlans) \
@@ -450,9 +487,7 @@ def mealplans_history():
 
     :return: mealplans history html page
     """
-    # # cannot apply order_by through this method
-    # mealplans = current_user.mealplans
-
+    # cannot apply order_by through current_user.mealplans, so
     mealplans = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
         .order_by(MealPlans.mealplan_id.desc()) \
@@ -498,8 +533,6 @@ def grocery_list(mealplan_id):
         .filter(MealPlans.mealplan_id == mealplan_id) \
         .filter(MealPlans.user_id == current_user.id) \
         .all()
-
-    print(grocery_list)
 
     return render_template('main/grocery_list.html', grocery_list=grocery_list, mealplan=mealplan, user=current_user)
 

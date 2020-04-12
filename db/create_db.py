@@ -21,7 +21,7 @@ import time
 
 start_time = time.time()
 
-db = sqlite3.connect("db/mealtime.db", isolation_level=None)
+db = sqlite3.connect("mealtime.db", isolation_level=None)
 c = db.cursor()
 
 c.execute("""CREATE TABLE IF NOT EXISTS Recipes (
@@ -88,7 +88,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS Allergies (
                                         );""")
 
 sql = "INSERT INTO Allergies (allergy_id, allergy_name) VALUES (?, ?)"
-values = [(1, 'celery'),
+values = [(1, 'dairy'),
           (2, 'gluten'),
           (3, 'seafood'),
           (4, 'eggs'),
@@ -98,7 +98,7 @@ values = [(1, 'celery'),
           (8, 'peanuts'),
           (9, 'sesame_seeds'),
           (10, 'soybeans'),
-          (11, 'dairy')]
+          (11, 'celery')]
 
 c.executemany(sql, values)
 
@@ -318,7 +318,7 @@ for url in second_urls:
             pic_url = pic_url[7]
             pic_url = "https:" + pic_url
         print(pic_url)
-        file_path = 'app/static/img/recipe_images/'
+        file_path = '../app/static/img/recipe_images/'
         pic_name = file_path + str(recipeidindex) + '.jpg'
         file_name = str(recipeidindex) + '.jpg'
         with open(pic_name, 'wb') as handle:
