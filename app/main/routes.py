@@ -122,12 +122,8 @@ def recipes():
     next_url = url_for('main.recipes', **args_dict, page=recipes.next_num) if recipes.has_next else None
     prev_url = url_for('main.recipes', **args_dict, page=recipes.prev_num) if recipes.has_prev else None
 
-    # Get the most recent mealplan. Will add recipe to this mealplan.
-    mealplan_active = db.session.query(MealPlans) \
-       .filter(MealPlans.user_id == current_user.id).first()
-
     return render_template("main/search_results.html", results=recipes.items, **args_dict, next_url=next_url,
-                           prev_url=prev_url, mealplan_active=mealplan_active)
+                           prev_url=prev_url)
 
 
 @bp_main.route('/view_all_recipes', methods=['GET'])
@@ -389,7 +385,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
     :return: stays on same page
     """
 
-    if mealplan_id is 'x':
+    if mealplan_id == 'x':
         return 'no plan'
 
     else:

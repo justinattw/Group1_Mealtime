@@ -41,7 +41,7 @@
                     {% if current_user.is_authenticated %}
 
                     <button id="addto_mealplan{{result.recipe_id}}" onclick="ajax_addplan('{{result.recipe_id}}', '{{result.recipe_name}}')">Add to Meal Plan</button>
-                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick="ajax_delplan('{{ mealplan_active.mealplan_id }}','{{result.recipe_id}}', '{{result.recipe_name}}')">Remove from Meal Plan</button>
+                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick="ajax_delplan('{{result.recipe_id}}', '{{result.recipe_name}}')">Remove from Meal Plan</button>
                     <br>
                     <br>
                     <button id="fav{{result.recipe_id}}" onclick="ajax_fav('{{result.recipe_id}}', '{{result.recipe_name}}')">Add Favourite</button>
@@ -128,10 +128,10 @@
             });
         }
 
-        function ajax_delplan(mealplan_id, recipe_id, name) {
-            if (mealplan_id == '') {
-                mealplan_id = 'x'
-            }
+        function ajax_delplan(recipe_id, name) {
+
+            var mealplan_id = 'x';
+
             $.ajax({
                 url: "/del_from_mealplan/" + mealplan_id + '/' + recipe_id, success: function (result) {
                     if (result == 'success') {
