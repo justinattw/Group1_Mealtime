@@ -108,6 +108,10 @@ def recipes():
                  'max_cal': request.args.get('max_cal', 1000, type=int),
                  'max_time': request.args.get('max_time', 99999, type=int)}
 
+    print(request.args.get('allergy_list'))
+
+    print(list(map(int, request.args.get('allergy_list').split(","))))
+
     # The following code related to pagination is adapted from:
     #
     # Title: The Flask Mega-Tutorial Part IX: Pagination

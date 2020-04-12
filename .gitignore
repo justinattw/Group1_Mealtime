@@ -132,6 +132,3 @@ dmypy.json
 
 # PyCharm
 .idea/
-
-# Mealtime database
-db/mealtime.db
