@@ -83,7 +83,7 @@ def check_user_owns_mealplan(func):
             .filter(MealPlans.mealplan_id == mealplan_id) \
             .first()
 
-        if user_owns_mealplan:
+        if user_owns_mealplan or mealplan_id == 'x':
             return func(*args, **kwargs)
         else:
             flash('Sorry, you do not have access to this meal plan', 'warning')

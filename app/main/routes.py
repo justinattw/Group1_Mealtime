@@ -133,6 +133,31 @@ def view_all_recipes():
 
     :return: the recipes route, with no search parameters (so that it queries all recipes)
     """
+    if current_user.is_authenticated:
+        diet_type = current_user.diet_preferences[0].diet_type_id
+        diet_name = current_user.diet_preferences[0].diet_type.diet_name
+
+        allergy_list = [allergy.allergy_id for allergy in current_user.allergies]
+        # Return list of allergies strings corresponding to allergy id, through config
+        allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
+
+        flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
+        flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
+                        f"Diet type: {diet_name}\n" \
+                        f"Allergies: {flash_allergies.lower()}"
+
+        # To show flash messages on new line, implement:
+        # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
+        flash(flash_message, "success")
+
+        # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
+        # request.args.get in recipes route can
+        allergy_id_str = map(str, allergy_list)
+        allergies = ','.join(allergy_id_str)
+
+        return redirect(
+            url_for('main.recipes', diet_type=diet_type, allergy_list=allergies))
+
     return redirect(url_for('main.recipes'))
 
 
@@ -152,19 +177,6 @@ def search():
 
         if current_user.is_authenticated:
 
-            # ## NOT USING INHERITANCE
-            # diet_type, diet_name = db.session.query(UserDietPreferences) \
-            #     .join(DietTypes) \
-            #     .filter(UserDietPreferences.user_id == user.id) \
-            #     .with_entities(UserDietPreferences.diet_type_id, DietTypes.diet_name) \
-            #     .first()
-            #
-            # allergy_query = db.session.query(UserAllergies.allergy_id).filter_by(user_id=user.id).all()
-            # allergy_list = [value for value, in allergy_query]  # Turn allergies query results into a list
-            # # Return list of allergies strings corresponding to allergy id, through config
-            # allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
-
-            ## USING INHERITANCE
             diet_type = current_user.diet_preferences[0].diet_type_id
             diet_name = current_user.diet_preferences[0].diet_type.diet_name
 
@@ -213,6 +225,21 @@ def advanced_search():
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
                      'max_cal': int(range[1])}
+
+        print(form.diet_type.data)
+
+
+        # diet_name = (config.DIET_CHOICES[form.diet_type.data-1])[1]
+        # print(diet_name)
+        allergy_list = list(map(int, form.allergies.data))
+        allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
+        flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
+
+        flash_message = f"We have applied the following filters:\n" \
+                        f"Diet type: {allergy_list}\n" \
+                        f"Allergies: {flash_allergies.lower()}"
+
+        flash(flash_message, "success")
 
         return redirect(url_for('main.recipes', **args_dict))
     return render_template('main/advanced_search.html', form=form)
@@ -506,8 +533,6 @@ def grocery_list(mealplan_id):
         .filter(MealPlans.mealplan_id == mealplan_id) \
         .filter(MealPlans.user_id == current_user.id) \
         .all()
-
-    print(grocery_list)
 
     return render_template('main/grocery_list.html', grocery_list=grocery_list, mealplan=mealplan, user=current_user)
 
