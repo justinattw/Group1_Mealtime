@@ -282,8 +282,8 @@ def view_mealplanner(client):
 # Browser helper functions
 def browser_signup(browser, user_data):
     signup_url = url_for('auth.signup', _external=True)
-
     browser.get(signup_url)
+
     form_first_name = browser.find_element_by_id('signup_first_name')
     form_last_name = browser.find_element_by_id('signup_last_name')
     form_email = browser.find_element_by_id('signup_email')
@@ -296,4 +296,16 @@ def browser_signup(browser, user_data):
     form_email.send_keys(user_data['email'])
     form_password.send_keys(user_data['password'])
     form_confirm.send_keys(user_data['confirm'])
+    form_submit.click()
+
+def browser_login(browser, user_data):
+    login_url = url_for('auth.login', _external=True)
+    browser.get(login_url)
+
+    form_email = browser.find_element_by_id('login-email')
+    form_password = browser.find_element_by_id('login-password')
+    form_submit = browser.find_element_by_css_selector('.btn.btn-primary')
+
+    form_email.send_keys(user_data["email"])
+    form_password.send_keys(user_data["password"])
     form_submit.click()
