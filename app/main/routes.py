@@ -339,7 +339,7 @@ def mealplanner():
     if request.method == 'POST':
 
         # If user has no recipes in most recent mealplan, they cannot make a new meal plan
-        if not most_recent.mealplan_recipes:
+        if all_mealplans and not most_recent.mealplan_recipes:
             flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
                  creating a new meal plan", "danger")
             return redirect(url_for('main.mealplanner'))

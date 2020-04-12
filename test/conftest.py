@@ -6,8 +6,6 @@ test/conftest.py:
 Configures settings for Pytest (the selected testing framework for Mealtime). Includes setup and teardowns (fixtures),
 as well as helper functions.
 """
-import string
-
 __authors__ = "Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
@@ -161,6 +159,19 @@ def user_data():
     return user_data
 
 
+@pytest.fixture(scope='function')
+def browser_user_data():
+    """ Provides the details for a browser user registration"""
+    user_data = {
+        "first_name": "Bowser",
+        "last_name": "User",
+        "email": "bowser@nintendo.com",
+        "password": "killMario",
+        "confirm": "killMario"
+    }
+    return user_data
+
+
 # Test browser configuration. The following code is adapted from a tutorial
 # Title: Set Your Test Automation Goals with Web UI Testing
 # Author: AutomationPanda
@@ -196,24 +207,8 @@ class TestLiveServer:
         assert b'OK' in res.read()
         assert res.code == 200
 
-@pytest.fixture(scope='function')
-def browser_user_data():
-    """ Provides the details for a user registration. """
-    letters = string.ascii_lowercase
-    random_name = ''.join(random.choice(letters) for i in range(5))
-    user_data = {
-        "first_name": "Signup",
-        "last_name": random_name,
-        "email": random_name + '@email.com',
-        # "last_name": "Test",
-        # "email": 'signup@test.com',
-        "password": "dog123",
-        "confirm": "dog123"
-    }
-    return user_data
 
-
-# Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
+# Client helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
@@ -259,14 +254,6 @@ def search_function(client, search_term):
         search_term=search_term,
     ), follow_redirects=True)
 
-def advanced_search_function(client, search_term, allergy_list, diet_type, cal_range):
-    return client.post('/advanced_search', data=dict(
-        search_term = search_term,
-        allergy_list = allergy_list,
-        diet_type = diet_type,
-        hidden = cal_range,
-    ), follow_redirects = True)
-
 
 def add_to_favourites(client, recipe_id):
     url_str = '/add_to_favourites/' + str(recipe_id)
@@ -287,29 +274,16 @@ def view_favourites(client):
 def view_about(client):
     return client.get('/about', follow_redirects=True)
 
-def view_advanced_search(client):
-    return client.get('/advanced_search', follow_redirects=True)
 
 def view_mealplanner(client):
     return client.get('/mealplanner', follow_redirects=True)
 
-def create_mealplan(client):
-    return client.post('/mealplanner', follow_redirects=True)
 
-def add_to_mealplan(client, recipeid):
-    return client.post('/add_to_mealplan/'+str(recipeid), data = dict(
-        recipeid=recipeid
-    ), follow_redirects=True)
-
-
-def user_signup(browser, browser_user_data):
-
-    index_url = 'http://127.0.0.1:5000/'
-    signup_url = index_url + 'signup/'
-   # index_url = url_for('main.index', _external=True)
-   # signup_url = url_for('auth.signup', _external=True)
-
+# Browser helper functions
+def browser_signup(browser, user_data):
+    signup_url = url_for('auth.signup', _external=True)
     browser.get(signup_url)
+
     form_first_name = browser.find_element_by_id('signup_first_name')
     form_last_name = browser.find_element_by_id('signup_last_name')
     form_email = browser.find_element_by_id('signup_email')
@@ -317,11 +291,21 @@ def user_signup(browser, browser_user_data):
     form_confirm = browser.find_element_by_id('signup_confirm')
     form_submit = browser.find_element_by_id("submit_button")
 
-    form_first_name.send_keys(browser_user_data["first_name"])
-    form_last_name.send_keys(browser_user_data["last_name"])
-    form_email.send_keys(browser_user_data["email"])
-    form_password.send_keys(browser_user_data["password"])
-    form_confirm.send_keys(browser_user_data["confirm"])
+    form_first_name.send_keys(user_data['first_name'])
+    form_last_name.send_keys(user_data['last_name'])
+    form_email.send_keys(user_data['email'])
+    form_password.send_keys(user_data['password'])
+    form_confirm.send_keys(user_data['confirm'])
     form_submit.click()
 
+def browser_login(browser, user_data):
+    login_url = url_for('auth.login', _external=True)
+    browser.get(login_url)
 
+    form_email = browser.find_element_by_id('login-email')
+    form_password = browser.find_element_by_id('login-password')
+    form_submit = browser.find_element_by_css_selector('.btn.btn-primary')
+
+    form_email.send_keys(user_data["email"])
+    form_password.send_keys(user_data["password"])
+    form_submit.click()
