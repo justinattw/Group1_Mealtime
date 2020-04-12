@@ -226,17 +226,13 @@ def advanced_search():
                      'min_cal': int(range[0]),
                      'max_cal': int(range[1])}
 
-        print(form.diet_type.data)
-
-
-        # diet_name = (config.DIET_CHOICES[form.diet_type.data-1])[1]
-        # print(diet_name)
+        diet_name = (config.DIET_CHOICES[int(form.diet_type.data)-1])[1]
         allergy_list = list(map(int, form.allergies.data))
         allergy_str = [(config.ALLERGY_CHOICES[i - 1])[1] for i in allergy_list]
         flash_allergies = "None" if not allergy_list else ', '.join(allergy_str)
 
         flash_message = f"We have applied the following filters:\n" \
-                        f"Diet type: {allergy_list}\n" \
+                        f"Diet type: {diet_name.lower()}\n" \
                         f"Allergies: {flash_allergies.lower()}"
 
         flash(flash_message, "success")
