@@ -90,7 +90,7 @@ def test_duplicate_register_error(test_client, user):
     WHEN user registers new account with pre-registered email
     THEN appropriate validation error is raised
     """
-    # with pytest.raises(ValidationError):  # Not sure hot to trigger validation error in forms
+    # with pytest.raises(ValidationError):  # Not sure how to trigger validation error in forms
 
     response = test_client.post('/signup/', data=dict(
         first_name="Test",

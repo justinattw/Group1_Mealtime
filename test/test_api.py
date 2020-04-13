@@ -66,4 +66,4 @@ def test_api_read_incorrect_recipe_route_invalid(test_client, db):
 
     # response = test_client.get('/api/recipes/' + str(invalid_recipe), follow_redirects=True)
     # # assert b'Page Not Found' in response.data
-    # assert response.status_code == 404
+    # assert response.status_code == 404  # Browser returns 404, but test breaks because 404 is not handled.

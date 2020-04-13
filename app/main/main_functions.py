@@ -69,23 +69,18 @@ def get_most_recent_mealplan_id():
     return mealplan_id
 
 
-def send_email(subject, sender, recipients, html_body):
-    msg = Message(subject, sender=sender, recipients=recipients)
+def send_email(subject, recipients, html_body):
+    msg = Message(subject,
+                  sender=('Mealtime', 'comp0034mealtime@gmail.com'),
+                  recipients=recipients)
     # msg.body = text_body
     msg.html = html_body
     mail.send(msg)
 
 
-def send_grocery_list_email(mealplan_id):
-    grocery_list = db.session.query(RecipeIngredients) \
-        .join(MealPlanRecipes, RecipeIngredients.recipe_id == MealPlanRecipes.recipe_id) \
-        .join(MealPlans, MealPlanRecipes.mealplan_id == MealPlans.mealplan_id) \
-        .filter(MealPlans.mealplan_id == mealplan_id) \
-        .filter(MealPlans.user_id == current_user.id) \
-        .all()
+def send_grocery_list_email(mealplan_id, grocery_list):
 
     send_email(f'[Mealtime] Your grocery shopping list for Mealplan {mealplan_id}',
-               sender='comp0034mealtime@gmail.com',
                recipients=[current_user.email],
                html_body=render_template('email/send_grocery_list_email.html',
                                          user=current_user, mealplan_id=mealplan_id, grocery_list=grocery_list))

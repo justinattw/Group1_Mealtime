@@ -554,11 +554,22 @@ def email_grocery_list(mealplan_id):
     :param mealplan_id:
     :return:
     """
-    try:
-        send_grocery_list_email(mealplan_id)
-        flash(f"Email has been sent!", "success")
-    except:
-        flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
+    grocery_list = db.session.query(RecipeIngredients) \
+        .join(MealPlanRecipes, RecipeIngredients.recipe_id == MealPlanRecipes.recipe_id) \
+        .join(MealPlans, MealPlanRecipes.mealplan_id == MealPlans.mealplan_id) \
+        .filter(MealPlans.mealplan_id == mealplan_id) \
+        .filter(MealPlans.user_id == current_user.id) \
+        .all()
+
+    if not grocery_list:
+        flash("There are no recipes in this meal plan, so we could not send you a grocery list!")
+
+    else:
+        try:
+            send_grocery_list_email(mealplan_id, grocery_list)
+            flash(f"Email has been sent!", "success")
+        except:
+            flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
 
     return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page
     # return 'done'
