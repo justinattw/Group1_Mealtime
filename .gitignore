@@ -134,3 +134,4 @@ dmypy.json
 .idea/
 /db/db_backup/
 /db/mealtime.db
+/db/mealtime_testing.db
