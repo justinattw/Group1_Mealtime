@@ -1,4 +1,5 @@
-<p>Dear {{ user.first_name }},</p>
+{% extends "email/email_base.html" %}
+{% block content %}
 <p>
     As you have requested the grocery shopping list for mealplan {{ mealplan_id }}, you can view the shopping list
     below:
@@ -17,12 +18,4 @@
 
 <p>If you think you have received this email by mistake, please log into your account and change your password, and/ or
     contact us at comp0034mealtime@gmail.com as your account security may be compromised.</p><br>
-<p>Thank you for supporting us,</p>
-<p><b>Mealtime</b></p>
-
-{#<img src="{{ url_for('static', filename=('img/icons/mealtime-logo-wide.png')) }}">#}
-
-<br>
-<p>Github: <a
-        href="https://www.github.com/justinattw/group1_mealtime">https://www.github.com/justinattw/group1_mealtime</a>
-</p>
+{% endblock %}

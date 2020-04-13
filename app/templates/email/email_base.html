@@ -1,0 +1,13 @@
+Dear {{ user.first_name }},
+
+{% block content %}
+    {# Email body here #}
+{% endblock %}
+
+{# Signatures #}
+<p>Thank you for supporting us,</p>
+<p><b>Mealtime</b></p>
+{#<img src="{{ url_for('static', filename=('img/icons/mealtime-logo-wide.png')) }}">#}
+<br><p>Github: <a
+        href="https://www.github.com/justinattw/group1_mealtime">https://www.github.com/justinattw/group1_mealtime</a>
+</p>
