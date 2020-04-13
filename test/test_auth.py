@@ -22,7 +22,7 @@ from test.conftest import login, login_test_user, logout, edit_password, edit_pr
 import random
 
 
-def test_login_fails_with_invalid_input(test_client, user):
+def test_login_fails_with_unregistered_email(test_client, user):
     """
     GIVEN a flask app
     WHEN a user attempts login with an unregistered email
@@ -31,6 +31,7 @@ def test_login_fails_with_invalid_input(test_client, user):
     response = login(test_client, email="notregistered@test.com", password='cat123')
     assert b'No account has been registered with this email.' in response.data
 
+def test_login_fails_with_invalid_password(test_client, user):
     """
     GIVEN a flask app
     WHEN a user attempts login with a registered email but invalid password
@@ -44,12 +45,11 @@ def test_login_success_with_valid_user(test_client, user):
     """
     GIVEN a flask app
     WHEN a user logs in with valid user details
-    THEN 1) response is valid and 2) redirection occurs
+    THEN 1) response is valid and 2) flash message shows
     """
     response = login_test_user(test_client)
     assert response.status_code == 200
-    assert b'Logged in successfully' in response.data
-    assert (b'Logged in successfully. Welcome, Test') in response.data
+    assert b'Logged in successfully. Welcome' in response.data
 
 
 def test_logout_user_success(test_client, user):
@@ -62,6 +62,27 @@ def test_logout_user_success(test_client, user):
     response = logout(test_client)
     assert response.status_code == 200
     assert b'You have been logged out.' in response.data
+
+
+def test_register_fails_with_invalid_email_format(test_client):
+    """
+    GIVEN a flask app
+    WHEN user signs up with an email
+    THEN email cannot sign up with same email of different casing/ can log in with email of different casing
+    """
+    email = "notanemailformat"
+    password = 'cat123'
+
+    response = test_client.post('/signup/', data=dict(
+        first_name="Test",
+        last_name="Name",
+        email=email,  # attempt signup with random case email of registered user
+        password=password,
+        confirm=password
+    ), follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Valid email address required' in response.data
+
 
 
 def test_register_user_success(test_client, user_data):

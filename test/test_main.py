@@ -14,7 +14,7 @@ __status__ = "Development"
 
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, login_vegan_test_user
+    view_mealplanner, login_vegan_test_user, login_test_user
 
 import pytest
 import random
@@ -211,3 +211,18 @@ def test_view_mealplanner(test_client):
     """
     response = view_mealplanner(test_client)
     assert response.status_code == 200
+
+
+def test_cannot_view_others_mealplan(test_client, user):
+    """
+    GIVEN a Flask application and user is logged in
+    WHEN user requests to view mealplan that they do not own
+    THEN error message flashes
+    """
+    login_test_user(test_client)
+
+    random_mealplan = random.randint(0, 1000)  # user has no mealplans, so they cannot view any
+    url = '/view_mealplan/' + str(random_mealplan)
+
+    response = test_client.get(url, follow_redirects=True)
+    assert b'Sorry, you do not have access to this meal plan' in response.data
