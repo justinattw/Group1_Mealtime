@@ -14,7 +14,7 @@ __status__ = "Development"
 
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, login_test_user, del_from_mealplan, view_grocery_list, view_mealplan, \
+    view_mealplanner, login_test_user, del_from_mealplan, view_grocery_list, view_mealplan, get_recipe_ids, \
     view_advanced_search, advanced_search_function, create_mealplan, view_all_recipes, add_to_mealplan, delete_mealplan
 
 import pytest
@@ -391,26 +391,10 @@ class TestSearchResults:
         WHEN user requests to view all recipes
         THEN returned recipes satisfies user's diet preferences and allergies
         """
+        # Pull the recipe ids that are returned in on the response page (as a list). See conftest helper function.
+        response_recipe_ids = get_recipe_ids(test_client, response)
 
         from app.models import Recipes, RecipeDietTypes, RecipeAllergies
-
-        # Pull the recipe ids that are returned in on the response page, as list of ints
-        response_recipe_ids = []
-        page_string = response.data.decode()
-        page_list = page_string.split("onclick='ajax_fav(")
-        print('length: ' + str(len(page_list)))
-        page_index = 1
-        for item in page_list:
-            if page_index == len(page_list):
-                pass
-            else:
-                print('AAAAA' + item)
-                item_recipe_id = item.split('button id="fav')[1]
-                item_recipe_id = item_recipe_id.replace('"', '')
-                item_recipe_id = item_recipe_id.strip()
-                response_recipe_ids.append(int(item_recipe_id))
-            page_index += 1
-        print(response_recipe_ids)
 
         for id in response_recipe_ids:  # for all recipes that are returned in results
             # Query all recipe ids which have the user's allergies
