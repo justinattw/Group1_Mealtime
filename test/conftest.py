@@ -6,24 +6,17 @@ test/conftest.py:
 Configures settings for Pytest (the selected testing framework for Mealtime). Includes setup and teardowns (fixtures),
 as well as helper functions.
 """
-import string
 
 __authors__ = "Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-import signal
-
 from app import create_app
 from app import db as _db
 import config
 
 from flask_login import login_user, logout_user
-import logging
-import multiprocessing
-import numpy as np
-import os
 import pytest
 import random
 from urllib.request import urlopen
@@ -343,6 +336,7 @@ def delete_mealplan(client, mealplan_id):
     ), follow_redirects=True)
 
 
+# Browser helper functions
 def browser_signup(browser, browser_user_data):
     signup_url = url_for('auth.signup', _external=True)
 
