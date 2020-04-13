@@ -334,9 +334,24 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
     # Somehow pull the recipe ids that are returned in on the response page, as list
     response_recipe_ids = []
 
-    for id in response_recipe_ids:
+    for id in response_recipe_ids:  # for all recipes that are returned in results
+        # Query all recipe ids which have the user's allergies
+        blacklist = db.session.query(RecipeAllergies.recipe_id) \
+            .filter(RecipeAllergies.allergy_id.in_(user_allergy_ids)) \
+            .distinct().subquery()
+
+        # Use outerjoin to exclude blacklisted recipes in query
         query = db.session.query(Recipes) \
-            .filter_by(Recipes.recipe_id == id)
+            .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
+            .join(RecipeDietTypes) \
+            .join(RecipeAllergies) \
+            .filter_by(Recipes.recipe_id == id) \
+            .filter_by(RecipeDietTypes.diet_type_id >= user_diet_id)
+        # Db recipe id should = recipe id on page
+        # Db diet type should be >= user's saved diet preference
+        # This query should not be None (it should return something) if the filters have been applied
+
+        assert query is not None
 
 
 
