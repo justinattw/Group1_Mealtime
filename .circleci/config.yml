@@ -69,16 +69,23 @@ jobs:
 
       # https://pytest.org
       - run:
-          name: run tests
+          name: run tests except test_browser
           command: |
             . venv/bin/activate
             python -m pytest test --ignore test/test_browser.py
+
 #            python -m pytest test
 #            python -m pytest test --ignore test/test_browser.py
 #            python -m pytest -v test/test_auth.py
 #            python -m pytest -v test/test_main.py
 
 #            python -m pytest test
+
+#      - run:
+#          name: run browser tests
+#          command: |
+#            . venv/bin/activate
+#            python -m pytest -v test/test_browser.py
 
 
       - store_test_results:

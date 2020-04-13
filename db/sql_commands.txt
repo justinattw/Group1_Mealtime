@@ -2,4 +2,4 @@
 SELECT R.recipe_id, R.recipe_name, RDT.diet_type_id
 FROM RecipeDietTypes RDT
 JOIN Recipes R
-    ON RDT.recipe_id = R.recipe_id
+    ON RDT.recipe_id = R.recipe_id;

@@ -1,4 +1,6 @@
+![Python](https://img.shields.io/badge/python-v3.7-blue.svg)
 [![CircleCI](https://circleci.com/gh/justinattw/Group1_Mealtime.svg?style=shield)](https://circleci.com/gh/justinattw/Group1_Mealtime)
+[![GitHub Issues](https://img.shields.io/github/issues/anfederico/flaskex.svg)](https://github.com/justinattw/Group1_Mealtime/issues)
 
 # Mealtime
 

@@ -16,8 +16,8 @@
 
 <h5>Mealtime REST API</h5>
 <p>Our recipes are open to access through an API for all users! Simply make an API call to the <a
-        href="{{ url_for('api.read_recipes') }}"> API recipes url</a> to query all users, or add "/{id}" at the end to
-    query a specific recipe <a href="{{ url_for('api.read_recipes') + "/5" }}">like so</a>.</p>
+        href="{{ url_for('api.read_recipes') }}"> API recipes url</a> to query all recipes, or add "/id" at the end to
+    query a specific recipe <a href="{{ url_for('api.read_recipes') + '/' + random_recipe }}">like so</a>.</p>
 <br><br>
 
 <h5>Licenses</h5>

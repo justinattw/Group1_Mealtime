@@ -11,13 +11,12 @@ __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-
 from app import db
-from app.models import Users, UserAllergies, UserDietPreferences
+from app.models import Users
 import config
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
 
 # GLOBAL VARIABLES taken from config file
@@ -39,12 +38,13 @@ class SignupForm(FlaskForm):
                              validators=[DataRequired(),
                                          Length(min=MIN_PW_LEN,
                                                 max=MAX_PW_LEN,
-                                                message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'),
+                                                message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} '
+                                                        f'characters long.'),
                                          EqualTo('confirm', message='The passwords do not match')])
     confirm = PasswordField('Confirm Password')
 
     def validate_email(self, email):
-        if db.session.query(Users).filter(Users.email == email.data).first():
+        if db.session.query(Users).filter(Users.email == (email.data).lower()).first():
             raise ValidationError('An account is already registered with this email.')
 
 
@@ -62,12 +62,12 @@ class EditPasswordForm(FlaskForm):
     new_password = PasswordField('New password', validators=[DataRequired(),
                                                              Length(min=MIN_PW_LEN,
                                                                     max=MAX_PW_LEN,
-                                                                    message=f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'),
-                                                             EqualTo('confirm_password',
-                                                                     message='The passwords do not match.')])
-    confirm_password = PasswordField('Confirm password')
+                                                                    message=f'Password must be between {MIN_PW_LEN} '
+                                                                            f'and {MAX_PW_LEN} characters long.')])
+    confirm_password = PasswordField('Confirm password', validators=[EqualTo('new_password',
+                                                                             message='The passwords do not match.')])
 
-    def validate_old_and_new_passwords_different(self, old_password, new_password):
+    def validate_different(self, old_password, new_password):
         if old_password == new_password:
             raise ValidationError("You can't set your new password to the same password.")
 

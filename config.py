@@ -52,13 +52,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(CWD, 'db/mealtime.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # # EMAIL SETTINGS
-    # MAIL_SERVER = 'smtp.gmail.com'
-    # MAIL_PORT = 465
-    # MAIL_USE_SSL = True
-    # MAIL_USERNAME = 'secret_email'
-    # MAIL_PASSWORD = 'secret_password'
-
 
 class ProdConfig(Config):
     """
@@ -75,8 +68,9 @@ class TestConfig(Config):
     DEBUG = True
     TESTING = True
 
-    CWD = dirname(abspath(__file__))
+    PRESERVE_CONTEXT_ON_EXCEPTION = False
 
+    CWD = dirname(abspath(__file__))
     # Create a duplicate of the current database
     from shutil import copy
     src = join(CWD, 'db/mealtime.db')  # current working db

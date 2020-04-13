@@ -3,7 +3,10 @@
 """
 app/auth/main_functions.py:
 
-This document includes functions that assists the main routes.
+This document includes functions that assists the main routes, including:
+- search_function
+- get_most_recent_mealplan_id
+- check_user_owns_mealplan
 """
 __authors__ = "Danny Wallis and Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
@@ -13,9 +16,9 @@ __status__ = "Development"
 from app import db
 from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans
 
-from flask import flash, render_template, request, redirect, url_for
+from flask import flash, redirect, url_for
 from flask_login import current_user
-from functools import wraps, update_wrapper
+from functools import wraps
 from sqlalchemy import and_
 from sqlalchemy.sql import func
 

@@ -5,7 +5,7 @@
 <h3>Meal Planner</h3>
 <p>Use the Meal Planner to organise your meals for the week. You can also favourite recipes to make them easier to
     find in the future.</p>
-    <p>View your <a href="{{ url_for('main.mealplans_history') }}">old meal plans</a> if you want something familiar.</p>
+<p>View your <a href="{{ url_for('main.mealplans_history') }}">old meal plans</a> if you want something familiar.</p>
 {#    {% if mealplan_active %}#}
 {#        <p>View your current mealplan here!</p>#}
 {#    {% endif %}#}
@@ -16,37 +16,33 @@
         <p><b>Continue with your most recent meal plan</b></p>
         {% if most_recent != None %}
         <p>Your active meal plan is:</p>
-            <table class="table">
-                <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Meal plan ID</th>
-                    <th scopw="col">Date & Time created</th>
-                    <th scope="col">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{{ most_recent.mealplan_id }}</td>
-                    <td>{{ most_recent.created_at }}</td>
-                    <td><a href="{{ url_for('main.view_mealplan', mealplan_id=most_recent.mealplan_id) }}">View&nbsp</a>
-                        <a href="{{ url_for('main.delete_mealplan', mealplan_id=most_recent.mealplan_id) }}">Delete</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Meal plan ID</th>
+                <th scopw="col">Date & Time created</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ most_recent.mealplan_id }}</td>
+                <td>{{ most_recent.created_at }}</td>
+                <td><a href="{{ url_for('main.view_mealplan', mealplan_id=most_recent.mealplan_id) }}">View&nbsp</a>
+                    <a href="{{ url_for('main.delete_mealplan', mealplan_id=most_recent.mealplan_id) }}">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
         {% else %}
-            <p>You don't have any meal plans</p>
+        <p>You don't have any meal plans</p>
         {% endif %}
-        <p><b>Or create a new meal plan</b></p>
-        <form class="form-inline ml-auto" method="post">
-            <button class="btn btn-primary btn-outline-light">Create</button>
-        </form>
     </li>
     <li>
         <p>
             <b>Add recipes to mealplan</b>
             <br>
-            Use the search bar to find and add recipes to your meal plan
+            Search the cookbook to find new recipes for your meal plan
         </p>
         <form class="form-inline ml-auto simple_search" action="search" method="post">
             <input class="form-control" type="search" placeholder="Search recipes" aria-label="Search"
@@ -56,6 +52,12 @@
         <a href="{{ url_for('main.advanced_search') }}" class="simple_search">Advanced Search</a>
         <br><br>
         <p>Or browse your <a href="{{ url_for('main.favourites') }}">favourites</a> to find recipes</p>
+    </li>
+    <li>
+        <p><b>Create a new meal plan when you're finished with your last one!</b></p>
+        <form class="form-inline ml-auto" method="post">
+            <button class="btn btn-primary btn-outline-light">Create new meal plan</button>
+        </form>
     </li>
 </ol>
 {% endblock %}
