@@ -44,7 +44,7 @@ class SignupForm(FlaskForm):
     confirm = PasswordField('Confirm Password')
 
     def validate_email(self, email):
-        if db.session.query(Users).filter(Users.email == email.data).first():
+        if db.session.query(Users).filter(Users.email == (email.data).lower()).first():
             raise ValidationError('An account is already registered with this email.')
 
 
