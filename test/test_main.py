@@ -333,6 +333,7 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
 
     # Somehow pull the recipe ids that are returned in on the response page, as list
     response_recipe_ids = []
+    print(response_recipe_ids)
 
     for id in response_recipe_ids:  # for all recipes that are returned in results
         # Query all recipe ids which have the user's allergies
