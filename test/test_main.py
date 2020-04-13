@@ -7,8 +7,6 @@ Pytests tests for main views and methods (relating to files in app/main/)
 
 Parameterised testing: https://blog.testproject.io/2019/07/16/python-test-automation-project-using-pytest/
 """
-
-
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
@@ -16,9 +14,8 @@ __status__ = "Development"
 
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, login_vegan_test_user, view_advanced_search, advanced_search_function, create_mealplan, login, \
-    login_test_user, add_to_mealplan, del_from_mealplan, delete_mealplan, view_grocery_list, view_mealplan, \
-    view_all_recipes, remove_from_favourites
+    view_mealplanner, login_vegan_test_user, login_test_user, del_from_mealplan, view_grocery_list, view_mealplan, \
+    view_advanced_search, advanced_search_function, create_mealplan, view_all_recipes, add_to_mealplan, delete_mealplan
 
 import pytest
 import random
@@ -73,7 +70,9 @@ def test_search_with_login(test_client, vegan_user, db):
     assert b'Based on saved user preferences,' in response.data
 
     # TODO assert diet and allergies are in response data
-    assert diet_name.encode() in response.data
+    # assert diet_name.encode in response.data
+    # for allergy in allergy_names:
+    #     assert allergy.encode in response.data
 
 
 def test_add_to_favourite(test_client, user, db):
@@ -109,13 +108,10 @@ def test_add_to_favourite(test_client, user, db):
     WHEN user adds a (random) recipe to favourites that has already been added
     THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
     """
-    # with pytest.raises(ObjectDeletedError):
-    #     # Although in the routes we expect IntegrityError, for some reasonObjectDeletedError is raised
-    #     response = add_to_favourites(test_client, rand_favourite)
-
-    # print(response.data)  # Because we are using Javascript to display errors, there is no 'response' because page
-    # isn't refreshed. Javascript uses AJAX requests
-    # assert b'is already in your favourites!' in response.data
+    with pytest.raises(ObjectDeletedError):
+        # Although in the routes we expect IntegrityError, ObjectDeletedError is raised in test environment because of
+        # the way the dbs interact
+        response = add_to_favourites(test_client, rand_favourite)
 
 
 def test_view_recipe(test_client, db):
@@ -161,9 +157,10 @@ def test_view_favourites(test_client, user):
     response = view_favourites(test_client)
     assert response.status_code == 200
     assert b"'s favourite recipes" in response.data
+    assert b"You haven't favourited any recipes! Check out the " in response.data
 
 
-def test_add_to_favourites_and_view_favourites_and_remove_from_favourites(test_client, user, db):
+def test_add_to_favourites_and_view_favourites(test_client, user, db):
     """
     GIVEN a Flask application and user is logged in
     WHEN user favourites a new recipe and views their Favourites page
@@ -194,18 +191,6 @@ def test_add_to_favourites_and_view_favourites_and_remove_from_favourites(test_c
         else:
             assert part.encode() in response.data
 
-    response = remove_from_favourites(test_client, favourite)
-    assert response.status_code == 200
-
-    # check the item is no longer in favourites
-    for part in fav_list:
-        if "'" in part:  # If apostrophe ' is in the name, then split the string by the '
-            part = part.split("'")[0]
-            assert part.encode() not in response.data
-        else:
-            assert part.encode() not in response.data
-
-
 
 def test_view_about(test_client):
     """
@@ -216,10 +201,42 @@ def test_view_about(test_client):
     response = view_about(test_client)
     assert response.status_code == 200
 
-def test_view_all_recipes(test_client, user, db):
+
+def test_view_mealplanner(test_client):
+    """
+    GIVEN a Flask application
+    WHEN the 'view_mealplanner' page is requested'
+    THEN response is valid
+    """
+    response = view_mealplanner(test_client)
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("random_mealplan", [(random.randint(0, 1000)) for i in range(5)])  # random mealplan 5 times
+def test_cannot_view_others_mealplan(test_client, user, random_mealplan):
+    """
+    GIVEN a Flask application and user is logged in
+    WHEN user requests to view mealplan that they do not own
+    THEN error message flashes
+    """
     login_test_user(test_client)
+
+    # User has no mealplans, so they cannot view any. We can feed any mealplan_id into the url and it should fail
+    url = '/view_mealplan/' + str(random_mealplan)
+
+    response = test_client.get(url, follow_redirects=True)
+    assert b'Sorry, you do not have access to this meal plan' in response.data
+
+
+def test_view_all_recipes(test_client):
+    """
+    GIVEN a flask application
+    WHEN user requests to view all recipes
+    THEN view is successful
+    """
     response = view_all_recipes(test_client)
     assert response.status_code == 200
+
 
 def test_view_create_and_add_to_mealplanner(test_client, user, db):
     """
@@ -239,14 +256,12 @@ def test_view_create_and_add_to_mealplanner(test_client, user, db):
     recipeid = random.randint(0, 1000)
     response = add_to_mealplan(test_client, recipeid)
     assert response.status_code == 200
-    print(response.data)
     assert b'success' in response.data
 
     from app.models import MealPlans
     meal_plan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
     response = view_mealplan(test_client, meal_plan_id)
     assert response.status_code == 200
-
 
     response = view_grocery_list(test_client, meal_plan_id)
     assert response.status_code == 200
@@ -255,33 +270,64 @@ def test_view_create_and_add_to_mealplanner(test_client, user, db):
     assert response.status_code == 200
     assert b'success' in response.data
 
-
-
     response = delete_mealplan(test_client, meal_plan_id)
     assert response.status_code == 200
     assert b'warning' in response.data
 
+
 def test_view_advanced_search(test_client):
     """
-        GIVEN a Flask application
-        WHEN the 'view_advanced_search' page is requested'
-        THEN response is valid
-        """
+    GIVEN a Flask application
+    WHEN the 'view_advanced_search' page is requested'
+    THEN response is valid
+    """
     response = view_advanced_search(test_client)
     assert response.status_code == 200
 
-@pytest.mark.parametrize("search_term,allergies,diet,hidden", [('cabbage', ['1','4'], 3, '100,500'), ('fried rice', ['3','8', '9'], 1, '200,700'), ('potato', ['5'], 2, '0,1000')])
-def test_advanced_search_results_correct(test_client, search_term,allergies,diet,hidden):
-    search_term = search_term
-    allergies = allergies
-    diet = diet
-    hidden = hidden
+
+@pytest.mark.parametrize("search_term, allergies, diet, hidden",
+                         [('cabbage', ['1', '4'], 3, '100,500'),
+                          ('fried rice', ['3', '8', '9'], 1, '200,700'),
+                          ('potato', ['5'], 2, '0,1000')])
+def test_advanced_search_results_correct(test_client, search_term, allergies, diet, hidden):
+
     response = advanced_search_function(test_client, search_term, allergies, diet, hidden)
     assert response.status_code == 200
-    search = search_term.encode()
-    assert search in response.data
+    assert search_term.encode() in response.data
 
 
+@pytest.mark.parametrize("itr", [(i) for i in range(5)])  # Do test 10 times
+def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user, itr):
+    """
+    GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
+    WHEN user requests to view all recipes
+    THEN saved foot preferences and diet types are automatically applied
+    """
+    # User details as stored in db
+    user_diet_name = user.diet_preferences[0].diet_type.diet_name
+    user_diet_id = user.diet_preferences[0].diet_type.diet_type_id
+    user_allergy_names = [allergy.allergy.allergy_name for allergy in user.allergies]
+    user_allergy_ids = [allergy.allergy.allergy_id for allergy in user.allergies]
+
+    # User details as presented in front-end, through config global variables
+    diet_name = str((config.DIET_CHOICES[user_diet_id - 1])[1]).lower()
+    allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]).lower() for i in user_allergy_ids]
+
+    # Show user preferences
+    print(user_diet_name)
+    print(user_diet_id)
+    print(user_allergy_names)
+    print(user_allergy_ids)
+    print(diet_name)
+    print(allergy_names)
+
+    login_test_user(test_client)
+    response = view_all_recipes(test_client)
+    assert b'Based on saved user preferences, we have applied the following filters:' in response.data
+    assert b'Diet type: ' + diet_name.encode() in response.data
+    assert b'Allergies: ' in response.data
+    for allergy_name in allergy_names:
+        assert allergy_name.encode() in response.data
 
 
 

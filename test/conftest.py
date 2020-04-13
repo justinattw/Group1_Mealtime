@@ -68,6 +68,7 @@ def user(test_client, db):
 
     # Set random food preferences (diet types and allergies) for test user
     random_diet_type = random.randint(1, len(config.DIET_CHOICES))
+    # User has a random number of between 1-5 allergies, and random allergies
     random_allergies = list(
         set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
     edit_preferences(test_client, random_diet_type, random_allergies)
@@ -171,6 +172,7 @@ from selenium import webdriver
 
 from flask import url_for
 
+
 @pytest.fixture
 def browser():
     """ Sets up driver for Selenium browser testing """
@@ -181,7 +183,7 @@ def browser():
 
     # (RECOMMENDED) Use following driver if chromedriver is in PATH.
     # To move chromedriver to PATH, just copy the chromedriver from test/chromedriver to venv/bin
-    driver = webdriver.Chrome() # CircleCI. Activate this when committing to GitHub.
+    driver = webdriver.Chrome()  # CircleCI. Activate this when committing to GitHub.
 
     driver.implicitly_wait(10)
     yield driver
@@ -196,24 +198,21 @@ class TestLiveServer:
         assert b'OK' in res.read()
         assert res.code == 200
 
+
 @pytest.fixture(scope='function')
 def browser_user_data():
-    """ Provides the details for a user registration. """
-    letters = string.ascii_lowercase
-    random_name = ''.join(random.choice(letters) for i in range(5))
+    """ Provides the details for a browser user registration. """
     user_data = {
-        "first_name": "Signup",
-        "last_name": random_name,
-        "email": random_name + '@email.com',
-        # "last_name": "Test",
-        # "email": 'signup@test.com',
-        "password": "dog123",
-        "confirm": "dog123"
+        "first_name": "Bowser",
+        "last_name": "User",
+        "email": "bowser@user.com",
+        "password": "bowsersCastle",
+        "confirm": "bowsersCastle"
     }
     return user_data
 
 
-# Helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
+# Client helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
@@ -259,13 +258,14 @@ def search_function(client, search_term):
         search_term=search_term,
     ), follow_redirects=True)
 
+
 def advanced_search_function(client, search_term, allergy_list, diet_type, cal_range):
     return client.post('/advanced_search', data=dict(
-        search_term = search_term,
-        allergy_list = allergy_list,
-        diet_type = diet_type,
-        hidden = cal_range,
-    ), follow_redirects = True)
+        search_term=search_term,
+        allergy_list=allergy_list,
+        diet_type=diet_type,
+        hidden=cal_range,
+    ), follow_redirects=True)
 
 
 def add_to_favourites(client, recipe_id):
@@ -285,62 +285,66 @@ def view_favourites(client):
 
 
 def remove_from_favourites(client, recipe_id):
-    rec_string = str(recipe_id)
-    return client.post('/remove_from_favourites/'+rec_string, data=dict(
-        recipe_id = recipe_id
-    ), follow_redirects = True)
+    return client.post('/remove_from_favourites/' + str(recipe_id), data=dict(
+        recipe_id=recipe_id
+    ), follow_redirects=True)
 
 
 def view_all_recipes(client):
     return client.get('/view_all_recipes', follow_redirects=True)
 
+
 def view_about(client):
     return client.get('/about', follow_redirects=True)
+
 
 def view_advanced_search(client):
     return client.get('/advanced_search', follow_redirects=True)
 
+
 def view_mealplanner(client):
     return client.get('/mealplanner', follow_redirects=True)
+
 
 def create_mealplan(client):
     return client.post('/mealplanner', follow_redirects=True)
 
+
 def add_to_mealplan(client, recipeid):
-    return client.post('/add_to_mealplan/'+str(recipeid), data = dict(
+    return client.post('/add_to_mealplan/' + str(recipeid), data=dict(
         recipeid=recipeid
     ), follow_redirects=True)
 
+
 def view_mealplan(client, mealplan_id):
     meal_string = str(mealplan_id)
-    return client.get('/view_mealplan/'+meal_string, follow_redirects=True)
+    return client.get('/view_mealplan/' + meal_string, follow_redirects=True)
+
 
 def del_from_mealplan(client, mealplan_id, recipe_id):
-    delete_string = str(mealplan_id)+'/'+str(recipe_id)
-    return client.post('/del_from_mealplan/'+delete_string, data=dict(
-        mealplan_id = mealplan_id,
-        recipe_id = recipe_id
-    ),follow_redirects=True)
+    delete_string = str(mealplan_id) + '/' + str(recipe_id)
+    return client.post('/del_from_mealplan/' + delete_string, data=dict(
+        mealplan_id=mealplan_id,
+        recipe_id=recipe_id
+    ), follow_redirects=True)
+
 
 def view_grocery_list(client, mealplan_id):
     meal_string = str(mealplan_id)
-    return client.post('/grocery_list/'+meal_string, data=dict(
-        mealplan_id = mealplan_id
-    ), follow_redirects = True)
+    return client.post('/grocery_list/' + meal_string, data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
+
 
 def delete_mealplan(client, mealplan_id):
     delete_string = str(mealplan_id)
-    return client.post('/del_mealplan/'+delete_string, data=dict(
-        mealplan_id = mealplan_id
-    ), follow_redirects = True)
+    return client.post('/del_mealplan/' + delete_string, data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
 
 
-def user_signup(browser, browser_user_data):
-
-    index_url = 'http://127.0.0.1:5000/'
-    signup_url = index_url + 'signup/'
-   # index_url = url_for('main.index', _external=True)
-   # signup_url = url_for('auth.signup', _external=True)
+def browser_signup(browser, browser_user_data):
+    signup_url = url_for('auth.signup', _external=True)
 
     browser.get(signup_url)
     form_first_name = browser.find_element_by_id('signup_first_name')
@@ -358,3 +362,14 @@ def user_signup(browser, browser_user_data):
     form_submit.click()
 
 
+def browser_login(browser, user_data):
+    login_url = url_for('auth.login', _external=True)
+    browser.get(login_url)
+
+    form_email = browser.find_element_by_id('login-email')
+    form_password = browser.find_element_by_id('login-password')
+    form_submit = browser.find_element_by_css_selector('.btn.btn-primary')
+
+    form_email.send_keys(user_data["email"])
+    form_password.send_keys(user_data["password"])
+    form_submit.click()

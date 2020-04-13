@@ -178,13 +178,13 @@ def test_user_can_add_and_view_favourite_recipes(test_client, db, session, brows
     element = browser.find_element_by_id(unselected_tag)
     browser.execute_script("arguments[0].click();", element)
 
-    browser.get(browser.current_url)
-    element = browser.find_element_by_id('favourites-link')
-
     # element_id = 'favourites-link'
     # ignored_exceptions=(NoSuchElementException, StaleElementReferenceException)
-    # element = WebDriverWait(browser, 2, ignored_exceptions=ignored_exceptions) \
+    # element = WebDriverWait(browser, 20, ignored_exceptions=ignored_exceptions) \
     #     .until(expected_conditions.presence_of_all_elements_located((By.ID, element_id)))
+
+    browser.get(browser.current_url)  # Refresh page to avoid Stale Element Error in CircleCI
+    element = browser.find_element_by_id('favourites-link')
 
     browser.execute_script("arguments[0].click();", element)
     assert browser.current_url == favourites_url  # Checks that browser has navigated to favourites
