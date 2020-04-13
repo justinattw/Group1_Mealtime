@@ -15,12 +15,14 @@ __status__ = "Development"
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
     view_mealplanner, login_test_user, del_from_mealplan, view_grocery_list, view_mealplan, get_recipe_ids, \
-    view_advanced_search, advanced_search_function, create_mealplan, view_all_recipes, add_to_mealplan, delete_mealplan
+    view_advanced_search, advanced_search_function, create_mealplan, view_all_recipes, add_to_mealplan, \
+    delete_mealplan, edit_preferences, remove_from_favourites
 
 import pytest
 import random
 from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.sql import func
+
 
 class TestSimpleViews:
 
@@ -34,7 +36,6 @@ class TestSimpleViews:
         assert response.status_code == 200
         assert b'Meal planning made easy' in response.data
 
-
     def test_view_favourites_invalid_without_login(self, test_client):
         """
         GIVEN a flask app
@@ -43,7 +44,6 @@ class TestSimpleViews:
         """
         response = view_favourites(test_client)
         assert b'You must be logged in to view that page.' in response.data  # Method not allowed
-
 
     def test_view_favourites_valid_with_login(self, test_client, user):
         """
@@ -56,7 +56,6 @@ class TestSimpleViews:
         assert response.status_code == 200
         assert b"'s favourite recipes" in response.data
         assert b"You haven't favourited any recipes! Check out the " in response.data
-
 
     def test_view_about(self, test_client):
         """
@@ -79,7 +78,6 @@ class TestSimpleViews:
         response_recipe_ids = get_recipe_ids(test_client, response)
         assert len(response_recipe_ids) > 0
 
-
     def test_view_advanced_search(self, test_client):
         """
         GIVEN a Flask application
@@ -92,6 +90,7 @@ class TestSimpleViews:
         assert b'Calorie range (per person):' in response.data
         assert b'Diet type' in response.data
         assert b'Allergies' in response.data
+
 
 class TestViewRecipes:
 
@@ -129,7 +128,7 @@ class TestFavourites:
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites
-        THEN check response is valid
+        THEN check response is valid abd favourited recipe has been added to model/ table
         """
         login_test_user(test_client)
 
@@ -145,27 +144,67 @@ class TestFavourites:
         assert response.status_code == 200
         assert b'failure' not in response.data
 
-        """
-        GIVEN a Flask application and user is logged in
-        WHEN user adds a (random) recipe to favourites
-        THEN check the recipe has been added to the database in the correct model/ tabe
-        """
-        fav_query = db.session.query(UserFavouriteRecipes) \
+        favourited = db.session.query(UserFavouriteRecipes) \
             .filter(UserFavouriteRecipes.user_id == user.id) \
             .filter(UserFavouriteRecipes.recipe_id == rand_favourite) \
             .first()
-        assert fav_query is not None
+        assert favourited  # recipe is favourited if this is not None
 
+    def test_add_to_favourite_twice_raises_error(self, test_client, user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites that has already been added
         THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
         """
-        with pytest.raises(ObjectDeletedError):
-            # Although in the routes we expect IntegrityError, ObjectDeletedError is raised in test environment because of
-            # the way the dbs interact
-            response = add_to_favourites(test_client, rand_favourite)
+        login_test_user(test_client)
+        from app.models import Recipes
+        number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
+        rand_favourite = random.randint(1, number_of_recipes)
+        add_to_favourites(test_client, rand_favourite)  # Add favourite recipe once
 
+        with pytest.raises(ObjectDeletedError):
+            # Although in the routes we expect IntegrityError, ObjectDeletedError is raised in test environment because
+            # of the way the dbs interact
+            add_to_favourites(test_client, rand_favourite)  # Add favourite recipe twice
+
+    def test_delete_from_favourites_success(self, test_client, user, db):
+        """
+        GIVEN a Flask application and user is logged in
+        WHEN user adds a (random) recipe to favourites that has already been added
+        THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
+        """
+        login_test_user(test_client)
+        from app.models import UserFavouriteRecipes, Recipes
+        number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
+        rand_favourite = random.randint(1, number_of_recipes)
+
+        add_to_favourites(test_client, rand_favourite)
+        favourited = db.session.query(UserFavouriteRecipes) \
+            .filter(UserFavouriteRecipes.user_id == user.id) \
+            .filter(UserFavouriteRecipes.recipe_id == rand_favourite) \
+            .first()
+        assert favourited  # Recipe is added to favourites
+
+        remove_from_favourites(test_client, rand_favourite)
+        favourited = db.session.query(UserFavouriteRecipes) \
+            .filter(UserFavouriteRecipes.user_id == user.id) \
+            .filter(UserFavouriteRecipes.recipe_id == rand_favourite) \
+            .first()
+        assert not favourited  # Recipe is not added to favourites (removed from favourites)
+
+    def test_delete_from_favourites_when_recipe_is_not_in_favourites(self, test_client, user, db):
+        """
+        GIVEN a Flask application and user is logged in
+        WHEN user adds a (random) recipe to favourites that has already been added
+        THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
+        """
+        login_test_user(test_client)
+        from app.models import Recipes
+        number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()  # Get number of recipes in db
+        rand_favourite = random.randint(1, number_of_recipes)
+
+        response = remove_from_favourites(test_client, rand_favourite)
+        assert b'failure' in response.data
 
     def test_add_to_favourites_and_view_favourites(self, test_client, user, db):
         """
@@ -228,7 +267,8 @@ class TestMealplans:
         assert b"You don't have any meal plans" in response.data
 
 
-    @pytest.mark.parametrize("random_mealplan", [(random.randint(0, 1000)) for i in range(5)])  # random mealplan 5 times
+    @pytest.mark.parametrize("random_mealplan",
+                             [(random.randint(0, 1000)) for i in range(5)])  # random mealplan 5 times
     def test_cannot_view_others_mealplan(self, test_client, user, random_mealplan):
         """
         GIVEN a Flask application and user is logged in
@@ -276,8 +316,8 @@ class TestMealplans:
         THEN appropriate error messages flashes on second attempt
         """
         login_test_user(test_client)
-        create_mealplan(test_client) # Create meal plan once
-        response = create_mealplan(test_client) # Create meal plan twice
+        create_mealplan(test_client)  # Create meal plan once
+        response = create_mealplan(test_client)  # Create meal plan twice
         assert b'Your most recent meal plan' in response.data
         assert b'has no recipes. Please make use of it before' in response.data
         assert b'creating a new meal plan' in response.data
@@ -306,7 +346,6 @@ class TestMealplans:
         assert not mealplan_added
 
 
-
     def test_add_and_delete_recipe_from_mealplan(self, test_client, user, db):
         """
         GIVEN a Flask application, user is logged in and meal plan is created
@@ -329,6 +368,7 @@ class TestMealplans:
             .filter(MealPlanRecipes.mealplan_id == mealplan_id) \
             .filter(MealPlanRecipes.recipe_id == recipe_id)
         assert recipe_is_added  # recipe is added to mealplan
+
         """
         GIVEN a Flask application, user is logged in and recipe has been added to a mealplan
         WHEN when user removes the recipe from mealplan
@@ -342,6 +382,57 @@ class TestMealplans:
             .filter(MealPlanRecipes.mealplan_id == mealplan_id) \
             .filter(MealPlanRecipes.recipe_id == recipe_id).first()
         assert not recipe_is_added  # recipe is added to mealplan
+
+
+    @pytest.mark.parametrize("recipe_ids", [(random.sample(range(1000), 5)) for j in range(10)])
+    # For each itr, add 5 random recipes. Do this 10 times.
+    def test_add_recipes_to_mealplan_and_mealplan_view(self, test_client, user, db, recipe_ids):
+        """
+        GIVEN a Flask application, user is logged in, meal plan is created and user has added 5 recipes to mealplan
+        WHEN user requests meal plan view
+        THEN success message is shown, and the recipe is added to meal plan
+        """
+        login_test_user(test_client)
+        create_mealplan(test_client)
+
+        from app.models import MealPlans, MealPlanRecipes
+        # Get current mealplan id
+        mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
+
+        for id in recipe_ids:
+            add_to_mealplan(test_client, id)  # Add 5 random recipes to meal plan
+
+        response = view_mealplan(test_client, mealplan_id)  # Navigate to meal plan page
+        response_recipe_ids = get_recipe_ids(test_client, response)  # Get recipe ids from recipes on page
+
+        assert recipe_ids.sort() == response_recipe_ids.sort()
+
+
+    @pytest.mark.parametrize("recipe_ids", [(random.sample(range(1000), 5)) for j in range(5)])
+    # For each itr, add 5 random recipes. Do this 10 times.
+    def test_grocery_list_is_expected(self, test_client, user, db, recipe_ids):
+        """
+        GIVEN a Flask application, user is logged in, meal plan is created and user has added 5 recipes to mealplan
+        WHEN user requests to view grocery list of meal plan
+        THEN correct ingredients are shown
+        """
+        login_test_user(test_client)
+        create_mealplan(test_client)
+        from app.models import MealPlans, RecipeIngredients
+        # Get current mealplan id
+        mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
+        for id in recipe_ids:
+            add_to_mealplan(test_client, id)  # Add 5 random recipes to meal plan
+
+        response = view_grocery_list(test_client, mealplan_id)
+
+        query = db.session.query(RecipeIngredients) \
+            .filter(RecipeIngredients.recipe_id.in_(recipe_ids)) \
+            .all()  # Query where recipe_id in recipe_ids
+        ingredients_list = [i.ingredient for i in query]
+
+        for ingredient in ingredients_list:
+            assert ingredient.encode() in response.data
 
 
 class TestSearchResults:
@@ -369,7 +460,7 @@ class TestSearchResults:
         assert search_term.encode() in response.data
 
 
-    @pytest.mark.parametrize("itr", [(i) for i in range(10)])  # Do test n times
+    @pytest.mark.parametrize("itr", [(f"itr {str(i)}") for i in range(10)])  # Do test n times
     def test_view_all_recipes_applies_preferences_with_logged_in_user(self, test_client, user, db, itr):
         """
         GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
@@ -422,6 +513,90 @@ class TestSearchResults:
             # This query should be not None (i.e. it should return something) if the filters have been applied
             assert query is not None
 
+    @pytest.mark.parametrize("itr, search_term", [(0, "vegan"), (1, "rice"), (2, "noodles")])
+    # Do test 3 times with different search terms
+    def test_search_function_applies_preferences_with_logged_in_user(self, test_client, user, db, itr, search_term):
+        """
+        GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
+        WHEN user requests to view all recipes
+        THEN saved food preferences and diet types are automatically applied
+        """
+        # User details as stored in db
+        user_diet_name = user.diet_preferences[0].diet_type.diet_name
+        user_diet_id = user.diet_preferences[0].diet_type.diet_type_id
+        user_allergy_names = [allergy.allergy.allergy_name for allergy in user.allergies]
+        user_allergy_ids = [allergy.allergy.allergy_id for allergy in user.allergies]
+
+        # User details as presented in front-end, through config global variables
+        diet_name = str((config.DIET_CHOICES[user_diet_id - 1])[1]).lower()
+        allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]).lower() for i in user_allergy_ids]
+
+        login_test_user(test_client)
+        response = search_function(test_client, search_term)
+        assert b'Based on saved user preferences, we have applied the following filters:' in response.data
+        # Check the Flash message
+        assert b'Diet type: ' + diet_name.encode() in response.data
+        assert b'Allergies: ' in response.data
+        for allergy_name in allergy_names:
+            assert allergy_name.encode() in response.data
+
+        """
+        GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
+        WHEN user requests to view all recipes
+        THEN returned recipes satisfies user's diet preferences and allergies
+        """
+        # Pull the recipe ids that are returned in on the response page (as a list). See conftest helper function.
+        response_recipe_ids = get_recipe_ids(test_client, response)
+
+        from app.models import Recipes, RecipeDietTypes, RecipeAllergies
+
+        for id in response_recipe_ids:  # for all recipes that are returned in results
+            # Query all recipe ids which have the user's allergies
+            blacklist = db.session.query(RecipeAllergies.recipe_id) \
+                .filter(RecipeAllergies.allergy_id.in_(user_allergy_ids)) \
+                .distinct().subquery()
+
+            # Use outerjoin to exclude blacklisted recipes in query
+            query = db.session.query(Recipes) \
+                .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
+                .join(RecipeDietTypes) \
+                .join(RecipeAllergies) \
+                .filter(Recipes.recipe_id == id) \
+                .filter(RecipeDietTypes.diet_type_id >= user_diet_id)
+            # db recipe id should = recipe id on page
+            # db diet type should be >= user's saved diet preference
+            # This query should be not None (i.e. it should return something) if the filters have been applied
+            assert query is not None
+
+    @pytest.mark.parametrize("itr, allergy, search_term", [(0, [8], "peanut"),  # Peanut-free
+                                                           (1, [1], "milk"),  # Milk-free
+                                                           (2, [3], "fish")])  # Seafood-free
+    # Do test 3 times with different search terms
+    # Sometimes we need to test for certain cases. For example, searching for gluten could return 'gluten-free' recipes,
+    # even if user has applied gluten-free to allergy.
+    def test_search_with_specific_allergies(self, test_client, user, db, itr, search_term, allergy):
+        """
+        GIVEN a flask application and registered user (with defined allergies)
+        WHEN user searches for recipes that conflict with their allergies
+        THEN appropriate response should return.
+        """
+        login_test_user(test_client)
+        # Change user to classic diet type, with parametrised allergies
+        edit_preferences(test_client, diet_choice=1, allergy_choices=allergy)
+
+        user_allergy_ids = [allergy.allergy.allergy_id for allergy in user.allergies]
+        allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]).lower() for i in user_allergy_ids]
+
+        response = search_function(test_client, search_term)
+        assert b'Based on saved user preferences, we have applied the following filters:' in response.data
+        assert b'Diet type: classic'
+        assert b'Allergies: ' in response.data
+        for allergy_name in allergy_names:
+            assert allergy_name.encode() in response.data
+        assert b'Sorry, no recipes found' in response.data
 
 
+class TestEmail:
 
+    def test_email(self, test_client):
+        pass
