@@ -193,7 +193,8 @@ def test_edit_preferences_view_accessible_after_login(test_client, user):
     assert response.status_code == 200
 
 
-def test_edit_preferences_response_and_database(test_client, user, db):
+@pytest.mark.parametrize("itr", [(i) for i in range(10)])  # Do test n times
+def test_edit_preferences_response_and_database(test_client, user, db, itr):
     """
     GIVEN a flask app and user is logged in
     WHEN /edit_preferences is posted and user has input some random diet preference and allergy
@@ -201,9 +202,9 @@ def test_edit_preferences_response_and_database(test_client, user, db):
     """
     from app.models import UserDietPreferences, UserAllergies
 
-    random_diet = random.randint(2, len(config.DIET_CHOICES) + 1)  # set diet type to random diet NOT classic
-    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))  # Give user a
-    # random set of allergies, ranging from having between 2 to 6 allergies (an arbitrary number)
+    random_diet = random.randint(1, len(config.DIET_CHOICES))  # set diet type to random diet
+    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES)), random.randint(2, 6))  # Give user a
+    # random set of allergies, ranging from having between 2 to 6 allergies
 
     response = edit_preferences(test_client, diet_choice=random_diet, allergy_choices=random_allergies)
     assert response.status_code == 200
@@ -214,17 +215,19 @@ def test_edit_preferences_response_and_database(test_client, user, db):
     WHEN /edit_preferences is posted and user has input some random diet preference and allergy
     THEN inputted diet_type/ allergies are added to db, and non-inputted diet_types/ allergies are not in db 
     """
-    all_diet_choices = range(1, len(config.DIET_CHOICES) + 1)  # A list of all diet_choice ids
-    all_allergy_choices = range(1, len(config.ALLERGY_CHOICES) + 1)  # A list of all allergy_choice ids
+    all_diet_choices = range(1, len(config.DIET_CHOICES))  # A list of all diet_choice ids
+    all_allergy_choices = range(1, len(config.ALLERGY_CHOICES))  # A list of all allergy_choice ids
 
     for diet in all_diet_choices:
         diet_query = db.session.query(UserDietPreferences) \
             .filter(UserDietPreferences.user_id == user.id) \
             .filter(UserDietPreferences.diet_type_id == diet) \
             .first()
-        if diet == random_diet:  # 1) if diet type is the one set previously, then query should not be None
+        # 1) if diet equal to what was set previously, then query should not be None (because it should have saved)
+        if diet == random_diet:
             assert diet_query is not None
-        else:  # 2) if diet_type is NOT set previously, then query should be None
+        # 2) if diet_type is NOT set previously, then this query should be None
+        else:
             assert diet_query is None
 
     for allergy in all_allergy_choices:
@@ -252,4 +255,3 @@ def test_edit_preferences_response_with_invalid_duplicate_allergies(test_client,
 
     response = edit_preferences(test_client, diet_choice=select_diet, allergy_choices=invalid_allergy_choices)
     assert b'ERROR! Unable to make preference changes.' in response.data
-    assert b'Your food preferences have been updated' in response.data

@@ -82,39 +82,6 @@ def user(test_client, db):
     return user
 
 
-@pytest.fixture(scope='function')
-def vegan_user(test_client, db):
-    """ Creates a test user who is vegan."""
-    from app.models import Users, UserDietPreferences, UserAllergies
-    user = Users(first_name='Vegan',
-                 last_name='User',
-                 email='veganuser@test.com')
-    user.set_password('GoVegan')
-
-    # Set random food preferences (diet types and allergies) for test user
-    random_diet_type = 4  # set user to be vegan
-    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))
-    # random_allergies = list(
-    #     set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
-    print(random_allergies)
-    edit_preferences(test_client, random_diet_type, random_allergies)
-
-    db.session.add(user)
-    db.session.commit()
-    user_diet_preferences = UserDietPreferences(user_id=user.id,
-                                                diet_type_id=random_diet_type)
-    db.session.add(user_diet_preferences)
-
-    for allergy in random_allergies:
-        user_allergy = UserAllergies(user_id=user.id,
-                                     allergy_id=allergy)
-        db.session.add(user_allergy)
-
-    db.session.commit()
-
-    return user
-
-
 @pytest.fixture(scope='function', autouse=True)
 def session(db):
     """ Rolls back database changes at the end of each test """
@@ -217,13 +184,6 @@ def login_test_user(client):
     return client.post('/login/', data=dict(
         email="user@test.com",
         password="cat123"
-    ), follow_redirects=True)
-
-
-def login_vegan_test_user(client):
-    return client.post('/login/', data=dict(
-        email="veganuser@test.com",
-        password="GoVegan"
     ), follow_redirects=True)
 
 
