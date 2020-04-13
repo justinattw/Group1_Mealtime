@@ -107,13 +107,10 @@ def test_add_to_favourite(test_client, user, db):
     WHEN user adds a (random) recipe to favourites that has already been added
     THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
     """
-    # with pytest.raises(ObjectDeletedError):
-    #     # Although in the routes we expect IntegrityError, for some reasonObjectDeletedError is raised
-    #     response = add_to_favourites(test_client, rand_favourite)
-
-    # print(response.data)  # Because we are using Javascript to display errors, there is no 'response' because page
-    # isn't refreshed. Javascript uses AJAX requests
-    # assert b'is already in your favourites!' in response.data
+    with pytest.raises(ObjectDeletedError):
+        # Although in the routes we expect IntegrityError, ObjectDeletedError is raised in test environment because of
+        # the way the dbs interact
+        response = add_to_favourites(test_client, rand_favourite)
 
 
 def test_view_recipe(test_client, db):
@@ -159,6 +156,7 @@ def test_view_favourites(test_client, user):
     response = view_favourites(test_client)
     assert response.status_code == 200
     assert b"'s favourite recipes" in response.data
+    assert b"You haven't favourited any recipes! Check out the " in response.data
 
 
 def test_add_to_favourites_and_view_favourites(test_client, user, db):
@@ -213,7 +211,8 @@ def test_view_mealplanner(test_client):
     assert response.status_code == 200
 
 
-def test_cannot_view_others_mealplan(test_client, user):
+@pytest.mark.parametrize("random_mealplan", [(random.randint(0, 1000)) for i in range(5)])  # random mealplan 5 times
+def test_cannot_view_others_mealplan(test_client, user, random_mealplan):
     """
     GIVEN a Flask application and user is logged in
     WHEN user requests to view mealplan that they do not own
@@ -221,7 +220,7 @@ def test_cannot_view_others_mealplan(test_client, user):
     """
     login_test_user(test_client)
 
-    random_mealplan = random.randint(0, 1000)  # user has no mealplans, so they cannot view any
+    # User has no mealplans, so they cannot view any. We can feed any mealplan_id into the url and it should fail
     url = '/view_mealplan/' + str(random_mealplan)
 
     response = test_client.get(url, follow_redirects=True)

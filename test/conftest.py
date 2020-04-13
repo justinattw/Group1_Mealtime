@@ -253,7 +253,7 @@ def search_function(client, search_term):
 
 def add_to_favourites(client, recipe_id):
     url_str = '/add_to_favourites/' + str(recipe_id)
-    return client.post(url_str, data=dict(
+    return client.get(url_str, data=dict(
         recipe_id=recipe_id
     ), follow_redirects=True)
 
