@@ -7,6 +7,8 @@ Pytests tests for main views and methods (relating to files in app/main/)
 
 Parameterised testing: https://blog.testproject.io/2019/07/16/python-test-automation-project-using-pytest/
 """
+
+
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
@@ -15,7 +17,8 @@ __status__ = "Development"
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
     view_mealplanner, login_vegan_test_user, view_advanced_search, advanced_search_function, create_mealplan, login, \
-    login_test_user, add_to_mealplan
+    login_test_user, add_to_mealplan, del_from_mealplan, delete_mealplan, view_grocery_list, view_mealplan, \
+    view_all_recipes, remove_from_favourites
 
 import pytest
 import random
@@ -70,9 +73,7 @@ def test_search_with_login(test_client, vegan_user, db):
     assert b'Based on saved user preferences,' in response.data
 
     # TODO assert diet and allergies are in response data
-    # assert diet_name.encode in response.data
-    # for allergy in allergy_names:
-    #     assert allergy.encode in response.data
+    assert diet_name.encode() in response.data
 
 
 def test_add_to_favourite(test_client, user, db):
@@ -162,7 +163,7 @@ def test_view_favourites(test_client, user):
     assert b"'s favourite recipes" in response.data
 
 
-def test_add_to_favourites_and_view_favourites(test_client, user, db):
+def test_add_to_favourites_and_view_favourites_and_remove_from_favourites(test_client, user, db):
     """
     GIVEN a Flask application and user is logged in
     WHEN user favourites a new recipe and views their Favourites page
@@ -193,6 +194,18 @@ def test_add_to_favourites_and_view_favourites(test_client, user, db):
         else:
             assert part.encode() in response.data
 
+    response = remove_from_favourites(test_client, favourite)
+    assert response.status_code == 200
+
+    # check the item is no longer in favourites
+    for part in fav_list:
+        if "'" in part:  # If apostrophe ' is in the name, then split the string by the '
+            part = part.split("'")[0]
+            assert part.encode() not in response.data
+        else:
+            assert part.encode() not in response.data
+
+
 
 def test_view_about(test_client):
     """
@@ -203,6 +216,10 @@ def test_view_about(test_client):
     response = view_about(test_client)
     assert response.status_code == 200
 
+def test_view_all_recipes(test_client, user, db):
+    login_test_user(test_client)
+    response = view_all_recipes(test_client)
+    assert response.status_code == 200
 
 def test_view_create_and_add_to_mealplanner(test_client, user, db):
     """
@@ -210,20 +227,39 @@ def test_view_create_and_add_to_mealplanner(test_client, user, db):
     WHEN the 'view_mealplanner' page is requested'
     THEN response is valid
     """
+
     login_test_user(test_client)
     response = view_mealplanner(test_client)
     assert response.status_code == 200
+
     response = create_mealplan(test_client)
-    print(response.data)
     assert b'Success, new meal plan' in response.data
     assert response.status_code == 200
+
     recipeid = random.randint(0, 1000)
     response = add_to_mealplan(test_client, recipeid)
     assert response.status_code == 200
     print(response.data)
     assert b'success' in response.data
 
-    #assert (b'Logged in successfully. Welcome, Test') in response.data
+    from app.models import MealPlans
+    meal_plan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
+    response = view_mealplan(test_client, meal_plan_id)
+    assert response.status_code == 200
+
+
+    response = view_grocery_list(test_client, meal_plan_id)
+    assert response.status_code == 200
+
+    response = del_from_mealplan(test_client, meal_plan_id, recipeid)
+    assert response.status_code == 200
+    assert b'success' in response.data
+
+
+
+    response = delete_mealplan(test_client, meal_plan_id)
+    assert response.status_code == 200
+    assert b'warning' in response.data
 
 def test_view_advanced_search(test_client):
     """
@@ -234,14 +270,16 @@ def test_view_advanced_search(test_client):
     response = view_advanced_search(test_client)
     assert response.status_code == 200
 
-def test_advanced_search_results_correct(test_client):
-    search_term = "cabbage"
-    allergies = ['1','2','5']
-    diet = 3
-    hidden = '100,500'
+@pytest.mark.parametrize("search_term,allergies,diet,hidden", [('cabbage', ['1','4'], 3, '100,500'), ('fried rice', ['3','8', '9'], 1, '200,700'), ('potato', ['5'], 2, '0,1000')])
+def test_advanced_search_results_correct(test_client, search_term,allergies,diet,hidden):
+    search_term = search_term
+    allergies = allergies
+    diet = diet
+    hidden = hidden
     response = advanced_search_function(test_client, search_term, allergies, diet, hidden)
     assert response.status_code == 200
-   # assert b'lupin' in response.data
+    search = search_term.encode()
+    assert search in response.data
 
 
 
