@@ -296,7 +296,7 @@ def test_advanced_search_results_correct(test_client, search_term, allergies, di
     assert search_term.encode() in response.data
 
 
-@pytest.mark.parametrize("itr", [(i) for i in range(5)])  # Do test 10 times
+@pytest.mark.parametrize("itr", [(i) for i in range(10)])  # Do test n times
 def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user, itr):
     """
     GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
