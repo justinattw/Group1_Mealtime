@@ -11,19 +11,15 @@ We achieve 90% coverage of the app/auth directory, but the uncovered sections se
 deliberately through the routes (such as IntegrityError for signing up), because there are form validations and route
 validations that prevent them from occurring.
 """
-
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-import pytest
-
 import config
 from test.conftest import login, login_test_user, logout, edit_password, edit_preferences, session
 
 import random
-from wtforms.validators import ValidationError
 
 
 def test_login_fails_with_invalid_input(test_client, user):
@@ -82,6 +78,7 @@ def test_register_user_success(test_client, user_data):
         confirm=user_data['confirm']
     ), follow_redirects=True)
     assert response.status_code == 200
+    assert b'You are now a registered user!' in response.data
 
 
 def test_duplicate_register_error(test_client, user):
@@ -91,7 +88,6 @@ def test_duplicate_register_error(test_client, user):
     THEN appropriate validation error is raised
     """
     # with pytest.raises(ValidationError):  # Not sure how to trigger validation error in forms
-
     response = test_client.post('/signup/', data=dict(
         first_name="Test",
         last_name="Name",
@@ -171,6 +167,36 @@ def test_edit_password_with_valid_and_invalid_inputs(test_client, user):
     response = login(test_client, email=user.email, password=new_password)  # login to test user with test password
     assert response.status_code == 200
     assert b'Logged in successfully. Welcome, ' in response.data
+
+
+def test_edit_password_wtforms_validation(test_client, user):
+    """
+    GIVEN a flask app and a registered user
+    WHEN database checks for old password
+    THEN old password is correct
+    """
+    old_password = 'cat123'
+    assert user.check_password(old_password) is True  # assert old password is 'cat123'
+
+    """
+    GIVEN a flask app and user is logged in
+    WHEN user tries to change password to a new password that is too long
+    THEN correct validation error is raised
+    """
+    too_long_password = '123456789012345678901'  # password should be between 6 and 20 characters
+    response = edit_password(test_client, old_password, too_long_password, too_long_password)
+    assert b'Password must be between' in response.data
+    assert user.check_password(too_long_password) is False
+
+    """
+    GIVEN a flask app and user is logged in
+    WHEN user tries to change password to a new password that is too short
+    THEN correct validation error is raised
+    """
+    too_short_password = '12345'  # password should be between 6 and 20 characters
+    response = edit_password(test_client, old_password, too_short_password, too_short_password)
+    assert b'Password must be between' in response.data
+    assert user.check_password(too_short_password) is False
 
 
 def test_edit_preferences_view_requires_login(test_client):
@@ -254,3 +280,40 @@ def test_edit_preferences_response_with_invalid_duplicate_allergies(test_client,
     response = edit_preferences(test_client, diet_choice=select_diet, allergy_choices=invalid_allergy_choices)
     assert b'ERROR! Unable to make preference changes.' in response.data
     assert b'Your food preferences have been updated' in response.data
+
+
+def test_signup_email_case_insensitive(test_client):
+    """
+    GIVEN a flask app
+    WHEN user signs up with an email
+    THEN email cannot sign up with same email of different casing/ can log in with email of different casing
+    """
+    email = "cAsEiNsEnSiTiVe@eMaIl.CoM"
+    lower_email = email.lower()
+    password = 'cat123'
+
+    response = test_client.post('/signup/', data=dict(
+        first_name="Test",
+        last_name="Name",
+        email=email,  # attempt signup with random case email of registered user
+        password=password,
+        confirm=password
+    ), follow_redirects=True)
+    assert response.status_code == 200
+    assert b'You are now a registered user!' in response.data
+
+    logout(test_client)  # log user out
+
+    response = test_client.post('/signup/', data=dict(
+        first_name="Test",
+        last_name="Name",
+        email=lower_email,  # attempt signup again with same email except lower cased
+        password=password,
+        confirm="password"
+    ), follow_redirects=True)
+    assert response.status_code == 200
+    assert b'An account is already registered with this email.' in response.data
+
+    response = login(test_client, email=lower_email, password=password)
+    assert response.status_code == 200
+    assert b'Logged in successfully. Welcome, ' in response.data

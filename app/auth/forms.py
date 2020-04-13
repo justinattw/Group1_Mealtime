@@ -63,10 +63,9 @@ class EditPasswordForm(FlaskForm):
                                                              Length(min=MIN_PW_LEN,
                                                                     max=MAX_PW_LEN,
                                                                     message=f'Password must be between {MIN_PW_LEN} '
-                                                                            f'and {MAX_PW_LEN} characters long.'),
-                                                             EqualTo('confirm_password',
-                                                                     message='The passwords do not match.')])
-    confirm_password = PasswordField('Confirm password')
+                                                                            f'and {MAX_PW_LEN} characters long.')])
+    confirm_password = PasswordField('Confirm password', validators=[EqualTo('new_password',
+                                                                             message='The passwords do not match.')])
 
     def validate_different(self, old_password, new_password):
         if old_password == new_password:
