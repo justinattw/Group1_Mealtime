@@ -64,5 +64,5 @@ def test_api_read_incorrect_recipe_route_invalid(test_client, db):
 
     rand_recipe = random.randint(1, number_of_recipes) + 10  # recipe out of range
 
-    return test_client.get('/api/recipes/' + str(rand_recipe), follow_redirects=True)
+    response = test_client.get('/api/recipes/' + str(rand_recipe), follow_redirects=True)
     assert response.status_code == 404
