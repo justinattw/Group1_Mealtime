@@ -36,7 +36,7 @@ def login():
 
         # Check if email has already been previously registered
         # at the moment we don't turn email to lower case, so mis-matched cases will not be verified
-        user = Users.query.filter_by(email=form.email.data).first()
+        user = Users.query.filter_by(email=(form.email.data).lower()).first()
 
         if user is None:
             flash('No account has been registered with this email.', 'warning')
@@ -71,7 +71,7 @@ def signup():
     if request.method == 'POST' and form.validate():
         user = Users(first_name=form.first_name.data,
                      last_name=form.last_name.data,
-                     email=form.email.data)
+                     email=(form.email.data).lower())
         user.set_password(form.password.data)
 
         try:
