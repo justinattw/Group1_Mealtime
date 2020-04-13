@@ -297,7 +297,7 @@ def test_advanced_search_results_correct(test_client, search_term, allergies, di
 
 
 @pytest.mark.parametrize("itr", [(i) for i in range(10)])  # Do test n times
-def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user, itr):
+def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user, db, itr):
     """
     GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
     WHEN user requests to view all recipes
@@ -328,6 +328,15 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
     assert b'Allergies: ' in response.data
     for allergy_name in allergy_names:
         assert allergy_name.encode() in response.data
+
+    from app.models import Recipes, RecipeDietTypes, RecipeAllergies
+
+    # Somehow pull the recipe ids that are returned in on the response page, as list
+    response_recipe_ids = []
+
+    for id in response_recipe_ids:
+        query = db.session.query(Recipes) \
+            .filter_by(Recipes.recipe_id == id)
 
 
 
