@@ -301,7 +301,7 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
     """
     GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
     WHEN user requests to view all recipes
-    THEN saved foot preferences and diet types are automatically applied
+    THEN saved food preferences and diet types are automatically applied
     """
     # User details as stored in db
     user_diet_name = user.diet_preferences[0].diet_type.diet_name
@@ -329,9 +329,18 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
     for allergy_name in allergy_names:
         assert allergy_name.encode() in response.data
 
+    """
+    GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
+    WHEN user requests to view all recipes
+    THEN returned recipes satisfies user's diet preferences and allergies
+    """
+
     from app.models import Recipes, RecipeDietTypes, RecipeAllergies
 
     # Somehow pull the recipe ids that are returned in on the response page, as list
+    # Example is to take from card title: <h6 class="card-title"><a href="/recipe/9">Pea hummus</a></h6>
+
+    print(response.data)
     response_recipe_ids = []
     print(response_recipe_ids)
 
