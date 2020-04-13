@@ -314,12 +314,12 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
     allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]).lower() for i in user_allergy_ids]
 
     # Show user preferences
-    print(user_diet_name)
-    print(user_diet_id)
-    print(user_allergy_names)
-    print(user_allergy_ids)
-    print(diet_name)
-    print(allergy_names)
+    # print(user_diet_name)
+    # print(user_diet_id)
+    # print(user_allergy_names)
+    # print(user_allergy_ids)
+    # print(diet_name)
+    # print(allergy_names)
 
     login_test_user(test_client)
     response = view_all_recipes(test_client)
@@ -340,8 +340,21 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
     # Somehow pull the recipe ids that are returned in on the response page, as list
     # Example is to take from card title: <h6 class="card-title"><a href="/recipe/9">Pea hummus</a></h6>
 
-    print(response.data)
     response_recipe_ids = []
+    page_string = response.data.decode()
+    page_list = page_string.split("onclick='ajax_fav(")
+    print('length: ' +str(len(page_list)))
+    page_index = 1
+    for item in page_list:
+        if page_index == len(page_list):
+            pass
+        else:
+            print('AAAAA' + item)
+            item_recipe_id = item.split('button id="fav')[1]
+            item_recipe_id = item_recipe_id.replace('"', '')
+            item_recipe_id = item_recipe_id.strip()
+            response_recipe_ids.append(item_recipe_id)
+        page_index +=1
     print(response_recipe_ids)
 
     for id in response_recipe_ids:  # for all recipes that are returned in results
@@ -355,8 +368,8 @@ def test_view_recipes_applies_preferences_with_logged_in_user(test_client, user,
             .outerjoin(blacklist, Recipes.recipe_id == blacklist.c.recipe_id) \
             .join(RecipeDietTypes) \
             .join(RecipeAllergies) \
-            .filter_by(Recipes.recipe_id == id) \
-            .filter_by(RecipeDietTypes.diet_type_id >= user_diet_id)
+            .filter(Recipes.recipe_id == id) \
+            .filter(RecipeDietTypes.diet_type_id >= user_diet_id)
         # Db recipe id should = recipe id on page
         # Db diet type should be >= user's saved diet preference
         # This query should not be None (it should return something) if the filters have been applied
