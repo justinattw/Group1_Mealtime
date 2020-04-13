@@ -6,24 +6,17 @@ test/conftest.py:
 Configures settings for Pytest (the selected testing framework for Mealtime). Includes setup and teardowns (fixtures),
 as well as helper functions.
 """
-import string
 
 __authors__ = "Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-import signal
-
 from app import create_app
 from app import db as _db
 import config
 
 from flask_login import login_user, logout_user
-import logging
-import multiprocessing
-import numpy as np
-import os
 import pytest
 import random
 from urllib.request import urlopen
@@ -71,39 +64,6 @@ def user(test_client, db):
     # User has a random number of between 1-5 allergies, and random allergies
     random_allergies = list(
         set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
-    edit_preferences(test_client, random_diet_type, random_allergies)
-
-    db.session.add(user)
-    db.session.commit()
-    user_diet_preferences = UserDietPreferences(user_id=user.id,
-                                                diet_type_id=random_diet_type)
-    db.session.add(user_diet_preferences)
-
-    for allergy in random_allergies:
-        user_allergy = UserAllergies(user_id=user.id,
-                                     allergy_id=allergy)
-        db.session.add(user_allergy)
-
-    db.session.commit()
-
-    return user
-
-
-@pytest.fixture(scope='function')
-def vegan_user(test_client, db):
-    """ Creates a test user who is vegan."""
-    from app.models import Users, UserDietPreferences, UserAllergies
-    user = Users(first_name='Vegan',
-                 last_name='User',
-                 email='veganuser@test.com')
-    user.set_password('GoVegan')
-
-    # Set random food preferences (diet types and allergies) for test user
-    random_diet_type = 4  # set user to be vegan
-    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))
-    # random_allergies = list(
-    #     set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
-    print(random_allergies)
     edit_preferences(test_client, random_diet_type, random_allergies)
 
     db.session.add(user)
@@ -227,13 +187,6 @@ def login_test_user(client):
     ), follow_redirects=True)
 
 
-def login_vegan_test_user(client):
-    return client.post('/login/', data=dict(
-        email="veganuser@test.com",
-        password="GoVegan"
-    ), follow_redirects=True)
-
-
 def logout(client):
     return client.get('/logout/', follow_redirects=True)
 
@@ -343,6 +296,7 @@ def delete_mealplan(client, mealplan_id):
     ), follow_redirects=True)
 
 
+# Browser helper functions
 def browser_signup(browser, browser_user_data):
     signup_url = url_for('auth.signup', _external=True)
 
