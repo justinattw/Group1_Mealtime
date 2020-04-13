@@ -9,32 +9,28 @@ Before running browser tests, ensure that the Selenium Chromedriver is placed in
 venv/bin).
 """
 
-
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-import multiprocessing
-import sys
+from test.conftest import browser_signup, browser_login
+
+from flask import url_for
+import pytest
 import random
-from test.conftest import user_signup
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 
-# letters = string.ascii_lowercase
-# # Set up random user
-# test_user_first_name = "Test"
-# test_user_last_name = ''.join(random.choice(letters) for i in range(5))
-# #test_user_last_name = "User"
-# test_user_email = test_user_last_name + '@email.com'
-# test_user_password = 'cat1234'
-URL = 'http://127.0.0.1:5000/'
 
-#def test_homepage_link_texts(test_client, session, browser, live_server):
-def test_homepage_link_texts(browser):
-    index_url = URL
-    #index_url = url_for('main.index', _external=True)
+def test_homepage_link_texts(test_client, db, session, browser, live_server):
+    index_url = url_for('main.index', _external=True)
 
     browser.get(index_url)
+
+    # Assert navbar is present
     signup_link = browser.find_element_by_id('signup-link')
     assert signup_link.text == 'Sign up'
     about_link = browser.find_element_by_id(('about-link'))
@@ -43,10 +39,8 @@ def test_homepage_link_texts(browser):
     assert login_link.text == 'Log in'
 
 
-#def test_simple_search(test_client, session, browser, live_server):
-def test_simple_search(browser):
-    index_url = URL
-    #index_url = url_for('main.index', _external=True)
+def test_simple_search(test_client, db, session, browser, live_server):
+    index_url = url_for('main.index', _external=True)
 
     browser.get(index_url)
     search_text = browser.find_element_by_css_selector('input')
@@ -56,86 +50,101 @@ def test_simple_search(browser):
     search_text.send_keys('cabbage')
     search_button.click()
 
+    # Assert the navbar is still present
+    signup_link = browser.find_element_by_id('signup-link')
+    assert signup_link.text == 'Sign up'
+    about_link = browser.find_element_by_id(('about-link'))
+    assert about_link.text == 'About'
+    login_link = browser.find_element_by_id('login-link')
+    assert login_link.text == 'Log in'
 
-#def test_user_signup(test_client, session, browser, live_server):
-def test_user_signup(browser, browser_user_data):
-    index_url = URL
-    signup_url = URL + 'signup/'
-   # index_url = url_for('main.index', _external=True)
-   # signup_url = url_for('auth.signup', _external=True)
 
-    user_signup(browser, browser_user_data)
+def test_user_signup(test_client, db, session, browser, live_server, browser_user_data):
+    """
+    GiVEN a Flask application and live test server
+    WHEN user requests signup with valid details
+    THEN user signup succeeds and user is logged in
+    """
+    index_url = url_for('main.index', _external=True)
+
+    browser_signup(browser, browser_user_data)  # Signup user with user details
 
     assert browser.find_element_by_css_selector(
         '.alert.alert-success.list-unstyled').text == '×\nYou are now a registered user!'
+    assert browser.current_url == index_url
 
-    browser.get(index_url)
+    # browser.get(index_url)
     links = browser.find_elements_by_css_selector('a')
     loggedin = False
     for link in links:
-        if link.text == 'Account':  # Find if 'Account' is in navbar links to assure user is logged in.
+        if link.text == 'Log out':  # Find if 'Log out' is in navbar links to assure user is logged in.
             loggedin = True
         else:
             pass
     assert loggedin == True
 
-    print(browser.current_url)
+    """
+    GiVEN a Flask application and live test server, user is signed up but logged out
+    WHEN user requests signup previously registered details
+    THEN user signup fails
+    """
     logout = browser.find_element_by_id('logout-link')
-    logout.click()
-    print(browser.current_url)
+    logout.click()  # First log out registered user
 
-    ###check user cannot sign in with email already registered
-    user_signup(browser, browser_user_data)
+    browser_signup(browser, browser_user_data)  # Sign up user with previously registered details
 
-    signup_url = URL + 'signup/'
+    signup_url = url_for('auth.signup', _external=True)
     assert browser.current_url == signup_url
     assert browser.find_element_by_class_name('help-block').text == 'An account is already registered with this email.'
 
 
+def test_user_can_login_after_registered(test_client, db, session, browser, live_server, browser_user_data):
+    """
+    GIVEN a Flask application and live test server, and user is registered
+    WHEN user logs in with registered details
+    THEN log in succeeds
+    """
 
-
-
-# def test_user_can_add_and_view_favourite_recipes(test_client, db, user, browser, live_server):
-def test_user_can_add_and_view_favourite_recipes(browser, browser_user_data):
-
-    user_signup(browser, browser_user_data)
-    browser.get(URL)
-
-    print(browser.current_url)
-    logout = browser.find_element_by_id('logout-link')
-    logout.click()
-    print(browser.current_url)
+    index_url = url_for('main.index', _external=True)
+    browser.get(index_url)
 
     login = browser.find_element_by_id('login-link')
     login.click()
-    assert browser.current_url == URL + 'login/'
+    assert browser.current_url == url_for('auth.login', _external=True)
 
-    form_email = browser.find_element_by_id('login-email')  ########THIS MIGHT NOT WORK IN VIRTUAL ENVIRONMENT -> LOGIN WITH DETAILS SAVED IN REAL DB, LIKE email = d@w.com, pword = 123456
-    form_password = browser.find_element_by_id('login-password')
-    form_submit = browser.find_element_by_css_selector('.btn.btn-primary')
-    #form_email.send_keys('user@test.com')
-    #form_password.send_keys('cat123')
-    form_email.send_keys(browser_user_data["email"])
-    form_password.send_keys(browser_user_data["password"])
-    form_submit.click()
+    browser_login(browser, browser_user_data)
 
     assert browser.find_element_by_css_selector(
-        '.alert.alert-success.list-unstyled').text == '×\nLogged in successfully. Welcome, ' + browser_user_data["first_name"] + '!'
+        '.alert.alert-success.list-unstyled').text == '×\nLogged in successfully. Welcome, ' + browser_user_data[
+               "first_name"] + '!'
 
-    # USER SEARCHES FOR CABBAGE
-    search_term = 'cabbage'
+
+@pytest.mark.parametrize("search_term", [('cabbage'), ('mango'), ('rice'), ('noodles')]) # ('mango')
+def test_user_can_add_and_view_favourite_recipes(test_client, db, session, browser, live_server, browser_user_data,
+                                                 search_term):
+    """
+    GIVEN a Flask application and live test server, and user is logged in
+    WHEN user logs adds a recipe to favourites
+    THEN recipe is added to favourites
+    """
+    index_url = url_for('main.index', _external=True)
+    # browser_signup(browser, browser_user_data)
+    browser_login(browser, browser_user_data)
+
+    search_term = search_term  # User searches for parameterised searches
+
     search_text = browser.find_element_by_css_selector('input')
     assert search_text.get_attribute('aria-label') == "Search"
     search_button = browser.find_element_by_css_selector('.btn.btn-primary.btn-outline-light')
-    print(browser.current_url)
     assert search_button.text == 'Search'
     search_text.send_keys(search_term)
     search_button.click()
     assert search_term in browser.current_url
 
-    # USER ADDS CABBAGE TO FAVOURITES
+    # User adds recipe to favourites
     favourites = browser.find_elements_by_xpath('//button[text()="Add Favourite"]')
-    selected = random.randint(0, len(favourites)-1)
+
+    selected = random.randint(0, len(favourites) - 1)
     selected_tag = favourites[selected].get_attribute("id")
     selected_id = selected_tag.replace('fav', '')
     element = browser.find_elements_by_xpath('//button[text()="Add Favourite"]')
@@ -143,37 +152,48 @@ def test_user_can_add_and_view_favourite_recipes(browser, browser_user_data):
 
     assert "Added" and "to favourites!" in browser.find_element_by_class_name("toast-message").text
 
-    # USER CHECKS CABBAGE IS IN FAVOURITES
+    # User checks the added recipe is in favourites
     element = browser.find_element_by_id('favourites-link')
     browser.execute_script("arguments[0].click();", element)
-    assert browser.current_url == URL + 'favourites'
+
+    favourites_url = url_for('main.favourites', _external=True)
+    assert browser.current_url == favourites_url
+
     body = browser.find_element_by_css_selector('body')
     favourite_recipe = body.find_elements_by_css_selector('a')
     added = False
+
     for rec in favourite_recipe:
-        if rec.get_attribute('href').replace(URL+'recipe/', '') == selected_id:
+        if rec.get_attribute('href').replace(index_url + 'recipe/', '') == selected_id:
             added = True
     assert added == True
 
-    unselected_tag = 'un'+selected_tag
+    """
+    GIVEN a Flask application and live test server, and user is logged in and recipe is added to favourites
+    WHEN user logs unfavourites a recipe
+    THEN recipe is removed from favourites
+    """
+    # User removes added recipe from favourites
+    unselected_tag = 'un' + selected_tag
     element = browser.find_element_by_id(unselected_tag)
     browser.execute_script("arguments[0].click();", element)
 
+    browser.get(browser.current_url)
     element = browser.find_element_by_id('favourites-link')
+
+    # element_id = 'favourites-link'
+    # ignored_exceptions=(NoSuchElementException, StaleElementReferenceException)
+    # element = WebDriverWait(browser, 2, ignored_exceptions=ignored_exceptions) \
+    #     .until(expected_conditions.presence_of_all_elements_located((By.ID, element_id)))
+
     browser.execute_script("arguments[0].click();", element)
-    assert browser.current_url == URL + 'favourites'
+    assert browser.current_url == favourites_url  # Checks that browser has navigated to favourites
 
     body = browser.find_element_by_css_selector('body')
     favourite_recipe = body.find_elements_by_css_selector('a')
 
     added = False
     for rec in favourite_recipe:
-        if rec.get_attribute('href').replace(URL + 'recipe/', '') == selected_id:
+        if rec.get_attribute('href').replace(index_url + 'recipe/', '') == selected_id:
             added = True
     assert added == False
-
-
-
-
-
-
