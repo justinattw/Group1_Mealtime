@@ -173,6 +173,29 @@ def browser_user_data():
 
 
 # Client helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
+def get_recipe_ids(client, response):
+    """
+    Gets recipe ids from any recipes view, such as /recipes or /favourites
+
+    :return: a list of all recipe_ids on page
+    """
+    response_recipe_ids = []
+    page_string = response.data.decode()
+    page_list = page_string.split('a href="/recipe/')
+    page_index = 0
+    for item in page_list:
+        if page_index == 0:
+            pass
+        else:
+            item_recipe_id = item.split('">')[0]
+            item_recipe_id = item_recipe_id.strip()
+            response_recipe_ids.append(int(item_recipe_id))
+        page_index += 1
+
+    return response_recipe_ids
+
+
+
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
