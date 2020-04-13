@@ -76,6 +76,8 @@ class TestSimpleViews:
         """
         response = view_all_recipes(test_client)
         assert response.status_code == 200
+        response_recipe_ids = get_recipe_ids(test_client, response)
+        assert len(response_recipe_ids) > 0
 
 
     def test_view_advanced_search(self, test_client):
@@ -86,7 +88,10 @@ class TestSimpleViews:
         """
         response = view_advanced_search(test_client)
         assert response.status_code == 200
-
+        assert b'Search' in response.data
+        assert b'Calorie range (per person):' in response.data
+        assert b'Diet type' in response.data
+        assert b'Allergies' in response.data
 
 class TestViewRecipes:
 
@@ -101,6 +106,7 @@ class TestViewRecipes:
 
         response = view_recipe(test_client, random_recipe)
         assert response.status_code == 200
+        assert str(random_recipe).encode() in response.data
 
         """
         GIVEN a Flask application
@@ -137,6 +143,7 @@ class TestFavourites:
         rand_favourite = random.randint(1, number_of_recipes)  # generate a random favourite recipe_id to test
         response = add_to_favourites(test_client, rand_favourite)  # add random favourite recipe to favourites
         assert response.status_code == 200
+        assert b'failure' not in response.data
 
         """
         GIVEN a Flask application and user is logged in
@@ -178,6 +185,7 @@ class TestFavourites:
         favourite = random.randint(1, number_of_recipes)
         response = add_to_favourites(test_client, favourite)
         assert response.status_code == 200
+        assert b'failure' not in response.data
 
         # Get recipe name of favourited recipe
         fav_name, = db.session.query(Recipes.recipe_name).filter(Recipes.recipe_id == favourite).first()
