@@ -42,7 +42,7 @@ def index(name=""):
     :param name: finds user's name if logged in
     :return: the index html page with a background
     """
-    # Demonstration of use of a session cookie. Display email as the name if the session cookie is there.
+    # Demonstration of use of a session cookie.
     if 'name' in request.cookies:
         name = request.cookies.get('name')
     if 'name' in session:
@@ -256,14 +256,10 @@ def add_to_favourites(recipe_id):
         current_user.favourite_recipes.append(fav_recipe)
 
         db.session.commit()
-
-        print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'success', 200  # keeps user on the same page
 
     except IntegrityError:
         db.session.rollback()
-
-        print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'failure', 200
 
 
@@ -284,12 +280,9 @@ def remove_from_favourites(recipe_id):
 
         db.session.delete(del_recipe)
         db.session.commit()
-
-        print(f"Removing recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'success', 200  # keeps user on the same page
 
     except InvalidRequestError:
-        print(f"Failed to remove recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'failure', 200
 
 
@@ -360,15 +353,13 @@ def mealplanner():
                     .order_by(MealPlans.mealplan_id.desc()) \
                     .first()
 
-                print(f"Adding new mealplan for user {current_user.id}")
                 flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
 
                 return redirect(url_for('main.mealplanner'))
 
-            except IntegrityError:
+            except IntegrityError:  # Not sure how to trigger this error through routes
                 db.session.rollback()
 
-                print(f"Failed to add new mealplan for user {current_user.id}")
                 flash(f"Error, could not create new meal plan! Please try again", "danger")
 
                 return redirect(url_for('main.mealplanner'))
@@ -394,14 +385,10 @@ def add_to_mealplan(recipe_id):
         try:
             db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
             db.session.commit()
-
-            print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
             return 'success', 200
 
         except IntegrityError:
             db.session.rollback()
-
-            print(f"Failed to add recipe {recipe_id} to meal plan {mealplan_id}")
             return 'failure', 200
 
 
@@ -431,14 +418,10 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
             db.session.delete(del_recipe)
             db.session.commit()
-
-            print(f"Removing recipe {recipe_id} from meal plan {mealplan_id}")
             return 'success', 200
 
         except InvalidRequestError:
             db.session.rollback()
-
-            print(f"Failed to remove recipe {recipe_id} from meal plan {mealplan_id}")
             return 'failure', 200
 
 
@@ -460,14 +443,12 @@ def delete_mealplan(mealplan_id):
         db.session.delete(del_mealplan)
         db.session.commit()
 
-        print(f"Removing mealplan {mealplan_id} from user {current_user.id}'s mealplans")
         flash(f"Mealplan {mealplan_id} deleted!", "warning")
 
         return redirect(url_for('main.mealplans_history'))
 
-    except InvalidRequestError:
+    except InvalidRequestError:  # Failsafe, as @check_user_owns_mealplans generally prevents this error from happening
 
-        print(f"Failed to remove mealplan {mealplan_id} from user {current_user.id}'s mealplans")
         flash(f"Error! Mealplan {mealplan_id} could not be deleted!", "danger")
 
         return redirect(url_for('main.mealplans_history'))
@@ -559,13 +540,15 @@ def email_grocery_list(mealplan_id):
         .all()
 
     if not grocery_list:
-        flash("There are no recipes in this meal plan, so we could not send you a grocery list!")
+        flash("There are no recipes in this meal plan, so we could not send you a grocery list!", "warning")
 
     else:
         try:
             send_grocery_list_email(mealplan_id, grocery_list)
             flash(f"Email has been sent!", "success")
         except:
+            # Fail safe for in case the mail client isn't working (this can be due to many problems, such as Google
+            # authentication)
             flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
 
     return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page

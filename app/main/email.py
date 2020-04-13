@@ -1,13 +1,13 @@
 #!usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-app/main/routes.py:
+app/main/email.py:
 
 This document includes functions for email functionalities within the main route.
 """
-__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__authors__ = "Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
-__credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
+__credits__ = ["Justin Wong"]
 __status__ = "Development"
 
 from app import mail

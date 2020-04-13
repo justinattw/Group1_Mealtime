@@ -5,7 +5,7 @@ test/test_api.py:
 
 Pytests tests for authentication views and methods (relating to files in app/auth/).
 
-app/api COVERAGE: 88%
+app/api COVERAGE: 100% files, 88% lines covered
 
 We achieve 88% coverage of the app/auth directory, but more tests need to be done to ensure the API call is returning
 what is expected.
@@ -63,6 +63,7 @@ def test_api_read_incorrect_recipe_route_invalid(test_client, db):
     # can upload + delete their uploaded recipes, this will need to be changed.
 
     invalid_recipe = number_of_recipes + 1000  # recipe out of range
+    pass
 
     # response = test_client.get('/api/recipes/' + str(invalid_recipe), follow_redirects=True)
     # # assert b'Page Not Found' in response.data

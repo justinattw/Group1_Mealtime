@@ -8,12 +8,15 @@
 <li>{{ item.ingredient }}</li>
 {% endfor %}
 {% else %}
-<li>Oh no, there were no recipes in your meal plan. Visit <a href="{{ url_for('main.recipes') }}">our cookbook to start
+<li>Oh no, there were no recipes in your meal plan. Visit <a href="{{ url_for('main.recipes', _external=True) }}">our cookbook to start
     discovering new recipes today!</a></li>
 {% endif %}
 
+<p>To view your meal plan, click <a
+        href="{{ url_for('main.view_mealplan', mealplan_id=mealplan_id, _external=True) }}">here</a>.</p>
 
-<p>If you think you have received this email by mistake, please contact us at comp0034mealtime@gmail.com</p><br>
+<p>If you think you have received this email by mistake, please log into your account and change your password, and/ or
+    contact us at comp0034mealtime@gmail.com as your account security may be compromised.</p><br>
 <p>Thank you for supporting us,</p>
 <p><b>Mealtime</b></p>
 

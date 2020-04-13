@@ -236,6 +236,7 @@ def search_function(client, search_term):
 
 
 def advanced_search_function(client, search_term, allergy_list, diet_type, cal_range):
+    print(allergy_list)
     return client.post('/advanced_search', data=dict(
         search_term=search_term,
         allergy_list=allergy_list,
@@ -278,10 +279,6 @@ def view_advanced_search(client):
     return client.get('/advanced_search', follow_redirects=True)
 
 
-def view_mealplanner(client):
-    return client.get('/mealplanner', follow_redirects=True)
-
-
 def create_mealplan(client):
     return client.post('/mealplanner', follow_redirects=True)
 
@@ -315,6 +312,12 @@ def view_grocery_list(client, mealplan_id):
 def delete_mealplan(client, mealplan_id):
     delete_string = str(mealplan_id)
     return client.post('/del_mealplan/' + delete_string, data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
+
+
+def send_grocery_list(client, mealplan_id):
+    return client.get('/send_grocery_list/' + str(mealplan_id), data=dict(
         mealplan_id=mealplan_id
     ), follow_redirects=True)
 
