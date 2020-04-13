@@ -397,16 +397,15 @@ class TestSearchResults:
         # Pull the recipe ids that are returned in on the response page, as list of ints
         response_recipe_ids = []
         page_string = response.data.decode()
-        page_list = page_string.split("onclick='ajax_fav(")
+        page_list = page_string.split('a href="/recipe/')
         print('length: ' + str(len(page_list)))
-        page_index = 1
+        page_index = 0
         for item in page_list:
-            if page_index == len(page_list):
+            if page_index == 0:
                 pass
             else:
                 print('AAAAA' + item)
-                item_recipe_id = item.split('button id="fav')[1]
-                item_recipe_id = item_recipe_id.replace('"', '')
+                item_recipe_id = item.split('">')[0]
                 item_recipe_id = item_recipe_id.strip()
                 response_recipe_ids.append(int(item_recipe_id))
             page_index += 1
