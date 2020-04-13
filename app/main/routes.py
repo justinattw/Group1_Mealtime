@@ -14,7 +14,8 @@ __status__ = "Development"
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Recipes, RecipeIngredients, UserFavouriteRecipes, MealPlanRecipes, MealPlans
-from app.main.main_functions import search_function, check_user_owns_mealplan, send_grocery_list_email
+from app.main.main_functions import search_function, check_user_owns_mealplan, get_most_recent_mealplan_id
+from app.main.email import send_grocery_list_email
 import config
 
 from datetime import datetime
@@ -24,7 +25,6 @@ from flask_wtf.csrf import CSRFError
 from markupsafe import escape
 import random
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from sqlalchemy.sql import func
 
 bp_main = Blueprint('main', __name__)
 
@@ -385,9 +385,7 @@ def add_to_mealplan(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to mealplan
     :return: stays on same page
     """
-    # Get the most recent mealplan by taking max(mealplan_id). Will add recipe to this mealplan.
-    mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-        .filter(MealPlans.user_id == current_user.id).first()[0]
+    mealplan_id = get_most_recent_mealplan_id()  # function from main_functions.py
 
     if mealplan_id is None:
         return 'no plan'
@@ -419,8 +417,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
     """
 
     if mealplan_id == 'x':
-        mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-            .filter(MealPlans.user_id == current_user.id).first()[0]
+        mealplan_id = get_most_recent_mealplan_id()  # function from main_functions.py
 
     if mealplan_id == None:
         return 'no plan'
