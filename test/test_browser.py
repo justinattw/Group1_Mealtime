@@ -106,8 +106,6 @@ class TestNavbar:
         recipe_link = browser.find_element_by_id('recipes-link')
         assert recipe_link.text == 'Recipes'
         recipe_link.click()
-        # assert browser.current_url == url_for('main.view_all_recipes')
-        # # recipes url is a bit different to view_all_recipes
 
         browser.get(index_url)
         mealplan_link = browser.find_element_by_id(('mealplan-link'))
@@ -139,7 +137,6 @@ def test_homepage_link_texts(test_client, db, session, browser, live_server):
 
     browser.get(index_url)
 
-    # Assert navbar is present
     signup_link = browser.find_element_by_id('signup-link')
     assert signup_link.text == 'Sign up'
     about_link = browser.find_element_by_id(('about-link'))
@@ -171,7 +168,6 @@ def test_user_can_login_after_registered(test_client, db, session, browser, live
     WHEN user logs in with registered details
     THEN log in succeeds
     """
-
     index_url = url_for('main.index', _external=True)
     browser.get(index_url)
 
@@ -186,7 +182,7 @@ def test_user_can_login_after_registered(test_client, db, session, browser, live
                "first_name"] + '!'
 
 
-@pytest.mark.parametrize("search_term", [('cabbage')])  # , ('mango'), ('rice'), ('noodles')
+@pytest.mark.parametrize("search_term", [('cabbage'), ('mango'), ('rice'), ('noodles')])
 def test_user_can_add_and_view_favourite_recipes(test_client, db, session, browser, live_server, browser_user_data,
                                                  search_term):
     """

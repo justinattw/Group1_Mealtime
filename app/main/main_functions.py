@@ -8,7 +8,7 @@ This document includes functions that assists the main routes, including:
 - get_most_recent_mealplan_id
 - check_user_owns_mealplan decorator
 """
-__authors__ = "Danny Wallis and Justin Wong"
+__authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"

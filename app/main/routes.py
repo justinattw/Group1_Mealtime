@@ -6,7 +6,7 @@ app/main/routes.py:
 This document includes WTForms for authentication methods.
 Authentication methods include signup, login, edit account details and log out.
 """
-__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__authors__ = "Ethan Low, Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
