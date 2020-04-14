@@ -106,7 +106,7 @@ def recipes():
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
                  'max_cal': request.args.get('max_cal', 1000, type=int),
-                 'max_time': request.args.get('max_time', 99999, type=int)}
+                 'time': request.args.get('time', 99999, type=int)}  # Default time to 99999
 
     # The following code related to pagination is adapted from:
     #
@@ -224,7 +224,8 @@ def advanced_search():
                      'allergy_list': ','.join(form.allergies.data),
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
-                     'max_cal': int(range[1])}
+                     'max_cal': int(range[1]) #, 'time': int(form.time.data)  # Add this to have max time
+                     }
 
         diet_name = (config.DIET_CHOICES[int(form.diet_type.data) - 1])[1]
         allergy_list = list(map(int, form.allergies.data))
