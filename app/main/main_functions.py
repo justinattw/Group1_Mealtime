@@ -23,7 +23,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import func
 
 
-def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, max_time=99999):
+def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, time=99999):
     """
     This function accepts 5 parameters to find appropriate recipes according to user input (or default values)
 
@@ -51,7 +51,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
         .filter(Recipes.recipe_name.contains(search_term)) \
         .filter(and_(NutritionValues.calories >= min_cal,
                      NutritionValues.calories <= max_cal)) \
-        .filter(Recipes.total_time <= max_time)
+        .filter(Recipes.total_time <= time)
 
     return results
 
