@@ -6,7 +6,7 @@ app/auth/main_functions.py:
 This document includes functions that assists the main routes, including:
 - search_function
 - get_most_recent_mealplan_id
-- check_user_owns_mealplan
+- check_user_owns_mealplan decorator
 """
 __authors__ = "Danny Wallis and Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
@@ -75,8 +75,9 @@ def check_user_owns_mealplan(func):
     protect users from being able to see other users' meal plans or make changes to other user's meal plans.
 
     :return: if user does not own mealplan, redirect user to mealplanner page with appropriate warning message. Else,
-        continue to route
+        continue to function
     """
+
     @wraps(func)
     def decorated_function(*args, **kwargs):
         mealplan_id = kwargs['mealplan_id']  # Take parameter from the route using kwargs

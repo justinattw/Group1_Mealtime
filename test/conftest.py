@@ -7,7 +7,7 @@ Configures settings for Pytest (the selected testing framework for Mealtime). In
 as well as helper functions.
 """
 
-__authors__ = "Justin Wong"
+__authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"

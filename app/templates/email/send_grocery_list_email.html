@@ -9,7 +9,8 @@
 <li>{{ item.ingredient }}</li>
 {% endfor %}
 {% else %}
-<li>Oh no, there were no recipes in your meal plan. Visit <a href="{{ url_for('main.recipes', _external=True) }}">our cookbook to start
+<li>Oh no, there were no recipes in your meal plan. Visit <a href="{{ url_for('main.recipes', _external=True) }}">our
+    cookbook to start
     discovering new recipes today!</a></li>
 {% endif %}
 

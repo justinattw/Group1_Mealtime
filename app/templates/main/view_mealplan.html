@@ -48,7 +48,8 @@
                     </form>
                     #}
 
-                    <button id="delfrom_mealplan{{result.recipe_id}}" onclick='ajax_delplan("{{ mealplan.mealplan_id }}", "{{result.recipe_id}}")'>
+                    <button id="delfrom_mealplan{{result.recipe_id}}"
+                            onclick='ajax_delplan("{{ mealplan.mealplan_id }}", "{{result.recipe_id}}")'>
                         Remove from Meal Plan
                     </button>
                     {% endif %}
@@ -70,15 +71,15 @@
 <script>
 
     function ajax_delplan(mealplan_id, recipe_id) {
-            $.ajax({
-                url: "/del_from_mealplan/" + mealplan_id + '/' + recipe_id, success: function (result) {
-                    if (result == 'success') {
+        $.ajax({
+            url: "/del_from_mealplan/" + mealplan_id + '/' + recipe_id, success: function (result) {
+                if (result == 'success') {
 
-                        location.reload()
-                    }
+                    location.reload()
                 }
-            });
-        }
+            }
+        });
+    }
 
 </script>
 {% endblock %}

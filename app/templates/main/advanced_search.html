@@ -3,8 +3,8 @@
 {% block title %}Advanced Search{% endblock %}
 
 {% block head %}
-    <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
-{%  endblock %}
+    <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+{% endblock %}
 
 {# Add the content for this page #}
 {% block content %}
@@ -54,7 +54,7 @@
                 max: 1000,
                 values: [250, 750],
                 slide: function (event, ui) {
-                    $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+                    $("#amount").val(ui.values[0] + " - " + ui.values[1]);
                 }
             });
             $("#amount").val($("#slider-range").slider("values", 0) +
@@ -68,7 +68,7 @@
                 min: 0,
                 max: 200,
                 slide: function (event, ui) {
-                    $( "#cooking_time" ).val(ui.value + " min");
+                    $("#cooking_time").val(ui.value + " min");
                 }
             });
             $("#cooking_time").val($("#slider-range-min").slider("value") + " min");

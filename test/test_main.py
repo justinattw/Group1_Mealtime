@@ -562,10 +562,10 @@ class TestSearchResults:
         assert search_term.encode() in response.data
 
     @pytest.mark.parametrize("search_term, allergies, diet, cal_range, time",
-                             [('cabbage', [], 3, '100,500', 40), # Vegetarian
-                              ('fried rice', [], 1, '200,700', 70), # Classic
-                              ('potato', [], 2, '0,1000', 80), # Pescatarian
-                              ('salad', [], 4, '0, 200', 40)]) # Vegan
+                             [('cabbage', [], 3, '100,500', 40),  # Vegetarian
+                              ('fried rice', [], 1, '200,700', 70),  # Classic
+                              ('potato', [], 2, '0,1000', 80),  # Pescatarian
+                              ('salad', [], 4, '0, 200', 40)])  # Vegan
     # TODO: Find workaround to test for allergies
     # Unfortunately we can't actually test for allergies here, because client.post does not seem to pass array data
     # types, and there is no other way for us to pass allergies through WTForms. We do test for allergies in other
