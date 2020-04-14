@@ -33,7 +33,6 @@ marshmallow==3.5.1
 marshmallow-sqlalchemy==0.22.3
 more-itertools==8.2.0
 mysql-connector-python==8.0.19
-numpy==1.18.2
 packaging==20.3
 pluggy==0.13.1
 protobuf==3.11.3
