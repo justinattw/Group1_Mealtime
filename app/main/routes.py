@@ -14,7 +14,8 @@ __status__ = "Development"
 from app import db
 from app.main.forms import AdvSearchRecipes
 from app.models import Recipes, RecipeIngredients, UserFavouriteRecipes, MealPlanRecipes, MealPlans
-from app.main.main_functions import search_function, check_user_owns_mealplan, send_grocery_list_email
+from app.main.main_functions import search_function, check_user_owns_mealplan, get_most_recent_mealplan_id
+from app.main.email import send_grocery_list_email
 import config
 
 from datetime import datetime
@@ -24,7 +25,6 @@ from flask_wtf.csrf import CSRFError
 from markupsafe import escape
 import random
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from sqlalchemy.sql import func
 
 bp_main = Blueprint('main', __name__)
 
@@ -42,7 +42,7 @@ def index(name=""):
     :param name: finds user's name if logged in
     :return: the index html page with a background
     """
-    # Demonstration of use of a session cookie. Display email as the name if the session cookie is there.
+    # Demonstration of use of a session cookie.
     if 'name' in request.cookies:
         name = request.cookies.get('name')
     if 'name' in session:
@@ -106,7 +106,7 @@ def recipes():
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
                  'max_cal': request.args.get('max_cal', 1000, type=int),
-                 'max_time': request.args.get('max_time', 99999, type=int)}
+                 'time': request.args.get('time', 99999, type=int)}  # Default time to 99999
 
     # The following code related to pagination is adapted from:
     #
@@ -225,7 +225,7 @@ def advanced_search():
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
                      'max_cal': int(range[1]),
-                     'max_time': int(form.hidden2.data)}
+                     'time': int(form.hidden2.data)}
 
         diet_name = (config.DIET_CHOICES[int(form.diet_type.data) - 1])[1]
         allergy_list = list(map(int, form.allergies.data))
@@ -257,14 +257,10 @@ def add_to_favourites(recipe_id):
         current_user.favourite_recipes.append(fav_recipe)
 
         db.session.commit()
-
-        print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'success', 200  # keeps user on the same page
 
     except IntegrityError:
         db.session.rollback()
-
-        print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'failure', 200
 
 
@@ -285,12 +281,9 @@ def remove_from_favourites(recipe_id):
 
         db.session.delete(del_recipe)
         db.session.commit()
-
-        print(f"Removing recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'success', 200  # keeps user on the same page
 
     except InvalidRequestError:
-        print(f"Failed to remove recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'failure', 200
 
 
@@ -361,15 +354,13 @@ def mealplanner():
                     .order_by(MealPlans.mealplan_id.desc()) \
                     .first()
 
-                print(f"Adding new mealplan for user {current_user.id}")
                 flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
 
                 return redirect(url_for('main.mealplanner'))
 
-            except IntegrityError:
+            except IntegrityError:  # Not sure how to trigger this error through routes
                 db.session.rollback()
 
-                print(f"Failed to add new mealplan for user {current_user.id}")
                 flash(f"Error, could not create new meal plan! Please try again", "danger")
 
                 return redirect(url_for('main.mealplanner'))
@@ -386,9 +377,7 @@ def add_to_mealplan(recipe_id):
     :param recipe_id: adds recipe associated with recipe_id to mealplan
     :return: stays on same page
     """
-    # Get the most recent mealplan by taking max(mealplan_id). Will add recipe to this mealplan.
-    mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-        .filter(MealPlans.user_id == current_user.id).first()[0]
+    mealplan_id = get_most_recent_mealplan_id()  # function from main_functions.py
 
     if mealplan_id is None:
         return 'no plan'
@@ -397,14 +386,10 @@ def add_to_mealplan(recipe_id):
         try:
             db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
             db.session.commit()
-
-            print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
             return 'success', 200
 
         except IntegrityError:
             db.session.rollback()
-
-            print(f"Failed to add recipe {recipe_id} to meal plan {mealplan_id}")
             return 'failure', 200
 
 
@@ -420,8 +405,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
     """
 
     if mealplan_id == 'x':
-        mealplan_id = db.session.query(func.max(MealPlans.mealplan_id)) \
-            .filter(MealPlans.user_id == current_user.id).first()[0]
+        mealplan_id = get_most_recent_mealplan_id()  # function from main_functions.py
 
     if mealplan_id == None:
         return 'no plan'
@@ -435,14 +419,10 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
             db.session.delete(del_recipe)
             db.session.commit()
-
-            print(f"Removing recipe {recipe_id} from meal plan {mealplan_id}")
             return 'success', 200
 
         except InvalidRequestError:
             db.session.rollback()
-
-            print(f"Failed to remove recipe {recipe_id} from meal plan {mealplan_id}")
             return 'failure', 200
 
 
@@ -464,14 +444,12 @@ def delete_mealplan(mealplan_id):
         db.session.delete(del_mealplan)
         db.session.commit()
 
-        print(f"Removing mealplan {mealplan_id} from user {current_user.id}'s mealplans")
         flash(f"Mealplan {mealplan_id} deleted!", "warning")
 
         return redirect(url_for('main.mealplans_history'))
 
-    except InvalidRequestError:
+    except InvalidRequestError:  # Failsafe, as @check_user_owns_mealplans generally prevents this error from happening
 
-        print(f"Failed to remove mealplan {mealplan_id} from user {current_user.id}'s mealplans")
         flash(f"Error! Mealplan {mealplan_id} could not be deleted!", "danger")
 
         return redirect(url_for('main.mealplans_history'))
@@ -563,14 +541,17 @@ def email_grocery_list(mealplan_id):
         .all()
 
     if not grocery_list:
-        flash("There are no recipes in this meal plan, so we could not send you a grocery list!")
+        flash("There are no recipes in this meal plan, so we could not send you a grocery list!", "warning")
 
     else:
         try:
             send_grocery_list_email(mealplan_id, grocery_list)
-            flash(f"Email has been sent!", "success")
+            flash(f"Your grocery list has been sent to {current_user.email}!", "success")
         except:
-            flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
+            # Fail safe for in case the mail client isn't working (this can be due to many problems, such as Google
+            # authentication)
+            flash(f"Unfortunately the email could not be sent due to a server error, please try again at a later time.",
+                  "warning")
 
     return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page
     # return 'done'

@@ -68,8 +68,9 @@ class TestConfig(Config):
     DEBUG = True
     TESTING = True
 
-    CWD = dirname(abspath(__file__))
+    PRESERVE_CONTEXT_ON_EXCEPTION = False
 
+    CWD = dirname(abspath(__file__))
     # Create a duplicate of the current database
     from shutil import copy
     src = join(CWD, 'db/mealtime.db')  # current working db

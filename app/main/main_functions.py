@@ -3,27 +3,27 @@
 """
 app/auth/main_functions.py:
 
-This document includes functions that assists the main routes.
+This document includes functions that assists the main routes, including:
+- search_function
+- get_most_recent_mealplan_id
+- check_user_owns_mealplan
 """
 __authors__ = "Danny Wallis and Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
-from app import db, mail
-from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans, RecipeIngredients, \
-    MealPlanRecipes
-import app
+from app import db
+from app.models import Recipes, RecipeAllergies, RecipeDietTypes, NutritionValues, MealPlans
 
-from flask import flash, redirect, url_for, render_template
+from flask import flash, redirect, url_for
 from flask_login import current_user
-from flask_mail import Message
 from functools import wraps
 from sqlalchemy import and_
 from sqlalchemy.sql import func
 
 
-def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, max_time=99999):
+def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, time=99999):
     """
     This function accepts 5 parameters to find appropriate recipes according to user input (or default values)
 
@@ -51,7 +51,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
         .filter(Recipes.recipe_name.contains(search_term)) \
         .filter(and_(NutritionValues.calories >= min_cal,
                      NutritionValues.calories <= max_cal)) \
-        .filter(Recipes.total_time <= max_time)
+        .filter(Recipes.total_time <= time)
 
     return results
 
@@ -67,23 +67,6 @@ def get_most_recent_mealplan_id():
         .filter(MealPlans.user_id == current_user.id).first()
 
     return mealplan_id
-
-
-def send_email(subject, recipients, html_body):
-    msg = Message(subject,
-                  sender=('Mealtime', 'comp0034mealtime@gmail.com'),
-                  recipients=recipients)
-    # msg.body = text_body
-    msg.html = html_body
-    mail.send(msg)
-
-
-def send_grocery_list_email(mealplan_id, grocery_list):
-
-    send_email(f'[Mealtime] Your grocery shopping list for Mealplan {mealplan_id}',
-               recipients=[current_user.email],
-               html_body=render_template('email/send_grocery_list_email.html',
-                                         user=current_user, mealplan_id=mealplan_id, grocery_list=grocery_list))
 
 
 def check_user_owns_mealplan(func):

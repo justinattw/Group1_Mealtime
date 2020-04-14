@@ -23,7 +23,6 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
-
 mail = Mail()
 
 
@@ -45,14 +44,6 @@ def create_app(config_class=DevConfig):
     app.config.from_object(config_class)
     db.init_app(app)
     login_manager.init_app(app)
-
-    # app.config['MAIL_SERVER']='smtp.gmail.com'
-    # app.config['MAIL_PORT']=587
-    # app.config['MAIL_USE_SSL']=True
-    # app.config['MAIL_PORT'] = 587
-    # app.config['MAIL_USE_SSL'] = True
-    # app.config['MAIL_USERNAME']='comp0034mealtime@gmail.com'
-    # app.config['MAIL_PASSWORD'] = 'BASCsFinest'
 
     app.config.update(
         # EMAIL SETTINGS

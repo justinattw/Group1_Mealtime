@@ -14,7 +14,7 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
         {% for result in results %}
         <div class="col mb-4">
-            <div class="card">
+            <div class="card h-100">
                 <img class="card-img-top" src="{{ url_for('static', filename=('img/recipe_images/' + result.photo)) }}"
                      alt={{ result.recipe_name }}>
                 <div class="card-body">
@@ -29,7 +29,7 @@
                     <p class="card-text">
                         <img src="{{ url_for('static', filename=('img/icons/group.png')) }}" alt="serves icon"
                              height="15" align="middle">
-                        {{ result.serves }} peoples
+                        {{ result.serves }} {% if result.serves == 1 %}person{% else %}people{% endif %}
                     </p>
 
                     {# Buttons to add to mealplan/ favourites #}

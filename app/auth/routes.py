@@ -77,14 +77,9 @@ def signup():
         try:
             db.session.add(user)
 
-            # Set user diet preference to classic upon signing up
-            # user_query = db.session.query(Users).filter_by(email=form.email.data).first()
-            # diet_preference = UserDietPreferences(user_id=user.id, diet_type_id=1)
-
             diet_preference = UserDietPreferences(diet_type_id=1)
-            user.diet_preferences.append(diet_preference)
+            user.diet_preferences.append(diet_preference)  # Add diet_preference to current user
 
-            # db.session.add(diet_preference)
             db.session.commit()
 
             login_user(user)  # User is logged in upon signing up
@@ -112,8 +107,7 @@ def account():
 
     :return: template for account.html
     """
-    user = Users.query.filter_by(id=current_user.id).first_or_404(
-        description='There is no user {}'.format(current_user.id))
+    user = Users.query.filter_by(id=current_user.id).first_or_404(description=f'There is no user {current_user.id}')
 
     return render_template('auth/account.html', user=user)
 
@@ -168,12 +162,6 @@ def edit_preferences():
             # Remove all diet preferences for user to overwrite pre-existing settings
             UserDietPreferences.query.filter_by(user_id=user.id).delete()
             UserAllergies.query.filter_by(user_id=user.id).delete()
-
-            # # WITHOUT OBJECT INHERITANCE
-            # # Re-add diet_preference and allergies
-            # db.session.add(UserDietPreferences(user_id=user.id, diet_type_id=diet_type_id))
-            # for allergy_id in allergy_list:
-            #     db.session.add(UserAllergies(user_id=user.id, allergy_id=allergy_id))
 
             # Add newly set diet preferences and allergies to current user
             diet_type = UserDietPreferences(diet_type_id=diet_type_id)

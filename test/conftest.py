@@ -6,22 +6,17 @@ test/conftest.py:
 Configures settings for Pytest (the selected testing framework for Mealtime). Includes setup and teardowns (fixtures),
 as well as helper functions.
 """
+
 __authors__ = "Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
-
-import signal
 
 from app import create_app
 from app import db as _db
 import config
 
 from flask_login import login_user, logout_user
-import logging
-import multiprocessing
-import numpy as np
-import os
 import pytest
 import random
 from urllib.request import urlopen
@@ -66,41 +61,9 @@ def user(test_client, db):
 
     # Set random food preferences (diet types and allergies) for test user
     random_diet_type = random.randint(1, len(config.DIET_CHOICES))
+    # User has a random number of between 1-5 allergies, and random allergies
     random_allergies = list(
         set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
-    edit_preferences(test_client, random_diet_type, random_allergies)
-
-    db.session.add(user)
-    db.session.commit()
-    user_diet_preferences = UserDietPreferences(user_id=user.id,
-                                                diet_type_id=random_diet_type)
-    db.session.add(user_diet_preferences)
-
-    for allergy in random_allergies:
-        user_allergy = UserAllergies(user_id=user.id,
-                                     allergy_id=allergy)
-        db.session.add(user_allergy)
-
-    db.session.commit()
-
-    return user
-
-
-@pytest.fixture(scope='function')
-def vegan_user(test_client, db):
-    """ Creates a test user who is vegan."""
-    from app.models import Users, UserDietPreferences, UserAllergies
-    user = Users(first_name='Vegan',
-                 last_name='User',
-                 email='veganuser@test.com')
-    user.set_password('GoVegan')
-
-    # Set random food preferences (diet types and allergies) for test user
-    random_diet_type = 4  # set user to be vegan
-    random_allergies = random.sample(range(1, len(config.ALLERGY_CHOICES) + 1), random.randint(2, 6))
-    # random_allergies = list(
-    #     set([random.randrange(1, len(config.ALLERGY_CHOICES)) for i in range(random.randint(1, 5))]))
-    print(random_allergies)
     edit_preferences(test_client, random_diet_type, random_allergies)
 
     db.session.add(user)
@@ -159,19 +122,6 @@ def user_data():
     return user_data
 
 
-@pytest.fixture(scope='function')
-def browser_user_data():
-    """ Provides the details for a browser user registration"""
-    user_data = {
-        "first_name": "Bowser",
-        "last_name": "User",
-        "email": "bowser@nintendo.com",
-        "password": "killMario",
-        "confirm": "killMario"
-    }
-    return user_data
-
-
 # Test browser configuration. The following code is adapted from a tutorial
 # Title: Set Your Test Automation Goals with Web UI Testing
 # Author: AutomationPanda
@@ -181,6 +131,7 @@ def browser_user_data():
 from selenium import webdriver
 
 from flask import url_for
+
 
 @pytest.fixture
 def browser():
@@ -192,7 +143,7 @@ def browser():
 
     # (RECOMMENDED) Use following driver if chromedriver is in PATH.
     # To move chromedriver to PATH, just copy the chromedriver from test/chromedriver to venv/bin
-    driver = webdriver.Chrome() # CircleCI. Activate this when committing to GitHub.
+    driver = webdriver.Chrome()  # CircleCI. Activate this when committing to GitHub.
 
     driver.implicitly_wait(10)
     yield driver
@@ -208,7 +159,43 @@ class TestLiveServer:
         assert res.code == 200
 
 
+@pytest.fixture(scope='function')
+def browser_user_data():
+    """ Provides the details for a browser user registration. """
+    user_data = {
+        "first_name": "Bowser",
+        "last_name": "User",
+        "email": "bowser@user.com",
+        "password": "bowsersCastle",
+        "confirm": "bowsersCastle"
+    }
+    return user_data
+
+
 # Client helper functions (not fixtures) from https://flask.palletsprojects.com/en/1.1.x/testing/
+def get_recipe_ids(client, response):
+    """
+    Gets recipe ids from any recipes view, such as /recipes or /favourites
+
+    :return: a list of all recipe_ids on page
+    """
+    response_recipe_ids = []
+    page_string = response.data.decode()
+    page_list = page_string.split('a href="/recipe/')
+    page_index = 0
+    for item in page_list:
+        if page_index == 0:
+            pass
+        else:
+            item_recipe_id = item.split('">')[0]
+            item_recipe_id = item_recipe_id.strip()
+            response_recipe_ids.append(int(item_recipe_id))
+        page_index += 1
+
+    return response_recipe_ids
+
+
+
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
@@ -220,13 +207,6 @@ def login_test_user(client):
     return client.post('/login/', data=dict(
         email="user@test.com",
         password="cat123"
-    ), follow_redirects=True)
-
-
-def login_vegan_test_user(client):
-    return client.post('/login/', data=dict(
-        email="veganuser@test.com",
-        password="GoVegan"
     ), follow_redirects=True)
 
 
@@ -255,6 +235,16 @@ def search_function(client, search_term):
     ), follow_redirects=True)
 
 
+def advanced_search_function(client, search_term, allergy_list, diet_type, cal_range):
+    print(allergy_list)
+    return client.post('/advanced_search', data=dict(
+        search_term=search_term,
+        allergy_list=allergy_list,
+        diet_type=diet_type,
+        hidden=cal_range,
+    ), follow_redirects=True)
+
+
 def add_to_favourites(client, recipe_id):
     url_str = '/add_to_favourites/' + str(recipe_id)
     return client.post(url_str, data=dict(
@@ -271,19 +261,72 @@ def view_favourites(client):
     return client.get('/favourites', follow_redirects=True)
 
 
+def remove_from_favourites(client, recipe_id):
+    return client.post('/remove_from_favourites/' + str(recipe_id), data=dict(
+        recipe_id=recipe_id
+    ), follow_redirects=True)
+
+
+def view_all_recipes(client):
+    return client.get('/view_all_recipes', follow_redirects=True)
+
+
 def view_about(client):
     return client.get('/about', follow_redirects=True)
 
 
-def view_mealplanner(client):
-    return client.get('/mealplanner', follow_redirects=True)
+def view_advanced_search(client):
+    return client.get('/advanced_search', follow_redirects=True)
+
+
+def create_mealplan(client):
+    return client.post('/mealplanner', follow_redirects=True)
+
+
+def add_to_mealplan(client, recipeid):
+    return client.post('/add_to_mealplan/' + str(recipeid), data=dict(
+        recipeid=recipeid
+    ), follow_redirects=True)
+
+
+def view_mealplan(client, mealplan_id):
+    meal_string = str(mealplan_id)
+    return client.get('/view_mealplan/' + meal_string, follow_redirects=True)
+
+
+def del_from_mealplan(client, mealplan_id, recipe_id):
+    delete_string = str(mealplan_id) + '/' + str(recipe_id)
+    return client.post('/del_from_mealplan/' + delete_string, data=dict(
+        mealplan_id=mealplan_id,
+        recipe_id=recipe_id
+    ), follow_redirects=True)
+
+
+def view_grocery_list(client, mealplan_id):
+    meal_string = str(mealplan_id)
+    return client.post('/grocery_list/' + meal_string, data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
+
+
+def delete_mealplan(client, mealplan_id):
+    delete_string = str(mealplan_id)
+    return client.post('/del_mealplan/' + delete_string, data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
+
+
+def send_grocery_list(client, mealplan_id):
+    return client.get('/send_grocery_list/' + str(mealplan_id), data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
 
 
 # Browser helper functions
-def browser_signup(browser, user_data):
+def browser_signup(browser, browser_user_data):
     signup_url = url_for('auth.signup', _external=True)
-    browser.get(signup_url)
 
+    browser.get(signup_url)
     form_first_name = browser.find_element_by_id('signup_first_name')
     form_last_name = browser.find_element_by_id('signup_last_name')
     form_email = browser.find_element_by_id('signup_email')
@@ -291,12 +334,13 @@ def browser_signup(browser, user_data):
     form_confirm = browser.find_element_by_id('signup_confirm')
     form_submit = browser.find_element_by_id("submit_button")
 
-    form_first_name.send_keys(user_data['first_name'])
-    form_last_name.send_keys(user_data['last_name'])
-    form_email.send_keys(user_data['email'])
-    form_password.send_keys(user_data['password'])
-    form_confirm.send_keys(user_data['confirm'])
+    form_first_name.send_keys(browser_user_data["first_name"])
+    form_last_name.send_keys(browser_user_data["last_name"])
+    form_email.send_keys(browser_user_data["email"])
+    form_password.send_keys(browser_user_data["password"])
+    form_confirm.send_keys(browser_user_data["confirm"])
     form_submit.click()
+
 
 def browser_login(browser, user_data):
     login_url = url_for('auth.login', _external=True)
