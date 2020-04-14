@@ -173,8 +173,8 @@ class TestFavourites:
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
         rand_favourite = random.randint(1, number_of_recipes)
 
-        add_to_favourites(test_client, rand_favourite)            # Add favourite recipe first time
-        response = add_to_favourites(test_client, rand_favourite) # Add favourite recipe second time
+        add_to_favourites(test_client, rand_favourite)  # Add favourite recipe first time
+        response = add_to_favourites(test_client, rand_favourite)  # Add favourite recipe second time
         assert b'failure' in response.data
 
         # with pytest.raises(ObjectDeletedError):
@@ -419,7 +419,7 @@ class TestMealplans:
         """
         create_mealplan(test_client)
 
-        from app.models import MealPlans, MealPlanRecipes
+        from app.models import MealPlans
         # Get current mealplan id
         mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
 
@@ -439,7 +439,7 @@ class TestMealplans:
         """
         create_mealplan(test_client)
 
-        from app.models import MealPlans, MealPlanRecipes
+        from app.models import MealPlans
         mealplan_added = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
         assert mealplan_added
 
@@ -550,7 +550,7 @@ class TestMealplans:
 
 class TestSearchResults:
 
-    @pytest.mark.parametrize("search_term", [('vegan'), ('rice')])
+    @pytest.mark.parametrize("search_term", [('vegan'), ('rice'), ('noodles')])
     def test_search_without_login(self, test_client, search_term):
         """
         GIVEN a Flask application
@@ -561,20 +561,24 @@ class TestSearchResults:
         assert response.status_code == 200
         assert search_term.encode() in response.data
 
-    @pytest.mark.parametrize("search_term, allergies, diet, cal_range",
-                             [('cabbage', [], 3, '100,500'),
-                              ('fried rice', [], 1, '200,700'),
-                              ('potato', [], 2, '0,1000')])
-    # Unfortunately we can't test for allergies, because client.post does not seem to allow passing through a list, and
-    # there is no other way for us to pass allergies through WTForms.
+    @pytest.mark.parametrize("search_term, allergies, diet, cal_range, time",
+                             [('cabbage', [], 3, '100,500', 40),  # Vegetarian
+                              ('fried rice', [], 1, '200,700', 70),  # Classic
+                              ('potato', [], 2, '0,1000', 80),  # Pescatarian
+                              ('salad', [], 4, '0, 200', 40)])  # Vegan
+    # TODO: Find workaround to test for allergies
+    # Unfortunately we can't actually test for allergies here, because client.post does not seem to pass array data
+    # types, and there is no other way for us to pass allergies through WTForms. We do test for allergies in other
+    # sections though.
     def test_advanced_search_results_applies_filter_to_recipes(self, test_client, db, search_term, allergies, diet,
-                                                               cal_range):
+                                                               cal_range, time):
         """
         GIVEN a flask application
         WHEN user makes advanced search with specified search inputs
         THEN return recipes satisfy
         """
-        response = advanced_search_function(test_client, search_term, allergies, diet, cal_range)
+        response = advanced_search_function(test_client, search_term=search_term, diet_type=diet, cal_range=cal_range,
+                                            time=time)
         assert response.status_code == 200
         assert search_term.encode() in response.data
 
@@ -591,6 +595,7 @@ class TestSearchResults:
             assert recipe.diet_type[0].diet_type_id >= diet
             assert search_term in recipe.recipe_name.lower()
             assert min_cal <= int(recipe.nutrition_values.calories) <= max_cal
+            assert recipe.total_time <= time
 
             # recipe_allergies = [allergy.allergy_id for allergy in recipe.allergies]
             # for allergy in user_allergies:
@@ -650,7 +655,8 @@ class TestSearchResults:
 
     @pytest.mark.parametrize("itr, search_term", [(0, "vegan"), (1, "rice"), (2, "noodles")])
     # Do test 3 times with different search terms
-    def test_search_function_applies_preferences_with_logged_in_user(self, test_client, user, logged_in_user, db, itr, search_term):
+    def test_search_function_applies_preferences_with_logged_in_user(self, test_client, user, logged_in_user, db, itr,
+                                                                     search_term):
         """
         GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
         WHEN user requests to view all recipes

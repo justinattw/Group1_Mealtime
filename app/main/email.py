@@ -18,6 +18,14 @@ from flask_mail import Message
 
 
 def send_email(subject, sender, recipients, html_body):
+    """
+
+
+    :param subject: Subject of email
+    :param sender: Sender (Mealtime)
+    :param recipients: recipient email address(es)
+    :param html_body:
+    """
     msg = Message(subject,
                   sender=sender,
                   recipients=recipients)
@@ -26,7 +34,13 @@ def send_email(subject, sender, recipients, html_body):
 
 
 def send_grocery_list_email(mealplan_id, grocery_list):
+    """
+    Uses send_email function to
 
+    :param mealplan_id: for which meal plan
+    :param grocery_list:
+    :return:
+    """
     send_email(f'[Mealtime] Your grocery shopping list for Mealplan {mealplan_id}',
                sender=('Mealtime', 'comp0034mealtime@gmail.com'),
                recipients=[current_user.email],

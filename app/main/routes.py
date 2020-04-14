@@ -61,27 +61,13 @@ def view_recipe(recipe_id):
     """
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == recipe_id).one()
 
+    nutrition = recipe.nutrition_values # Demonstrations of Object Relationship (SQLAlchemy)
     allergies = recipe.allergies
     ingredients = recipe.ingredients
     steps = recipe.instructions
-    nutrition = recipe.nutrition_values
 
-    # allergies = db.session.query(Allergies, RecipeAllergies) \
-    #     .join(RecipeAllergies) \
-    #     .filter(RecipeAllergies.recipe_id == recipe_id) \
-    #     .all()
-    # ingredients = db.session.query(RecipeIngredients) \
-    #     .filter(RecipeIngredients.recipe_id == recipe_id) \
-    #     .all()
-    # steps = db.session.query(RecipeInstructions) \
-    #     .filter(RecipeInstructions.recipe_id == recipe_id) \
-    #     .all()
-    # nutrition = db.session.query(NutritionValues) \
-    #     .filter(NutritionValues.recipe_id == recipe_id) \
-    #     .one()
-
-    return render_template("main/view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps,
-                           nutrition=nutrition, allergies=allergies)
+    return render_template("main/view_recipe.html", recipe=recipe, nutrition=nutrition, allergies=allergies,
+                           ingredients=ingredients,  steps=steps)
 
 
 @bp_main.route('/recipes', methods=['GET'])
@@ -145,9 +131,6 @@ def view_all_recipes():
         flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
                         f"Diet type: {diet_name}\n" \
                         f"Allergies: {flash_allergies.lower()}"
-
-        # To show flash messages on new line, implement:
-        # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
         flash(flash_message, "success")
 
         # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
@@ -188,13 +171,8 @@ def search():
             flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
                             f"Diet type: {diet_name}\n" \
                             f"Allergies: {flash_allergies.lower()}"
-
-            # To show flash messages on new line, implement:
-            # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
             flash(flash_message, "success")
 
-            # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
-            # request.args.get in recipes route can
             allergy_id_str = map(str, allergy_list)
             allergies = ','.join(allergy_id_str)
 
@@ -278,7 +256,6 @@ def remove_from_favourites(recipe_id):
             .filter(UserFavouriteRecipes.recipe_id == recipe_id) \
             .filter(UserFavouriteRecipes.user_id == current_user.id) \
             .one()
-
         db.session.delete(del_recipe)
         db.session.commit()
         return 'success', 200  # keeps user on the same page
@@ -317,27 +294,23 @@ def mealplanner():
     """
     Guides the user through creating and editing meal plans
 
-    :return: mealplanner html page
+    :return: mealplanner view
     """
-    # # Cannot order mealplans using this method
-    # mealplans = current_user.mealplans
-
+    # Cannot order mealplans using object relationship (current_user.mealplans), so use db.session.query
     mealplans = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
-        .order_by(MealPlans.mealplan_id.desc())  # Show mealplans by most recent using order_by
+        .order_by(MealPlans.mealplan_id.desc())  # display mealplans by most recent using order_by
 
     all_mealplans = mealplans.all()
     most_recent = mealplans.first()
 
-    # Create a new meal plan when the "create" button is clicked
-    if request.method == 'POST':
+    if request.method == 'POST': # Create a new meal plan when the "create" button is clicked
 
         # If user has created a meal plan but no recipes in most recent mealplan, they cannot make a new meal plan
         if most_recent and not most_recent.mealplan_recipes:
             flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
                  creating a new meal plan", "danger")
             return redirect(url_for('main.mealplanner'))
-
 
         else:
             try:
@@ -355,14 +328,12 @@ def mealplanner():
                     .first()
 
                 flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
-
                 return redirect(url_for('main.mealplanner'))
 
             except IntegrityError:  # Not sure how to trigger this error through routes
                 db.session.rollback()
 
                 flash(f"Error, could not create new meal plan! Please try again", "danger")
-
                 return redirect(url_for('main.mealplanner'))
 
     return render_template('main/mealplanner.html', mealplans=all_mealplans, most_recent=most_recent)
@@ -375,7 +346,7 @@ def add_to_mealplan(recipe_id):
     Allows user to add recipe to the most recent mealplan
 
     :param recipe_id: adds recipe associated with recipe_id to mealplan
-    :return: stays on same page
+    :return: stays on same page, returns success or failure to trigger Javascript Ajax notification
     """
     mealplan_id = get_most_recent_mealplan_id()  # function from main_functions.py
 
@@ -401,7 +372,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
     Allows user to delete a recipe from any mealplan
 
     :param recipe_id: deletes recipe associated with recipe_id from mealplan
-    :return: stays on same page
+    :return: stays on same page, returns success or failure to trigger Javascript Ajax notification
     """
 
     if mealplan_id == 'x':
@@ -430,6 +401,11 @@ def del_from_mealplan(mealplan_id, recipe_id):
 @login_required
 @check_user_owns_mealplan
 def delete_mealplan(mealplan_id):
+    """
+
+    :param mealplan_id: meal plan to be deleted
+    :return: redirects to meal plan history page
+    """
     try:
         del_mealplan = db.session.query(MealPlans) \
             .filter(MealPlans.mealplan_id == mealplan_id) \
@@ -461,7 +437,7 @@ def mealplans_history():
     """
     Allows user to view past meal plans
 
-    :return: mealplans history html page
+    :return: shows mealplans history html page
     """
     # cannot apply order_by through current_user.mealplans, so use traditional query
     mealplans = db.session.query(MealPlans) \
@@ -530,8 +506,8 @@ def email_grocery_list(mealplan_id):
     """
     Sends grocery list to user's registered email.
 
-    :param mealplan_id:
-    :return:
+    :param mealplan_id: mealplan for which grocery list should be sent
+    :return: redirects to grocery list of specified meal plan
     """
     grocery_list = db.session.query(RecipeIngredients) \
         .join(MealPlanRecipes, RecipeIngredients.recipe_id == MealPlanRecipes.recipe_id) \

@@ -7,7 +7,7 @@ Configures settings for Pytest (the selected testing framework for Mealtime). In
 as well as helper functions.
 """
 
-__authors__ = "Justin Wong"
+__authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
@@ -195,7 +195,6 @@ def get_recipe_ids(client, response):
     return response_recipe_ids
 
 
-
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
@@ -235,13 +234,13 @@ def search_function(client, search_term):
     ), follow_redirects=True)
 
 
-def advanced_search_function(client, search_term, allergy_list, diet_type, cal_range):
-    print(allergy_list)
+def advanced_search_function(client, search_term="", allergy_list=[], diet_type=1, cal_range="0,1000", time=1000):
     return client.post('/advanced_search', data=dict(
         search_term=search_term,
         allergy_list=allergy_list,
         diet_type=diet_type,
         hidden=cal_range,
+        hidden2=time
     ), follow_redirects=True)
 
 
