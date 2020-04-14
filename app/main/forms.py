@@ -27,10 +27,7 @@ class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
 
-    amount = StringField()  # Set field to render slider current values
-    hidden = HiddenField()  # Field for calorie range
-    hidden2 = HiddenField()  # Field for max cooking time
-
-    # time = StringField('Maximum time')
+    cals = HiddenField()  # Field for calorie range
+    max_time = HiddenField()  # Field for max cooking time
 
     allergies = SelectMultipleField('Allergies (cmd/ctrl + click to select multiple)', choices=ALLERGY_CHOICES)
