@@ -239,8 +239,8 @@ def advanced_search_function(client, search_term="", allergy_list=[], diet_type=
         search_term=search_term,
         allergy_list=allergy_list,
         diet_type=diet_type,
-        hidden=cal_range,
-        hidden2=time
+        cals=cal_range,
+        max_time=time
     ), follow_redirects=True)
 
 

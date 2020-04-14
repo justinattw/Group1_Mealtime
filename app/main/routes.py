@@ -61,13 +61,13 @@ def view_recipe(recipe_id):
     """
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == recipe_id).one()
 
-    nutrition = recipe.nutrition_values # Demonstrations of Object Relationship (SQLAlchemy)
+    nutrition = recipe.nutrition_values  # Demonstrations of Object Relationship (SQLAlchemy)
     allergies = recipe.allergies
     ingredients = recipe.ingredients
     steps = recipe.instructions
 
     return render_template("main/view_recipe.html", recipe=recipe, nutrition=nutrition, allergies=allergies,
-                           ingredients=ingredients,  steps=steps)
+                           ingredients=ingredients, steps=steps)
 
 
 @bp_main.route('/recipes', methods=['GET'])
@@ -304,7 +304,7 @@ def mealplanner():
     all_mealplans = mealplans.all()
     most_recent = mealplans.first()
 
-    if request.method == 'POST': # Create a new meal plan when the "create" button is clicked
+    if request.method == 'POST':  # Create a new meal plan when the "create" button is clicked
 
         # If user has created a meal plan but no recipes in most recent mealplan, they cannot make a new meal plan
         if most_recent and not most_recent.mealplan_recipes:
