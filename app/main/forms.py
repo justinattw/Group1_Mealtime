@@ -31,6 +31,4 @@ class AdvSearchRecipes(FlaskForm):
     hidden = HiddenField()  # Field for calorie range
     hidden2 = HiddenField()  # Field for max cooking time
 
-    # time = StringField('Maximum time')
-
     allergies = SelectMultipleField('Allergies (cmd/ctrl + click to select multiple)', choices=ALLERGY_CHOICES)
