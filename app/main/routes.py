@@ -224,7 +224,8 @@ def advanced_search():
                      'allergy_list': ','.join(form.allergies.data),
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
-                     'max_cal': int(range[1])}
+                     'max_cal': int(range[1]),
+                     'max_time': int(form.hidden2.data)}
 
         diet_name = (config.DIET_CHOICES[int(form.diet_type.data) - 1])[1]
         allergy_list = list(map(int, form.allergies.data))

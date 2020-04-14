@@ -13,12 +13,21 @@
         {{ form.csrf_token }}
         <dl>
             {{ wtf.form_field(form.search_term, class='form-control', placeholder="Enter recipe name") }}
+            {# Slider for calorie range #}
             <p>
                 <label for="amount">Calorie range (per person):</label>
                 <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
                 <input class='form-control' id="hidden" name="hidden" type="hidden" value="">
             </p>
             <div id="slider-range"></div>
+            <br>
+            {# Slider for max cooking time #}
+            <p>
+                <label for="cooking_time">Max cooking time:</label>
+                <input type="text" id="cooking_time" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                <input class='form-control' id="hidden2" name="hidden2" type="hidden" value="">
+            </p>
+            <div id="slider-range-min"></div>
             <br>
             {{ wtf.form_field(form.diet_type, class='form-control') }}
             {{ wtf.form_field(form.allergies, class='form-control') }}
@@ -30,7 +39,7 @@
 {% block footer %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
-        /* Use JQuery UI to create a 'two-headed slider'
+        /* Use JQuery UI to create a sliders
 
         Library: JQuery UI
         Main Authors: Alex Schmitz, Jörn Zaefferer, Felix Nagel, Mike Sherov and Rafael Xavier de Souza
@@ -51,9 +60,25 @@
             $("#amount").val($("#slider-range").slider("values", 0) +
                 " - " + $("#slider-range").slider("values", 1));
         });
+
+        $(function () {
+            $("#slider-range-min").slider({
+                range: "min",
+                value: 100,
+                min: 0,
+                max: 200,
+                slide: function (event, ui) {
+                    $( "#cooking_time" ).val(ui.value + " min");
+                }
+            });
+            $("#cooking_time").val($("#slider-range-min").slider("value") + " min");
+        });
+
         function SetRangeFunction() {
             var range = $("#slider-range").slider("values")
+            var max_cook_time = $("#slider-range-min").slider("value")
             document.getElementById("hidden").setAttribute('value', range);
+            document.getElementById("hidden2").setAttribute('value', max_cook_time);
         }
     </script>
 {% endblock %}

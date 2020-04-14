@@ -29,5 +29,6 @@ class AdvSearchRecipes(FlaskForm):
 
     amount = StringField()  # Set field to render slider current values
     hidden = HiddenField()  # Field for calorie range
+    hidden2 = HiddenField()  # Field for max cooking time
 
     allergies = SelectMultipleField('Allergies (cmd/ctrl + click to select multiple)', choices=ALLERGY_CHOICES)
