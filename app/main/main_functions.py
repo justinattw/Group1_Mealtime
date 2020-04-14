@@ -34,7 +34,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
     :param allergy_list: list of allergies
     :param min_cal: minimum calorie
     :param max_cal: maximum calorie
-    :param max_time: maximum time that user wants to prep+cook for
+    :param time: maximum time that user wants to prep+cook for
     :return: an SQLAlchemy query of recipes matching the above parameters
     """
     # Subquery: blacklist recipes if user has certain allergies
