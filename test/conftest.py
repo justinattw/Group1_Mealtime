@@ -195,7 +195,6 @@ def get_recipe_ids(client, response):
     return response_recipe_ids
 
 
-
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
