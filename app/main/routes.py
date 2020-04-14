@@ -545,11 +545,12 @@ def email_grocery_list(mealplan_id):
     else:
         try:
             send_grocery_list_email(mealplan_id, grocery_list)
-            flash(f"Email has been sent!", "success")
+            flash(f"Your grocery list has been sent to {current_user.email}!", "success")
         except:
             # Fail safe for in case the mail client isn't working (this can be due to many problems, such as Google
             # authentication)
-            flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
+            flash(f"Unfortunately the email could not be sent due to a server error, please try again at a later time.",
+                  "warning")
 
     return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page
     # return 'done'

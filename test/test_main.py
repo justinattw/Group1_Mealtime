@@ -66,7 +66,6 @@ class TestSimpleViews:
         login_test_user(test_client)
 
         response = test_client.get('/favourites', follow_redirects=True)
-        print(response.data)
         assert response.status_code == 200
         assert b"'s favourite recipes" in response.data
         assert b"You haven't favourited any recipes! Check out the " in response.data
@@ -765,5 +764,8 @@ class TestEmail:
         # Get current mealplan id
 
         response = send_grocery_list(test_client, mealplan_id)
-        assert (b'Email has been sent!' in response.data) or \
-               (b'Unfortunately the email could not be sent, please try again at a later time.' in response.data)
+
+        success_message = f"Your grocery list has been sent to {user.email}!"
+        assert (success_message.encode() in response.data) or \
+               (b'Unfortunately the email could not be sent due to a server error, please try again at a later time.'
+                in response.data)

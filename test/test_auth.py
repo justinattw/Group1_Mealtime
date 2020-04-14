@@ -212,9 +212,6 @@ class TestLoginRequiredViews:
         assert response.status_code == 302
         assert url_for('auth.login') in response.location
 
-        response = test_client.get('/account/', follow_redirects=True)
-        print(response.headers)
-
     def test_account_view_accessible_after_login(self, test_client, logged_in_user):
         """
         GIVEN a flask app and user logged in
@@ -309,11 +306,8 @@ class TestEditPassword:
         WHEN user tries to 'change' password to the same old password
         THEN an appropriate error message is flashed, as you cannot change to current password
         """
-        old_password = 'cat123'
-        # Use old password for all inputs
+        old_password = 'cat123'  # Use old password for all inputs
         response = edit_password(test_client, old_password, old_password, old_password)
-
-        print(response.data)
 
         # Apostrophe turns to &#39;t in response.data
         # Response.data:    "You can&#39;t set your new password to the current password."
