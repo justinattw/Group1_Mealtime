@@ -235,7 +235,7 @@ class TestLoginRequiredViews:
         """
         GIVEN a flask app and user is logged in
         WHEN /edit_preferences is requested
-        THEN response is valid
+        THEN response is valid and correct data is displayed
         """
         response = test_client.get('/edit_preferences/')
         assert b'Edit preferences' in response.data
