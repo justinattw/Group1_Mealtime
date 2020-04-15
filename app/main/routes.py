@@ -193,6 +193,8 @@ def advanced_search():
 
     :return: the recipes route with associated query
     """
+    if current_user.is_authenticated:
+        flash("This advanced search will override user's saved preferences", "warning")
     form = AdvSearchRecipes()
 
     if request.method == 'POST':
