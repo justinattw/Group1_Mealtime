@@ -141,7 +141,7 @@ class TestFavourites:
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites
-        THEN check response is valid abd favourited recipe has been added to model/ table
+        THEN check response is valid and favourited recipe has been added to model/ table
         """
         from app.models import UserFavouriteRecipes, Recipes
 
