@@ -73,19 +73,19 @@ jobs:
           command: |
             . venv/bin/activate
             python -m pytest test --ignore test/test_browser.py
-
-#            python -m pytest test
-#            python -m pytest test --ignore test/test_browser.py
-#            python -m pytest -v test/test_auth.py
-#            python -m pytest -v test/test_main.py
-
-#            python -m pytest test
-
       - run:
           name: run browser tests
           command: |
             . venv/bin/activate
             python -m pytest -v test/test_browser.py
+#            python -m pytest test
+#            python -m pytest test -k "not test_browser"
+#            python -m pytest -v test/test_auth.py
+#            python -m pytest -v test/test_main.py
+
+#            python -m pytest test
+
+
 
 
       - store_test_results:

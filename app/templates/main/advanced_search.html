@@ -3,8 +3,8 @@
 {% block title %}Advanced Search{% endblock %}
 
 {% block head %}
-    <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
-{%  endblock %}
+    <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+{% endblock %}
 
 {# Add the content for this page #}
 {% block content %}
@@ -13,12 +13,21 @@
         {{ form.csrf_token }}
         <dl>
             {{ wtf.form_field(form.search_term, class='form-control', placeholder="Enter recipe name") }}
+            {# Slider for calorie range #}
             <p>
-                <label for="amount">Calorie range (per person):</label>
-                <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
-                <input class='form-control' id="hidden" name="hidden" type="hidden" value="">
+                <label for="cal_range">Calorie range (per person):</label>
+                <input type="text" id="cal_range" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                <input class='form-control' id="cals" name="cals" type="hidden" value="">
             </p>
             <div id="slider-range"></div>
+            <br>
+            {# Slider for max cooking time #}
+            <p>
+                <label for="cooking_time">Max cooking time:</label>
+                <input type="text" id="cooking_time" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                <input class='form-control' id="max_time" name="max_time" type="hidden" value="">
+            </p>
+            <div id="slider-range-min"></div>
             <br>
             {{ wtf.form_field(form.diet_type, class='form-control') }}
             {{ wtf.form_field(form.allergies, class='form-control') }}
@@ -30,7 +39,7 @@
 {% block footer %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
-        /* Use JQuery UI to create a 'two-headed slider'
+        /* Use JQuery UI to create a sliders
 
         Library: JQuery UI
         Main Authors: Alex Schmitz, Jörn Zaefferer, Felix Nagel, Mike Sherov and Rafael Xavier de Souza
@@ -45,15 +54,31 @@
                 max: 1000,
                 values: [250, 750],
                 slide: function (event, ui) {
-                    $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+                    $( "#cal_range" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
                 }
             });
-            $("#amount").val($("#slider-range").slider("values", 0) +
+            $("#cal_range").val($("#slider-range").slider("values", 0) +
                 " - " + $("#slider-range").slider("values", 1));
         });
+
+        $(function () {
+            $("#slider-range-min").slider({
+                range: "min",
+                value: 100,
+                min: 0,
+                max: 200,
+                slide: function (event, ui) {
+                    $( "#cooking_time" ).val(ui.value + " min");
+                }
+            });
+            $("#cooking_time").val($("#slider-range-min").slider("value") + " min");
+        });
+
         function SetRangeFunction() {
             var range = $("#slider-range").slider("values")
-            document.getElementById("hidden").setAttribute('value', range);
+            var time = $("#slider-range-min").slider("value")
+            document.getElementById("cals").setAttribute('value', range);
+            document.getElementById("max_time").setAttribute('value', time);
         }
     </script>
 {% endblock %}

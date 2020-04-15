@@ -5,11 +5,12 @@ test/test_auth.py:
 
 Pytests tests for authentication views and methods (relating to files in app/auth/).
 
-app/auth COVERAGE: 90%
+app/auth COVERAGE: 100% files, 90% lines covered
 
 We achieve 90% coverage of the app/auth directory, but the uncovered sections seem to be code that we cannot trigger
 deliberately through the routes (such as IntegrityError for signing up), because there are form validations and route
-validations that prevent them from occurring.
+validations that prevent them from occurring. Most untested sections are final failsafes (excepts) in case the
+connection to SQLAlchemy database fails
 """
 
 __authors__ = "Danny Wallis, Justin Wong"
@@ -20,9 +21,12 @@ __status__ = "Development"
 import config
 from test.conftest import login, login_test_user, logout, edit_password, edit_preferences, session
 
+from flask import url_for
 import pytest
 import random
 
+MIN_PW_LEN = config.MIN_PW_LEN
+MAX_PW_LEN = config.MAX_PW_LEN
 
 class TestLoginLogout:
 
@@ -55,13 +59,12 @@ class TestLoginLogout:
         assert response.status_code == 200
         assert (b'Logged in successfully. Welcome, Test') in response.data
 
-    def test_logout_user_success(self, test_client, user):
+    def test_logout_user_success(self, test_client, user, logged_in_user):
         """
         GIVEN a flask app and user logged in
         WHEN user logs out
         THEN response is valid and success message is flashed
         """
-        login_test_user(test_client)
         response = logout(test_client)
         assert response.status_code == 200
         assert b'You have been logged out.' in response.data
@@ -69,7 +72,7 @@ class TestLoginLogout:
 
 class TestSignup:
 
-    def test_register_user_success(self, test_client, user_data):
+    def test_signup_user_success(self, test_client, user_data):
         """
         GIVEN a flask app
         WHEN a user registers with valid user details
@@ -84,8 +87,7 @@ class TestSignup:
         ), follow_redirects=True)
         assert response.status_code == 200
 
-
-    def test_duplicate_register_error(self, test_client, user):
+    def test_duplicate_email_register_error(self, test_client, user):
         """
         GIVEN a flask app
         WHEN user registers new account with pre-registered email
@@ -100,7 +102,102 @@ class TestSignup:
         ), follow_redirects=True)
         assert response.status_code == 200
         assert b'An account is already registered with this email.' in response.data
-        # Error message associated with ValidationError
+
+    def test_register_email_case_insensitive_success(self, test_client, db):
+        """
+        GIVEN a flask app
+        WHEN user registers an account and the email has capital letters
+        THEN the email is turned to lower case, and you can log in with lower cased email
+        """
+        case_insensitive_email = "cAsEiNsEnSiTiVe@EmAiL.CoM"
+        lower_email = case_insensitive_email.lower()
+        password = "cat123"
+
+        test_client.post('/signup/', data=dict(
+            first_name="Test",
+            last_name="Name",
+            email=case_insensitive_email,  # attempt signup with email of registered user
+            password=password,
+            confirm=password
+        ), follow_redirects=True)
+
+        logout(test_client)
+        response = login(test_client, email=lower_email, password=password)  # login with lower_email
+        assert response.status_code == 200
+        assert (b'Logged in successfully. Welcome, Test') in response.data
+
+    def test_signup_email_format_validator(self, test_client):
+        """
+        GIVEN a flask app
+        WHEN user registers account with an email in the wrong format
+        THEN appropriate validation error is raised
+        """
+        invalid_format_email = "thisIsNotAnEmail"
+
+        response = test_client.post('/signup/', data=dict(
+            first_name="Test",
+            last_name="Name",
+            email=invalid_format_email,  # attempt signup with email of registered user
+            password='cat123',
+            confirm='cat123'
+        ), follow_redirects=True)
+        assert b'Valid email address required' in response.data
+
+    def test_signup_both_passwords_must_match(self, test_client, user_data):
+        """
+        GIVEN a flask app
+        WHEN user registers account but password and confirm-password don't match
+        THEN appropriate validation error is raised
+        """
+        password1 = 'cat123'
+        password2 = 'dog123'
+
+        response = test_client.post('/signup/', data=dict(
+            first_name="Test",
+            last_name="Name",
+            email=user_data['email'],  # attempt signup with email of registered user
+            password=password1,
+            confirm=password2
+        ), follow_redirects=True)
+        assert b'The passwords do not match' in response.data
+
+    def test_signup_password_length_validator_too_short_password(self, test_client, user_data):
+        """
+        GIVEN a flask app
+        WHEN user registers new account too short password
+        THEN appropriate validation error is raised
+        """
+        # password must be between 6 and 20 characters
+        too_short_password = "12345" # 5 characters
+
+        response = test_client.post('/signup/', data=dict(
+            first_name="Test",
+            last_name="Name",
+            email=user_data['email'],  # attempt signup with email of registered user
+            password=too_short_password,
+            confirm=too_short_password
+        ), follow_redirects=True)
+        error_message = f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'
+        assert error_message.encode() in response.data
+
+    def test_signup_password_length_validator_too_long_password(self, test_client, user_data):
+        """
+        GIVEN a flask app
+        WHEN user registers new account too long password
+        THEN appropriate validation error is raised
+        """
+        # password must be between 6 and 20 characters
+        too_long_password = "123456789012345678901" # 21 characters
+
+        response = test_client.post('/signup/', data=dict(
+            first_name="Test",
+            last_name="Name",
+            email=user_data['email'],  # attempt signup with email of registered user
+            password=too_long_password,
+            confirm=too_long_password
+        ), follow_redirects=True)
+        error_message = f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'
+        assert error_message.encode() in response.data
 
 
 class TestLoginRequiredViews:
@@ -113,19 +210,17 @@ class TestLoginRequiredViews:
         """
         response = test_client.get('/account/')
         assert response.status_code == 302
+        assert url_for('auth.login') in response.location
 
-
-    def test_account_view_accessible_after_login(self, test_client, user):
+    def test_account_view_accessible_after_login(self, test_client, logged_in_user):
         """
         GIVEN a flask app and user logged in
         WHEN /account is requested
         THEN response is valid
         """
-        login_test_user(test_client)
         response = test_client.get('/account/')
         assert b'Account details for Test User' in response.data
         assert response.status_code == 200
-
 
     def test_edit_preferences_view_requires_login(self, test_client):
         """
@@ -136,8 +231,7 @@ class TestLoginRequiredViews:
         response = test_client.get('/edit_preferences/')
         assert response.status_code == 302  # Method not allowed
 
-
-    def test_edit_preferences_view_accessible_after_login(self, test_client, user):
+    def test_edit_preferences_view_accessible_after_login(self, test_client, logged_in_user):
         """
         GIVEN a flask app and user is logged in
         WHEN /edit_preferences is requested
@@ -159,22 +253,7 @@ class TestEditPassword:
         old_password = 'cat123'
         assert user.check_password(old_password) is True  # assert old password is 'cat123'
 
-    def test_change_password_incorrect_old_password_fails(self, test_client, user):
-        """
-        GIVEN a flask app and user is logged in
-        WHEN user tries to change password to a new password, but enters an incorrect old password
-        THEN an appropriate error message is flashed, and the password change is not made
-        """
-        login_test_user(test_client)
-
-        incorrect_old_password = 'elephant999'
-        new_password = 'dog123'
-
-        response = edit_password(test_client, incorrect_old_password, new_password, new_password)
-        assert b'Incorrect old password' in response.data
-        assert user.check_password(new_password) is False
-
-    def test_change_password_success_with_valid_inputs(self, test_client, user):
+    def test_edit_password_success_with_valid_inputs(self, test_client, user, logged_in_user):
         """
         GIVEN a flask app and user is logged in
         WHEN user tries to change password to a new password WITH a correct old_password
@@ -194,6 +273,74 @@ class TestEditPassword:
         response = login(test_client, email=user.email, password=new_password)  # login to with new password
         assert response.status_code == 200
         assert b'Logged in successfully. Welcome, ' in response.data
+
+    def test_edit_password_incorrect_old_password_validator(self, test_client, user, logged_in_user):
+        """
+        GIVEN a flask app and user is logged in
+        WHEN user tries to change password to a new password, but enters an incorrect old password
+        THEN an appropriate error message is flashed, and the password change is not made
+        """
+        incorrect_old_password = 'elephant999'
+        new_password = 'dog123'
+
+        response = edit_password(test_client, incorrect_old_password, new_password, new_password)
+        assert b'Incorrect old password' in response.data
+        assert user.check_password(new_password) is False
+
+    def test_edit_password_both_passwords_must_match(self, test_client, user, logged_in_user):
+        """
+        GIVEN a flask app and user is logged in
+        WHEN user edits password but password and confirm-password don't match
+        THEN appropriate validation error is raised
+        """
+        old_password = 'cat123'
+        new_password1 = 'dog321'
+        new_password2 = 'dog123'
+
+        response = edit_password(test_client, old_password, new_password1, new_password2)
+        assert b'The passwords do not match' in response.data
+
+    def test_edit_password_old_cannot_equal_new_validator(self, test_client, user, logged_in_user):
+        """
+        GIVEN a flask app and user is logged in
+        WHEN user tries to 'change' password to the same old password
+        THEN an appropriate error message is flashed, as you cannot change to current password
+        """
+        old_password = 'cat123'  # Use old password for all inputs
+        response = edit_password(test_client, old_password, old_password, old_password)
+
+        # Apostrophe turns to &#39;t in response.data
+        # Response.data:    "You can&#39;t set your new password to the current password."
+        # Intended message: "You can't set your new password to the current password"
+        # Break up the assert message
+        assert (b"You can" in response.data) and \
+               (b"t set your new password to the current password." in response.data)
+
+    def test_edit_password_password_length_validator_too_short_password(self, test_client, logged_in_user):
+        """
+        GIVEN a flask app
+        WHEN user registers new account too short password
+        THEN appropriate validation error is raised
+        """
+        # password must be between 6 and 20 characters
+        too_short_password = "12345" # 5 characters
+
+        response = edit_password(test_client, 'cat123', too_short_password, too_short_password)
+        error_message = f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'
+        assert error_message.encode() in response.data
+
+    def test_edit_password_password_length_validator_too_long_password(self, test_client, logged_in_user):
+        """
+        GIVEN a flask app
+        WHEN user registers new account too long password
+        THEN appropriate validation error is raised
+        """
+        # password must be between 6 and 20 characters
+        too_long_password = "123456789012345678901" # 21 characters
+
+        response = edit_password(test_client, 'cat123', too_long_password, too_long_password)
+        error_message = f'Password must be between {MIN_PW_LEN} and {MAX_PW_LEN} characters long.'
+        assert error_message.encode() in response.data
 
 
 class TestEditPreferences:
@@ -242,15 +389,13 @@ class TestEditPreferences:
             else:  # 2) if allergy is NOT set previously, then query should be None
                 assert allergy_query is None
 
-
-    def test_edit_preferences_response_with_invalid_duplicate_allergies(self, test_client, user, db):
+    def test_edit_preferences_response_with_invalid_duplicate_allergies(self, test_client, user, logged_in_user):
         """
         GIVEN a flask app and user is logged in
         WHEN /edit_preferences is posted but with an invalid input where there are duplicate allergies
         THEN unique constraint on the composite key in UserAllergies will fail, IntegrityError will occur in SQLAlchemy.
             An error message will therefore flash.
         """
-        login_test_user(test_client)
         select_diet = 1
         invalid_allergy_choices = [2, 2]  # Duplicate allergies,
 

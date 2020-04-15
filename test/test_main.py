@@ -5,10 +5,15 @@ test/test_main.py:
 
 Pytests tests for main views and methods (relating to files in app/main/)
 
-Parameterised testing: https://blog.testproject.io/2019/07/16/python-test-automation-project-using-pytest/
-"""
-import numpy as np
+app/main COVERAGE: 100% files, 93% lines covered
 
+We achieve 93% coverage of the app/main directory, but the uncovered sections seem to be code that we cannot trigger
+deliberately through the routes (such as IntegrityError for signing up), because there are form validations and route
+validations that prevent them from occurring. Most untested sections are final failsafes (excepts) in case the
+connection to SQLAlchemy database fails.
+
+We make extensive use of pytest parametrisation to ensure exhaustive coverage.
+"""
 __authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
@@ -16,13 +21,13 @@ __status__ = "Development"
 
 import config
 from test.conftest import search_function, add_to_favourites, view_recipe, view_favourites, view_about, \
-    view_mealplanner, login_test_user, del_from_mealplan, view_grocery_list, view_mealplan, get_recipe_ids, \
-    view_advanced_search, advanced_search_function, create_mealplan, view_all_recipes, add_to_mealplan, \
-    delete_mealplan, edit_preferences, remove_from_favourites
+    login_test_user, del_from_mealplan, view_grocery_list, view_mealplan, get_recipe_ids, view_advanced_search, \
+    advanced_search_function, create_mealplan, view_all_recipes, add_to_mealplan, delete_mealplan, edit_preferences, \
+    remove_from_favourites, send_grocery_list
 
+from flask import url_for
 import pytest
 import random
-from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.sql import func
 
 
@@ -42,9 +47,14 @@ class TestSimpleViews:
         """
         GIVEN a flask app
         WHEN /favourites page is requested without login
-        THEN response is invalid
+        THEN response is invalid and redirects to login
         """
-        response = view_favourites(test_client)
+        response = test_client.get('/favourites')
+        assert response.status_code == 302
+        assert url_for('auth.login') in response.location  # login route is in redirect location
+
+        response = test_client.get('/favourites', follow_redirects=True)
+        assert response.status_code == 200
         assert b'You must be logged in to view that page.' in response.data  # Method not allowed
 
     def test_view_favourites_valid_with_login(self, test_client, user):
@@ -54,7 +64,8 @@ class TestSimpleViews:
         THEN response is always valid and correct data is displayed
         """
         login_test_user(test_client)
-        response = view_favourites(test_client)
+
+        response = test_client.get('/favourites', follow_redirects=True)
         assert response.status_code == 200
         assert b"'s favourite recipes" in response.data
         assert b"You haven't favourited any recipes! Check out the " in response.data
@@ -73,7 +84,7 @@ class TestSimpleViews:
         """
         GIVEN a flask application
         WHEN user requests to view all recipes
-        THEN view is successful
+        THEN view is successful and there are recipes
         """
         response = view_all_recipes(test_client)
         assert response.status_code == 200
@@ -126,14 +137,12 @@ class TestViewRecipes:
 
 class TestFavourites:
 
-    def test_add_to_favourite(self, test_client, user, db):
+    def test_add_to_favourite(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites
         THEN check response is valid abd favourited recipe has been added to model/ table
         """
-        login_test_user(test_client)
-
         from app.models import UserFavouriteRecipes, Recipes
 
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()  # Query the highest recipe_id,
@@ -159,23 +168,25 @@ class TestFavourites:
         THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
         """
         login_test_user(test_client)
+
         from app.models import Recipes
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
         rand_favourite = random.randint(1, number_of_recipes)
-        add_to_favourites(test_client, rand_favourite)  # Add favourite recipe once
 
-        with pytest.raises(ObjectDeletedError):
-            # Although in the routes we expect IntegrityError, ObjectDeletedError is raised in test environment because
-            # of the way the dbs interact
-            add_to_favourites(test_client, rand_favourite)  # Add favourite recipe twice
+        add_to_favourites(test_client, rand_favourite)  # Add favourite recipe first time
+        response = add_to_favourites(test_client, rand_favourite)  # Add favourite recipe second time
+        assert b'failure' in response.data
 
-    def test_delete_from_favourites_success(self, test_client, user, db):
+        # with pytest.raises(ObjectDeletedError):
+        #     # Although in the routes we expect IntegrityError, ObjectDeletedError is raised in some instances
+        #     response = add_to_favourites(test_client, rand_favourite)  # Add favourite recipe twice
+
+    def test_delete_from_favourites_success(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites that has already been added
         THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
         """
-        login_test_user(test_client)
         from app.models import UserFavouriteRecipes, Recipes
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
         rand_favourite = random.randint(1, number_of_recipes)
@@ -194,13 +205,12 @@ class TestFavourites:
             .first()
         assert not favourited  # Recipe is not added to favourites (removed from favourites)
 
-    def test_delete_from_favourites_when_recipe_is_not_in_favourites(self, test_client, user, db):
+    def test_delete_from_favourites_when_recipe_is_not_in_favourites(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites that has already been added
         THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
         """
-        login_test_user(test_client)
         from app.models import Recipes
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()  # Get number of recipes in db
         rand_favourite = random.randint(1, number_of_recipes)
@@ -208,14 +218,12 @@ class TestFavourites:
         response = remove_from_favourites(test_client, rand_favourite)
         assert b'failure' in response.data
 
-    def test_add_to_favourites_and_view_favourites(self, test_client, user, db):
+    def test_add_to_favourites_and_view_favourites(self, test_client, logged_in_user, user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN user favourites a new recipe and views their Favourites page
         THEN response is valid (response code is 200), and favourited recipe_name is in the response data
         """
-        login_test_user(test_client)
-
         from app.models import Recipes
 
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()  # Query the highest recipe_id,
@@ -251,49 +259,58 @@ class TestMealplans:
         WHEN the 'view_mealplanner' page is requested'
         THEN redirects to login page
         """
-        response = view_mealplanner(test_client)
+        response = test_client.get('/mealplanner')
+        redirect_url = url_for('auth.login')
+        assert response.status_code == 302
+        assert redirect_url in response.location
+
+        response = test_client.get('/mealplanner', follow_redirects=True)
         assert response.status_code == 200
         assert b'You must be logged in' in response.data
 
-
-    def test_view_mealplanner_with_login(self, test_client, user, db):
+    def test_view_mealplanner_with_login(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN the 'view_mealplanner' page is requested'
         THEN response is valid
         """
-        login_test_user(test_client)
-        response = view_mealplanner(test_client)
+        response = test_client.get('/mealplanner', follow_redirects=True)
         assert response.status_code == 200
         assert b'Meal Planner' in response.data
         assert b"You don't have any meal plans" in response.data
 
-
     @pytest.mark.parametrize("random_mealplan",
                              [(random.randint(0, 1000)) for i in range(5)])  # random mealplan 5 times
-    def test_cannot_view_others_mealplan(self, test_client, user, random_mealplan):
+    def test_cannot_view_other_users_mealplan(self, test_client, user, logged_in_user, random_mealplan):
         """
         GIVEN a Flask application and user is logged in
         WHEN user requests to view mealplan that they do not own
         THEN error message flashes
         """
-        login_test_user(test_client)
-
         # User has no mealplans, so they cannot view any. We can feed any mealplan_id into the url and it should fail
         url = '/view_mealplan/' + str(random_mealplan)
-
         response = test_client.get(url, follow_redirects=True)
         assert b'Sorry, you do not have access to this meal plan' in response.data
 
+    def test_add_recipe_when_mealplan_not_created_fails(self, test_client, user, logged_in_user, db):
+        """
+        GIVEN a Flask application and user is logged in
+        WHEN user tries to add recipe to meal plan before creating a meal plan
+        THEN appropriate error
+        """
+        from app.models import MealPlans
+        mealplan = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
+        assert not mealplan  # Assert user has not already created a meal plan
 
-    def test_create_new_mealplan_success(self, test_client, user, db):
+        response = add_to_mealplan(test_client, random.randint(0, 1400))  # add a random recipe to meal plan
+        assert b'no plan' in response.data  # JS notification shows
+
+    def test_create_new_mealplan_success(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN the 'create_mealplan' is requested
         THEN response is valid and meal plan is added to database, and that you can view the meal plan
         """
-        login_test_user(test_client)
-
         from app.models import MealPlans
         query = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
         assert query is None  # Assert user has not already created a meal plan
@@ -310,14 +327,12 @@ class TestMealplans:
         assert response.status_code == 200
         assert check_message.encode() in response.data
 
-
-    def test_cannot_add_new_mealplan_while_old_mealplan_is_empty(self, test_client, user, db):
+    def test_cannot_add_new_mealplan_while_old_mealplan_is_empty(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
         WHEN user requests 'create_mealplan' twice (thus on the second request, the active meal plan is empty)
         THEN appropriate error messages flashes on second attempt
         """
-        login_test_user(test_client)
         create_mealplan(test_client)  # Create meal plan once
         response = create_mealplan(test_client)  # Create meal plan twice
         assert b'Your most recent meal plan' in response.data
@@ -325,43 +340,19 @@ class TestMealplans:
         assert b'creating a new meal plan' in response.data
         assert response.status_code == 200
 
-
-    def test_delete_mealplan_success(self, test_client, user, db):
-        """
-        GIVEN a Flask application, user is logged in and has created a mealplan
-        WHEN user requests to delete a mealplan
-        THEN deletion succeeds
-        """
-        login_test_user(test_client)
-        create_mealplan(test_client)
-
-        from app.models import MealPlans, MealPlanRecipes
-        mealplan_added = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
-        mealplan_id = mealplan_added.mealplan_id
-        assert mealplan_added
-
-        response = delete_mealplan(test_client, mealplan_id)
-        assert response.status_code == 200
-        assert b'warning' in response.data
-
-        mealplan_added = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
-        assert not mealplan_added
-
-
-    def test_add_and_delete_recipe_from_mealplan(self, test_client, user, db):
+    def test_add_and_delete_recipe_from_mealplan(self, test_client, logged_in_user, user, db):
         """
         GIVEN a Flask application, user is logged in and meal plan is created
         WHEN user adds new recipe to mealplan
         THEN success message is shown, and the recipe is added to meal plan
         """
-        login_test_user(test_client)
         create_mealplan(test_client)
 
         from app.models import MealPlans, MealPlanRecipes
         mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
         # Get current mealplan id
 
-        recipe_id = random.randint(0, 1000)
+        recipe_id = random.randint(0, 1400)
         response = add_to_mealplan(test_client, recipe_id)
         assert response.status_code == 200
         assert b'success' in response.data
@@ -385,19 +376,50 @@ class TestMealplans:
             .filter(MealPlanRecipes.recipe_id == recipe_id).first()
         assert not recipe_is_added  # recipe is added to mealplan
 
+    def test_add_duplicate_recipes_to_mealplan(self, test_client, logged_in_user):
+        """
+        GIVEN a Flask application, user is logged in and meal plan is created
+        WHEN user adds the same recipe to mealplan twice
+        THEN error message shows
+        """
+        create_mealplan(test_client)
+        recipe_id = random.randint(0, 1400)
+
+        add_to_mealplan(test_client, recipe_id)  # Add recipe to meal plan first time
+        response = add_to_mealplan(test_client, recipe_id)  # Add recipe to meal plan second time
+        assert b'failure' in response.data
+
+    def test_remove_recipe_from_mealplan_when_recipe_already_not_in_mealplan_fails(self, test_client, logged_in_user,
+                                                                                   user, db):
+        """
+        GIVEN a Flask application, user is logged in and meal plan is created
+        WHEN user requests to remove a recipe from mealplan while recipe isn't in mealplan
+        THEN error message shows
+        """
+        create_mealplan(test_client)
+        from app.models import MealPlans, MealPlanRecipes
+        mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
+        # Get current mealplan id
+
+        mealplan_has_recipes = db.session.query(MealPlanRecipes) \
+            .filter(MealPlanRecipes.mealplan_id == mealplan_id).all()
+        assert not mealplan_has_recipes  # Check that mealplan has no recipes
+
+        recipe_id = random.randint(0, 1400)  # Random recipe id to 'remove' from mealplan
+        response = del_from_mealplan(test_client, mealplan_id, recipe_id)
+        assert b'failure' in response.data
 
     @pytest.mark.parametrize("recipe_ids", [(random.sample(range(1000), 5)) for j in range(10)])
     # For each itr, add 5 random recipes. Do this 10 times.
-    def test_add_recipes_to_mealplan_and_mealplan_view(self, test_client, user, db, recipe_ids):
+    def test_add_recipes_to_mealplan_and_mealplan_view(self, test_client, user, logged_in_user, db, recipe_ids):
         """
         GIVEN a Flask application, user is logged in, meal plan is created and user has added 5 recipes to mealplan
         WHEN user requests meal plan view
         THEN success message is shown, and the recipe is added to meal plan
         """
-        login_test_user(test_client)
         create_mealplan(test_client)
 
-        from app.models import MealPlans, MealPlanRecipes
+        from app.models import MealPlans
         # Get current mealplan id
         mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
 
@@ -409,16 +431,82 @@ class TestMealplans:
 
         assert recipe_ids.sort() == response_recipe_ids.sort()
 
+    def test_delete_mealplan_success(self, test_client, logged_in_user, user, db):
+        """
+        GIVEN a Flask application, user is logged in and has created a mealplan
+        WHEN user requests to delete a mealplan
+        THEN deletion succeeds
+        """
+        create_mealplan(test_client)
 
-    @pytest.mark.parametrize("recipe_ids", [(random.sample(range(1400), 10)) for j in range(1400)])
-    # For each itr, add 5 random recipes. Do this 10 times.
-    def test_grocery_list_is_expected(self, test_client, user, db, recipe_ids):
+        from app.models import MealPlans
+        mealplan_added = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
+        assert mealplan_added
+
+        mealplan_id = mealplan_added.mealplan_id
+
+        response = delete_mealplan(test_client, mealplan_id)
+        assert response.status_code == 200
+        assert b'warning' in response.data
+
+        mealplan_added = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
+        assert not mealplan_added
+
+    def test_delete_mealplan_with_recipes_added_success(self, test_client, logged_in_user, user, db):
+        """
+        GIVEN a Flask application, user is logged in, meal plan has been created and recipes are in meal plan
+        WHEN user requests meal plan to be deleted
+        THEN meal plan deletion obliges, and all recipes in MealPlanRecipes are deleted
+        """
+        create_mealplan(test_client)
+        recipe_ids = random.sample(range(1400), 10)
+        for id in recipe_ids:
+            add_to_mealplan(test_client, id)  # Add 10 random recipes to meal plan
+
+        from app.models import MealPlans, MealPlanRecipes
+        mealplan_added = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
+        assert mealplan_added
+
+        mealplan_id = mealplan_added.mealplan_id
+
+        mealplan_has_recipes = db.session.query(MealPlanRecipes) \
+            .filter(MealPlanRecipes.mealplan_id == mealplan_id).first()
+        assert mealplan_has_recipes  # MealPlanRecipes associated with meal plan id exists
+
+        response = delete_mealplan(test_client, mealplan_id)
+        assert b'warning' in response.data
+
+        mealplan_added = db.session.query(MealPlans).filter(MealPlans.mealplan_id == mealplan_id).first()
+        assert not mealplan_added  # meal plan has been deleted
+
+        mealplan_has_recipes = db.session.query(MealPlanRecipes) \
+            .filter(MealPlanRecipes.mealplan_id == mealplan_id).first()
+        assert not mealplan_has_recipes  # all MealPlanRecipes with associated meal plan id has been deleted
+
+    def test_user_cannot_delete_mealplan_they_dont_own(self, test_client, logged_in_user, user, db):
+        """
+        GIVEN a Flask application and user is logged in
+        WHEN user requests deleting a mealplan that they don't own
+        THEN mealplan is not deleted and user is notified
+        """
+        from app.models import MealPlans, MealPlanRecipes
+        user_has_mealplans = db.session.query(MealPlans).filter(MealPlans.user_id == user.id).first()
+        assert not user_has_mealplans
+
+        del_mealplan_id = random.randint(1, 100)
+        # Random mealplan to be attempted to delete (doesn't matter if it doesn't exist)
+
+        response = delete_mealplan(test_client, del_mealplan_id)
+        assert b'Sorry, you do not have access to this meal plan' in response.data
+
+    @pytest.mark.parametrize("recipe_ids", [(range(1400))])  # Test this for almost all recipes
+    def test_grocery_list_contains_ingredients_of_mealplan_recipes(self, test_client, logged_in_user, user, db,
+                                                                   recipe_ids):
         """
         GIVEN a Flask application, user is logged in, meal plan is created and user has added 5 recipes to mealplan
         WHEN user requests to view grocery list of meal plan
         THEN correct ingredients are shown
         """
-        login_test_user(test_client)
         create_mealplan(test_client)
         from app.models import MealPlans, RecipeIngredients
         # Get current mealplan id
@@ -434,9 +522,8 @@ class TestMealplans:
         ingredients_list = [i.ingredient for i in query]
 
         blockers = ["'", "&", "…"]
-        for ingredient in ingredients_list:
-            print(str(ingredient))
-            if "href=" in str(ingredient):
+        for ingredient in ingredients_list:  # Check that ingredients are in grocery list
+            if "href=" in str(ingredient):  # If an ingredient has a link in it, then don't check
                 pass
             else:
                 ing = []
@@ -444,38 +531,26 @@ class TestMealplans:
                 ing[:0] = ingredient
                 for blocker in blockers:
                     if blocker in ingredient:
-                        if blocker == "½":
-                            print("WHY THE HELL WONT IT RECOGNISE THIS")
                         split.append(int(ing.index(blocker)))
                         ing.remove(blocker)
-                sorted = split.sort()
                 start = 0
                 index = 1
                 for s in split:
-                    end = (s+1) - index
+                    end = (s + 1) - index
                     search_string = ''.join(ing[start:end])
-                    print("aaaaaa" + search_string)
                     if "amp;" in search_string:
-                        s_list = search_string.split("amp;")
+                        s_list = search_string.split("amp;")  # Split string by ampersand and assert them separately
                         assert s_list[0].encode() in response.data
-                        assert s_list[0].encode() in response.data
-                    # elif "juice" in search_string:
-                    #     #assert b'juice' in response.data   <- doesn't work
-                    #     print(response.data)
-                    # elif '3cm/1in piece fresh turmeric root, peeled and grated, or' in search_string:
-                    #     print(response.data)
-                    #     #assert b'1in piece fresh turmeric root, peeled and grated, or' in response.data <-doesnt work
                     else:
                         check = search_string.strip().encode()
                         assert check in response.data
                     start = end
-                    index +=1
-
+                    index += 1
 
 
 class TestSearchResults:
 
-    @pytest.mark.parametrize("search_term", [('vegan'), ('rice')])
+    @pytest.mark.parametrize("search_term", [('vegan'), ('rice'), ('noodles')])
     def test_search_without_login(self, test_client, search_term):
         """
         GIVEN a Flask application
@@ -486,20 +561,48 @@ class TestSearchResults:
         assert response.status_code == 200
         assert search_term.encode() in response.data
 
-
-    @pytest.mark.parametrize("search_term, allergies, diet, hidden",
-                             [('cabbage', ['1', '4'], 3, '100,500'),
-                              ('fried rice', ['3', '8', '9'], 1, '200,700'),
-                              ('potato', ['5'], 2, '0,1000')])
-    def test_advanced_search_results_correct(self, test_client, search_term, allergies, diet, hidden):
-
-        response = advanced_search_function(test_client, search_term, allergies, diet, hidden)
+    @pytest.mark.parametrize("search_term, allergies, diet, cal_range, time",
+                             [('cabbage', [], 3, '100,500', 40),  # Vegetarian
+                              ('fried rice', [], 1, '200,700', 70),  # Classic
+                              ('potato', [], 2, '0,1000', 80),  # Pescatarian
+                              ('salad', [], 4, '0, 200', 40)])  # Vegan
+    # TODO: Find workaround to test for allergies
+    # Unfortunately we can't actually test for allergies here, because client.post does not seem to pass array data
+    # types, and there is no other way for us to pass allergies through WTForms. We do test for allergies in other
+    # sections though.
+    def test_advanced_search_results_applies_filter_to_recipes(self, test_client, db, search_term, allergies, diet,
+                                                               cal_range, time):
+        """
+        GIVEN a flask application
+        WHEN user makes advanced search with specified search inputs
+        THEN return recipes satisfy
+        """
+        response = advanced_search_function(test_client, search_term=search_term, diet_type=diet, cal_range=cal_range,
+                                            time=time)
         assert response.status_code == 200
         assert search_term.encode() in response.data
 
+        min_cal = int(cal_range.split(',')[0])
+        max_cal = int(cal_range.split(',')[1])
+        user_allergies = list(map(int, allergies))
+
+        response_recipe_ids = get_recipe_ids(test_client, response)
+
+        from app.models import Recipes
+        recipes = db.session.query(Recipes).filter(Recipes.recipe_id.in_(response_recipe_ids)).all()
+
+        for recipe in recipes:
+            assert recipe.diet_type[0].diet_type_id >= diet
+            assert search_term in recipe.recipe_name.lower()
+            assert min_cal <= int(recipe.nutrition_values.calories) <= max_cal
+            assert recipe.total_time <= time
+
+            # recipe_allergies = [allergy.allergy_id for allergy in recipe.allergies]
+            # for allergy in user_allergies:
+            #     assert allergy not in recipe_allergies
 
     @pytest.mark.parametrize("itr", [(f"itr {str(i)}") for i in range(10)])  # Do test n times
-    def test_view_all_recipes_applies_preferences_with_logged_in_user(self, test_client, user, db, itr):
+    def test_view_all_recipes_applies_preferences_with_logged_in_user(self, test_client, user, logged_in_user, db, itr):
         """
         GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
         WHEN user requests to view all recipes
@@ -515,7 +618,6 @@ class TestSearchResults:
         diet_name = str((config.DIET_CHOICES[user_diet_id - 1])[1]).lower()
         allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]).lower() for i in user_allergy_ids]
 
-        login_test_user(test_client)
         response = view_all_recipes(test_client)
         assert b'Based on saved user preferences, we have applied the following filters:' in response.data
         assert b'Diet type: ' + diet_name.encode() in response.data
@@ -553,11 +655,12 @@ class TestSearchResults:
 
     @pytest.mark.parametrize("itr, search_term", [(0, "vegan"), (1, "rice"), (2, "noodles")])
     # Do test 3 times with different search terms
-    def test_search_function_applies_preferences_with_logged_in_user(self, test_client, user, db, itr, search_term):
+    def test_search_function_applies_preferences_with_logged_in_user(self, test_client, user, logged_in_user, db, itr,
+                                                                     search_term):
         """
         GIVEN a flask application and registered user (with randomly generated diet type and food preferences)
         WHEN user requests to view all recipes
-        THEN saved food preferences and diet types are automatically applied
+        THEN saved food preferences and diet types are automatically applied and is shown by a Flash message
         """
         # User details as stored in db
         user_diet_name = user.diet_preferences[0].diet_type.diet_name
@@ -569,7 +672,6 @@ class TestSearchResults:
         diet_name = str((config.DIET_CHOICES[user_diet_id - 1])[1]).lower()
         allergy_names = [str((config.ALLERGY_CHOICES[i - 1])[1]).lower() for i in user_allergy_ids]
 
-        login_test_user(test_client)
         response = search_function(test_client, search_term)
         assert b'Based on saved user preferences, we have applied the following filters:' in response.data
         # Check the Flash message
@@ -584,6 +686,7 @@ class TestSearchResults:
         THEN returned recipes satisfies user's diet preferences and allergies
         """
         # Pull the recipe ids that are returned in on the response page (as a list). See conftest helper function.
+        # We will compare these recipe ids in a db query to ensure that the filters have been applied
         response_recipe_ids = get_recipe_ids(test_client, response)
 
         from app.models import Recipes, RecipeDietTypes, RecipeAllergies
@@ -612,13 +715,12 @@ class TestSearchResults:
     # Do test 3 times with different search terms
     # Sometimes we need to test for certain cases. For example, searching for gluten could return 'gluten-free' recipes,
     # even if user has applied gluten-free to allergy.
-    def test_search_with_specific_allergies(self, test_client, user, db, itr, search_term, allergy):
+    def test_search_with_specific_allergies(self, test_client, user, logged_in_user, db, itr, search_term, allergy):
         """
         GIVEN a flask application and registered user (with defined allergies)
         WHEN user searches for recipes that conflict with their allergies
         THEN appropriate response should return.
         """
-        login_test_user(test_client)
         # Change user to classic diet type, with parametrised allergies
         edit_preferences(test_client, diet_choice=1, allergy_choices=allergy)
 
@@ -636,5 +738,40 @@ class TestSearchResults:
 
 class TestEmail:
 
-    def test_email(self, test_client):
-        pass
+    def test_mail_grocery_list_fails_if_mealplan_is_empty(self, test_client, db, user, logged_in_user):
+        """
+        GIVEN a flask mail and logged in user with mealplan created
+        WHEN user requests grocery list sent to email, but no recipes are in meal plan
+        THEN warning message flashes
+        """
+        from app.models import MealPlans
+        create_mealplan(test_client)
+        mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
+        # Get current mealplan id
+
+        response = send_grocery_list(test_client, mealplan_id)
+        assert b'There are no recipes in this meal plan, so we could not send you a grocery list!' in response.data
+
+    @pytest.mark.parametrize("recipe_ids", [(random.sample(range(1400), 5))])
+    def test_mail_grocery_list_succeeds_if_mealplan_is_not_empty(self, test_client, db, user, logged_in_user,
+                                                                 recipe_ids):
+        """
+        GIVEN a flask mail and logged in user with mealplan created
+        WHEN user requests grocery list sent to email, but no recipes are in meal plan
+        THEN warning message flashes
+        """
+        from app.models import MealPlans
+        create_mealplan(test_client)
+
+        for id in recipe_ids:
+            add_to_mealplan(test_client, id)
+
+        mealplan_id, = db.session.query(MealPlans.mealplan_id).filter(MealPlans.user_id == user.id).first()
+        # Get current mealplan id
+
+        response = send_grocery_list(test_client, mealplan_id)
+
+        success_message = f"Your grocery list has been sent to {user.email}!"
+        assert (success_message.encode() in response.data) or \
+               (b'Unfortunately the email could not be sent due to a server error, please try again at a later time.'
+                in response.data)

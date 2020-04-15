@@ -44,7 +44,7 @@
                     <a class="nav-link" id=signup-link href="{{ url_for("auth.signup") }}">Sign up</a>
                 </li>
                 <li>
-                    <a class="nav-link" id= login-link href="{{ url_for("auth.login") }}">Log in</a>
+                    <a class="nav-link" id=login-link href="{{ url_for("auth.login") }}">Log in</a>
                 </li>
             {% else %}
                 <li>
@@ -84,9 +84,9 @@
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     <li>
                         {{ message }}
-{#                        {% for para in message %}#}
-{#                            {{ para }}<br>#}
-{#                        {% endfor %}#}
+                        {#                        {% for para in message %}#}
+                        {#                            {{ para }}<br>#}
+                        {#                        {% endfor %}#}
                     </li>
                 </ul>
             {% endfor %}

@@ -6,7 +6,7 @@ app/main/forms.py:
 This document includes WTForms for authentication methods.
 Authentication methods include signup, login, edit account details and log out.
 """
-__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__authors__ = "Ethan Low, Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
@@ -27,7 +27,7 @@ class AdvSearchRecipes(FlaskForm):
     search_term = StringField('Search')
     diet_type = SelectField('Diet type', choices=DIET_CHOICES)
 
-    amount = StringField()  # Set field to render slider current values
-    hidden = HiddenField()  # Field for calorie range
+    cals = HiddenField()  # Field for calorie range
+    max_time = HiddenField()  # Field for max cooking time
 
     allergies = SelectMultipleField('Allergies (cmd/ctrl + click to select multiple)', choices=ALLERGY_CHOICES)

@@ -7,7 +7,7 @@ Configures settings for Pytest (the selected testing framework for Mealtime). In
 as well as helper functions.
 """
 
-__authors__ = "Justin Wong"
+__authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
@@ -136,7 +136,7 @@ from flask import url_for
 @pytest.fixture
 def browser():
     """ Sets up driver for Selenium browser testing """
-    # (NOT RECOMMENDED) Use following driver if chromedriver is in PATH.
+    # (NOT RECOMMENDED) Use following driver if chromedriver is NOT in PATH.
     # # path = "join(os.getcwd() + 'chromedriver/chromedriver')"  # Mac
     # path = "join(os.getcwd() + 'chromedriver/chromedriver.exe')"  # Windows
     # driver = webdriver.Chrome(executable_path=path)
@@ -195,7 +195,6 @@ def get_recipe_ids(client, response):
     return response_recipe_ids
 
 
-
 def login(client, email, password):
     return client.post('/login/', data=dict(
         email=email,
@@ -235,12 +234,13 @@ def search_function(client, search_term):
     ), follow_redirects=True)
 
 
-def advanced_search_function(client, search_term, allergy_list, diet_type, cal_range):
+def advanced_search_function(client, search_term="", allergy_list=[], diet_type=1, cal_range="0,1000", time=1000):
     return client.post('/advanced_search', data=dict(
         search_term=search_term,
         allergy_list=allergy_list,
         diet_type=diet_type,
-        hidden=cal_range,
+        cals=cal_range,
+        max_time=time
     ), follow_redirects=True)
 
 
@@ -278,10 +278,6 @@ def view_advanced_search(client):
     return client.get('/advanced_search', follow_redirects=True)
 
 
-def view_mealplanner(client):
-    return client.get('/mealplanner', follow_redirects=True)
-
-
 def create_mealplan(client):
     return client.post('/mealplanner', follow_redirects=True)
 
@@ -315,6 +311,12 @@ def view_grocery_list(client, mealplan_id):
 def delete_mealplan(client, mealplan_id):
     delete_string = str(mealplan_id)
     return client.post('/del_mealplan/' + delete_string, data=dict(
+        mealplan_id=mealplan_id
+    ), follow_redirects=True)
+
+
+def send_grocery_list(client, mealplan_id):
+    return client.get('/send_grocery_list/' + str(mealplan_id), data=dict(
         mealplan_id=mealplan_id
     ), follow_redirects=True)
 

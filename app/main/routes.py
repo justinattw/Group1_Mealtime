@@ -6,7 +6,7 @@ app/main/routes.py:
 This document includes WTForms for authentication methods.
 Authentication methods include signup, login, edit account details and log out.
 """
-__authors__ = "Ethan Low, Danny Wallis, and Justin Wong"
+__authors__ = "Ethan Low, Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
@@ -42,7 +42,7 @@ def index(name=""):
     :param name: finds user's name if logged in
     :return: the index html page with a background
     """
-    # Demonstration of use of a session cookie. Display email as the name if the session cookie is there.
+    # Demonstration of use of a session cookie.
     if 'name' in request.cookies:
         name = request.cookies.get('name')
     if 'name' in session:
@@ -61,27 +61,13 @@ def view_recipe(recipe_id):
     """
     recipe = db.session.query(Recipes).filter(Recipes.recipe_id == recipe_id).one()
 
+    nutrition = recipe.nutrition_values  # Demonstrations of Object Relationship (SQLAlchemy)
     allergies = recipe.allergies
     ingredients = recipe.ingredients
     steps = recipe.instructions
-    nutrition = recipe.nutrition_values
 
-    # allergies = db.session.query(Allergies, RecipeAllergies) \
-    #     .join(RecipeAllergies) \
-    #     .filter(RecipeAllergies.recipe_id == recipe_id) \
-    #     .all()
-    # ingredients = db.session.query(RecipeIngredients) \
-    #     .filter(RecipeIngredients.recipe_id == recipe_id) \
-    #     .all()
-    # steps = db.session.query(RecipeInstructions) \
-    #     .filter(RecipeInstructions.recipe_id == recipe_id) \
-    #     .all()
-    # nutrition = db.session.query(NutritionValues) \
-    #     .filter(NutritionValues.recipe_id == recipe_id) \
-    #     .one()
-
-    return render_template("main/view_recipe.html", recipe=recipe, ingredients=ingredients, steps=steps,
-                           nutrition=nutrition, allergies=allergies)
+    return render_template("main/view_recipe.html", recipe=recipe, nutrition=nutrition, allergies=allergies,
+                           ingredients=ingredients, steps=steps)
 
 
 @bp_main.route('/recipes', methods=['GET'])
@@ -106,7 +92,7 @@ def recipes():
                  'diet_type': request.args.get('diet_type', 1, type=int),
                  'min_cal': request.args.get('min_cal', 0, type=int),
                  'max_cal': request.args.get('max_cal', 1000, type=int),
-                 'max_time': request.args.get('max_time', 99999, type=int)}
+                 'time': request.args.get('time', 99999, type=int)}  # Default time to 99999
 
     # The following code related to pagination is adapted from:
     #
@@ -145,9 +131,6 @@ def view_all_recipes():
         flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
                         f"Diet type: {diet_name}\n" \
                         f"Allergies: {flash_allergies.lower()}"
-
-        # To show flash messages on new line, implement:
-        # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
         flash(flash_message, "success")
 
         # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
@@ -188,13 +171,8 @@ def search():
             flash_message = f"Based on saved user preferences, we have applied the following filters:\n" \
                             f"Diet type: {diet_name}\n" \
                             f"Allergies: {flash_allergies.lower()}"
-
-            # To show flash messages on new line, implement:
-            # https://stackoverflow.com/questions/12244057/any-way-to-add-a-new-line-from-a-string-with-the-n-character-in-flask
             flash(flash_message, "success")
 
-            # We need to pass the list of allergy IDs as a concatenated string (e.g. allergies [1, 4] --> "14"), so that
-            # request.args.get in recipes route can
             allergy_id_str = map(str, allergy_list)
             allergies = ','.join(allergy_id_str)
 
@@ -218,13 +196,14 @@ def advanced_search():
     form = AdvSearchRecipes()
 
     if request.method == 'POST':
-        range = form.hidden.data.split(',')
+        range = form.cals.data.split(',')
 
         args_dict = {'search_term': form.search_term.data,
                      'allergy_list': ','.join(form.allergies.data),
                      'diet_type': int(form.diet_type.data),
                      'min_cal': int(range[0]),
-                     'max_cal': int(range[1])}
+                     'max_cal': int(range[1]),
+                     'time': int(form.max_time.data)}
 
         diet_name = (config.DIET_CHOICES[int(form.diet_type.data) - 1])[1]
         allergy_list = list(map(int, form.allergies.data))
@@ -256,14 +235,10 @@ def add_to_favourites(recipe_id):
         current_user.favourite_recipes.append(fav_recipe)
 
         db.session.commit()
-
-        print(f"Adding recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'success', 200  # keeps user on the same page
 
     except IntegrityError:
         db.session.rollback()
-
-        print(f"Failed to add recipe {recipe_id} to user {current_user.id}'s favourites")
         return 'failure', 200
 
 
@@ -281,15 +256,11 @@ def remove_from_favourites(recipe_id):
             .filter(UserFavouriteRecipes.recipe_id == recipe_id) \
             .filter(UserFavouriteRecipes.user_id == current_user.id) \
             .one()
-
         db.session.delete(del_recipe)
         db.session.commit()
-
-        print(f"Removing recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'success', 200  # keeps user on the same page
 
     except InvalidRequestError:
-        print(f"Failed to remove recipe {recipe_id} from user {current_user.id}'s favourites")
         return 'failure', 200
 
 
@@ -323,27 +294,23 @@ def mealplanner():
     """
     Guides the user through creating and editing meal plans
 
-    :return: mealplanner html page
+    :return: mealplanner view
     """
-    # # Cannot order mealplans using this method
-    # mealplans = current_user.mealplans
-
+    # Cannot order mealplans using object relationship (current_user.mealplans), so use db.session.query
     mealplans = db.session.query(MealPlans) \
         .filter(MealPlans.user_id == current_user.id) \
-        .order_by(MealPlans.mealplan_id.desc())  # Show mealplans by most recent using order_by
+        .order_by(MealPlans.mealplan_id.desc())  # display mealplans by most recent using order_by
 
     all_mealplans = mealplans.all()
     most_recent = mealplans.first()
 
-    # Create a new meal plan when the "create" button is clicked
-    if request.method == 'POST':
+    if request.method == 'POST':  # Create a new meal plan when the "create" button is clicked
 
         # If user has created a meal plan but no recipes in most recent mealplan, they cannot make a new meal plan
         if most_recent and not most_recent.mealplan_recipes:
             flash(f"Your most recent meal plan {most_recent.mealplan_id} has no recipes. Please make use of it before \
                  creating a new meal plan", "danger")
             return redirect(url_for('main.mealplanner'))
-
 
         else:
             try:
@@ -360,17 +327,13 @@ def mealplanner():
                     .order_by(MealPlans.mealplan_id.desc()) \
                     .first()
 
-                print(f"Adding new mealplan for user {current_user.id}")
                 flash(f"Success, new meal plan {new.mealplan_id} created!", "success")
-
                 return redirect(url_for('main.mealplanner'))
 
-            except IntegrityError:
+            except IntegrityError:  # Not sure how to trigger this error through routes
                 db.session.rollback()
 
-                print(f"Failed to add new mealplan for user {current_user.id}")
                 flash(f"Error, could not create new meal plan! Please try again", "danger")
-
                 return redirect(url_for('main.mealplanner'))
 
     return render_template('main/mealplanner.html', mealplans=all_mealplans, most_recent=most_recent)
@@ -383,7 +346,7 @@ def add_to_mealplan(recipe_id):
     Allows user to add recipe to the most recent mealplan
 
     :param recipe_id: adds recipe associated with recipe_id to mealplan
-    :return: stays on same page
+    :return: stays on same page, returns success or failure to trigger Javascript Ajax notification
     """
     mealplan_id = get_most_recent_mealplan_id()  # function from main_functions.py
 
@@ -394,14 +357,10 @@ def add_to_mealplan(recipe_id):
         try:
             db.session.add(MealPlanRecipes(mealplan_id=mealplan_id, recipe_id=recipe_id))
             db.session.commit()
-
-            print(f"Adding recipe {recipe_id} to meal plan {mealplan_id}")
             return 'success', 200
 
         except IntegrityError:
             db.session.rollback()
-
-            print(f"Failed to add recipe {recipe_id} to meal plan {mealplan_id}")
             return 'failure', 200
 
 
@@ -413,7 +372,7 @@ def del_from_mealplan(mealplan_id, recipe_id):
     Allows user to delete a recipe from any mealplan
 
     :param recipe_id: deletes recipe associated with recipe_id from mealplan
-    :return: stays on same page
+    :return: stays on same page, returns success or failure to trigger Javascript Ajax notification
     """
 
     if mealplan_id == 'x':
@@ -431,14 +390,10 @@ def del_from_mealplan(mealplan_id, recipe_id):
 
             db.session.delete(del_recipe)
             db.session.commit()
-
-            print(f"Removing recipe {recipe_id} from meal plan {mealplan_id}")
             return 'success', 200
 
         except InvalidRequestError:
             db.session.rollback()
-
-            print(f"Failed to remove recipe {recipe_id} from meal plan {mealplan_id}")
             return 'failure', 200
 
 
@@ -446,6 +401,11 @@ def del_from_mealplan(mealplan_id, recipe_id):
 @login_required
 @check_user_owns_mealplan
 def delete_mealplan(mealplan_id):
+    """
+
+    :param mealplan_id: meal plan to be deleted
+    :return: redirects to meal plan history page
+    """
     try:
         del_mealplan = db.session.query(MealPlans) \
             .filter(MealPlans.mealplan_id == mealplan_id) \
@@ -460,14 +420,12 @@ def delete_mealplan(mealplan_id):
         db.session.delete(del_mealplan)
         db.session.commit()
 
-        print(f"Removing mealplan {mealplan_id} from user {current_user.id}'s mealplans")
         flash(f"Mealplan {mealplan_id} deleted!", "warning")
 
         return redirect(url_for('main.mealplans_history'))
 
-    except InvalidRequestError:
+    except InvalidRequestError:  # Failsafe, as @check_user_owns_mealplans generally prevents this error from happening
 
-        print(f"Failed to remove mealplan {mealplan_id} from user {current_user.id}'s mealplans")
         flash(f"Error! Mealplan {mealplan_id} could not be deleted!", "danger")
 
         return redirect(url_for('main.mealplans_history'))
@@ -479,7 +437,7 @@ def mealplans_history():
     """
     Allows user to view past meal plans
 
-    :return: mealplans history html page
+    :return: shows mealplans history html page
     """
     # cannot apply order_by through current_user.mealplans, so use traditional query
     mealplans = db.session.query(MealPlans) \
@@ -548,8 +506,8 @@ def email_grocery_list(mealplan_id):
     """
     Sends grocery list to user's registered email.
 
-    :param mealplan_id:
-    :return:
+    :param mealplan_id: mealplan for which grocery list should be sent
+    :return: redirects to grocery list of specified meal plan
     """
     grocery_list = db.session.query(RecipeIngredients) \
         .join(MealPlanRecipes, RecipeIngredients.recipe_id == MealPlanRecipes.recipe_id) \
@@ -559,14 +517,17 @@ def email_grocery_list(mealplan_id):
         .all()
 
     if not grocery_list:
-        flash("There are no recipes in this meal plan, so we could not send you a grocery list!")
+        flash("There are no recipes in this meal plan, so we could not send you a grocery list!", "warning")
 
     else:
         try:
             send_grocery_list_email(mealplan_id, grocery_list)
-            flash(f"Email has been sent!", "success")
+            flash(f"Your grocery list has been sent to {current_user.email}!", "success")
         except:
-            flash(f"Unfortunately the email could not be sent, please try again at a later time.", "warning")
+            # Fail safe for in case the mail client isn't working (this can be due to many problems, such as Google
+            # authentication)
+            flash(f"Unfortunately the email could not be sent due to a server error, please try again at a later time.",
+                  "warning")
 
     return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page
     # return 'done'

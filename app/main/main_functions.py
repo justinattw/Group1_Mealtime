@@ -6,9 +6,9 @@ app/auth/main_functions.py:
 This document includes functions that assists the main routes, including:
 - search_function
 - get_most_recent_mealplan_id
-- check_user_owns_mealplan
+- check_user_owns_mealplan decorator
 """
-__authors__ = "Danny Wallis and Justin Wong"
+__authors__ = "Danny Wallis, Justin Wong"
 __email__ = "justin.wong.17@ucl.ac.uk"
 __credits__ = ["Ethan Low", "Danny Wallis", "Justin Wong"]
 __status__ = "Development"
@@ -23,7 +23,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import func
 
 
-def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, max_time=99999):
+def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max_cal=1000, time=99999):
     """
     This function accepts 5 parameters to find appropriate recipes according to user input (or default values)
 
@@ -34,7 +34,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
     :param allergy_list: list of allergies
     :param min_cal: minimum calorie
     :param max_cal: maximum calorie
-    :param max_time: maximum time that user wants to prep+cook for
+    :param time: maximum time that user wants to prep+cook for
     :return: an SQLAlchemy query of recipes matching the above parameters
     """
     # Subquery: blacklist recipes if user has certain allergies
@@ -51,7 +51,7 @@ def search_function(search_term="", diet_type=1, allergy_list=[], min_cal=0, max
         .filter(Recipes.recipe_name.contains(search_term)) \
         .filter(and_(NutritionValues.calories >= min_cal,
                      NutritionValues.calories <= max_cal)) \
-        .filter(Recipes.total_time <= max_time)
+        .filter(Recipes.total_time <= time)
 
     return results
 
@@ -75,8 +75,9 @@ def check_user_owns_mealplan(func):
     protect users from being able to see other users' meal plans or make changes to other user's meal plans.
 
     :return: if user does not own mealplan, redirect user to mealplanner page with appropriate warning message. Else,
-        continue to route
+        continue to function
     """
+
     @wraps(func)
     def decorated_function(*args, **kwargs):
         mealplan_id = kwargs['mealplan_id']  # Take parameter from the route using kwargs
