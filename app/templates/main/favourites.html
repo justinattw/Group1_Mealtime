@@ -34,17 +34,17 @@
 
                     {# Buttons to add to mealplan/ favourites #}
                     {% if current_user.is_authenticated %}
-                    <button id="addto_mealplan{{ result.recipe_id }}"
+                    <button id="addto_mealplan{{ result.recipe_id }}" type="button" class="btn btn-light"
                             onclick='ajax_addplan("{{result.recipe_id}}", "{{result.recipe_name}}")'>Add to Meal Plan
                     </button>
-                    <button id="delfrom_mealplan{{ result.recipe_id }}"
+                    <button id="delfrom_mealplan{{ result.recipe_id }}" type="button" class="btn btn-light"
                             onclick='ajax_delplan("{{result.recipe_id}}", "{{result.recipe_name}}")'>Remove from Meal
                         Plan
                     </button>
                     <br>
                     <br>
-                    <button id="unfav{{result.recipe_id}}" onclick='ajax_unfav("{{result.recipe_id}}")'>Remove
-                        Favourite
+                    <button id="unfav{{result.recipe_id}}" type="button" class="btn btn-light"
+                            onclick='ajax_unfav("{{result.recipe_id}}")'>Remove Favourite
                     </button>
                     {% endif %}
 
