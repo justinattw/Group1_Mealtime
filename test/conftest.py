@@ -136,7 +136,7 @@ from flask import url_for
 @pytest.fixture
 def browser():
     """ Sets up driver for Selenium browser testing """
-    # (NOT RECOMMENDED) Use following driver if chromedriver is in PATH.
+    # (NOT RECOMMENDED) Use following driver if chromedriver is NOT in PATH.
     # # path = "join(os.getcwd() + 'chromedriver/chromedriver')"  # Mac
     # path = "join(os.getcwd() + 'chromedriver/chromedriver.exe')"  # Windows
     # driver = webdriver.Chrome(executable_path=path)
