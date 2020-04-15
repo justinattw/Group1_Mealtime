@@ -40,18 +40,18 @@
                     {# Buttons to add to mealplan/ favourites #}
                     {% if current_user.is_authenticated %}
 
-                    <button id="addto_mealplan{{ result.recipe_id }}" type="button" class="btn btn-light"
+                    <button id="addto_mealplan{{ result.recipe_id }}" type="button" class="btn btn-outline-secondary btn-block"
                             onclick='ajax_addplan("{{result.recipe_id}}", "{{result.recipe_name}}")'>Add to Meal Plan
                     </button>
-                    <button id="delfrom_mealplan{{ result.recipe_id }}" type="button" class="btn btn-light"
+                    <button id="delfrom_mealplan{{ result.recipe_id }}" type="button" class="btn btn-light btn-block"
                             onclick='ajax_delplan("{{result.recipe_id}}", "{{result.recipe_name}}")'>Remove from Meal
                         Plan
                     </button>
                     <br>
                     <br>
-                    <button id="fav{{ result.recipe_id }}" type="button" class="btn btn-light"
+                    <button id="fav{{ result.recipe_id }}" type="button" class="btn btn-outline-secondary btn-block"
                             onclick='ajax_fav("{{result.recipe_id}}", "{{result.recipe_name}}")'>Add Favourite</button>
-                    <button id="unfav{{ result.recipe_id }}" type="button" class="btn btn-light"
+                    <button id="unfav{{ result.recipe_id }}" type="button" class="btn btn-light btn-block"
                             onclick='ajax_unfav("{{result.recipe_id}}", "{{result.recipe_name}}")'>Remove Favourite
                     </button>
 
