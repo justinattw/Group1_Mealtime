@@ -374,7 +374,7 @@ for url in second_urls:
                     "crab", "shrimp", "lobster", "prawn", "krill", "barnacle", "cod", "salmon", "trout",
                     "tuna", "haddock", "plaice", "ceviche", "anchovies", "sardine", "worcestershire sauce",
                     "calamari", "miso", "dashi", "takoyaki", "mackarel", "mackerel", "sea bass", "shark", "caviar",
-                    "snapper", "sole", "bream", "halibut", "pollock", "tilapia"]
+                    "snapper", "sole", "bream", "halibut", "pollock", "tilapia", "salmon"]
         egg_allergy_added = False
         lupin_allergy_added = False
         mustard_allergy_added = False
@@ -464,9 +464,9 @@ for url in second_urls:
         is_pescatarian = False
 
         banned_for_pescatarians = ["meat", "pork", "beef", "lamb", "kangaroo", "chicken", "turkey", "duck", "goose",
-                                   "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail",
-                                   "ostrich", "ham", "mince", "crocodile", "dog", "cat", "horse", "lamb", "mutton",
-                                   "deer", "venison", "boar", "veal", "bovrin", "steak", "chorizo", "bacon"]
+                                   "sausage", "bone", "wing", "mutton", "leg", "thigh", "belly", "quail", "ostrich",
+                                   "ham", "mince", "crocodile", "horse", "lamb", "mutton", "deer", "venison", "boar",
+                                   "veal", "bovril", "steak", "chorizo", "bacon"]
         banned_for_vegetarians = seafoods
 
         banned_for_vegans = dairies

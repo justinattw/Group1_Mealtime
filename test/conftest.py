@@ -19,7 +19,6 @@ import config
 from flask_login import login_user, logout_user
 import pytest
 import random
-from urllib.request import urlopen
 
 
 @pytest.yield_fixture(scope='session')
@@ -128,22 +127,22 @@ def user_data():
 # Date: 2019
 # Availability: https://blog.testproject.io/2019/07/16/test-automation-goals-with-web-ui-testing/
 # Accessed: 6 April 2020
-from selenium import webdriver
-
 from flask import url_for
+from selenium import webdriver
+from urllib.request import urlopen
 
 
 @pytest.fixture
 def browser():
     """ Sets up driver for Selenium browser testing """
-    # (NOT RECOMMENDED) Use following driver if chromedriver is NOT in PATH.
+    # # (NOT RECOMMENDED) Use following driver if chromedriver is NOT in PATH.
     # # path = "join(os.getcwd() + 'chromedriver/chromedriver')"  # Mac
     # path = "join(os.getcwd() + 'chromedriver/chromedriver.exe')"  # Windows
     # driver = webdriver.Chrome(executable_path=path)
 
     # (RECOMMENDED) Use following driver if chromedriver is in PATH.
-    # To move chromedriver to PATH, just copy the chromedriver from test/chromedriver to venv/bin
-    driver = webdriver.Chrome()  # CircleCI. Activate this when committing to GitHub.
+    # To move chromedriver to PATH, just copy the chromedriver from test/chromedrivers to venv/bin
+    driver = webdriver.Chrome()
 
     driver.implicitly_wait(10)
     yield driver
