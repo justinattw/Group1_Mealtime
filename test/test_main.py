@@ -374,7 +374,7 @@ class TestMealplans:
         recipe_is_added = db.session.query(MealPlanRecipes) \
             .filter(MealPlanRecipes.mealplan_id == mealplan_id) \
             .filter(MealPlanRecipes.recipe_id == recipe_id).first()
-        assert not recipe_is_added  # recipe is added to mealplan
+        assert not recipe_is_added  # recipe is not added to mealplan
 
     def test_add_duplicate_recipes_to_mealplan(self, test_client, logged_in_user):
         """
@@ -575,7 +575,7 @@ class TestSearchResults:
         """
         GIVEN a flask application
         WHEN user makes advanced search with specified search inputs
-        THEN return recipes satisfy
+        THEN return recipes satisfy search parameters
         """
         response = advanced_search_function(test_client, search_term=search_term, diet_type=diet, cal_range=cal_range,
                                             time=time)

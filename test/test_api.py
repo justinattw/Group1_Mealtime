@@ -16,8 +16,10 @@ __credits__ = ["Danny Wallis", "Justin Wong"]
 __status__ = "Development"
 
 
+import pytest
 import random
 from sqlalchemy.sql import func
+from werkzeug.exceptions import HTTPException, NotFound
 
 
 def test_api_read_recipes_route_valid(test_client):
@@ -53,7 +55,7 @@ def test_api_read_incorrect_recipe_route_invalid(test_client, db):
     """
     GIVEN a flask app
     WHEN a user makes API call to read an invalid recipes
-    THEN route is valid
+    THEN a 404 error JSON message is returned
     """
     from app.models import Recipes
 
@@ -63,8 +65,7 @@ def test_api_read_incorrect_recipe_route_invalid(test_client, db):
     # can upload + delete their uploaded recipes, this will need to be changed.
 
     invalid_recipe = number_of_recipes + 1000  # recipe out of range
-    pass
 
-    # response = test_client.get('/api/recipes/' + str(invalid_recipe), follow_redirects=True)
-    # # assert b'Page Not Found' in response.data
-    # assert response.status_code == 404  # Browser returns 404, but test breaks because 404 is not handled.
+    response = test_client.get('/api/recipes/' + str(invalid_recipe), follow_redirects=True)
+    assert b'Not Found' in response.data
+    assert response.status_code == 404

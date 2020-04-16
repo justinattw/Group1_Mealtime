@@ -532,7 +532,6 @@ def email_grocery_list(mealplan_id):
                   "warning")
 
     return redirect(url_for('main.grocery_list', mealplan_id=mealplan_id))  # keeps user on the same page
-    # return 'done'
 
 
 @bp_main.route('/about', methods=['POST', 'GET'])

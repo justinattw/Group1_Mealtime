@@ -14,8 +14,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      # use `-browsers` suffix for selenium tests, e.g. `3.6.1-browsers`
-#      - image: circleci/python:3.7.4-stretch-browsers
+      # use `-browsers` suffix for selenium tests
       - image: circleci/python:jessie-node-browsers
 
     working_directory: ~/repo
@@ -57,7 +56,7 @@ jobs:
             . venv/bin/activate
             pip install -r requirements.txt
 
-      # For browser testing
+      # Selenium for browser testing
       - run:
           name: Download Selenium
           command: curl -O http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar

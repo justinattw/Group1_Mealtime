@@ -151,6 +151,7 @@ def browser():
 
 @pytest.mark.usefixtures('live_server')
 class TestLiveServer:
+    """ Sets up a live test server to host test client for Selenium browser testing """
 
     def test_server_is_up_and_running(self):
         res = urlopen(url_for('index', _external=True))
