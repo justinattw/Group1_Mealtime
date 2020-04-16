@@ -158,7 +158,7 @@ def test_homepage_link_texts_not_logged_in(test_client, db, session, browser, li
 def test_homepage_link_texts_logged_in(test_client, db, session, browser, live_server, browser_user_data):
     index_url = url_for('main.index', _external=True)
 
-    browser_signup(browser, browser_user_data)
+    browser_login(browser, browser_user_data)
 
     # Assert navbar is present
     recipe_link = browser.find_element_by_id('recipes-link')
