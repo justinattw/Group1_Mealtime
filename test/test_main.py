@@ -141,7 +141,7 @@ class TestFavourites:
         """
         GIVEN a Flask application and user is logged in
         WHEN user adds a (random) recipe to favourites
-        THEN check response is valid abd favourited recipe has been added to model/ table
+        THEN check response is valid and favourited recipe has been added to model/ table
         """
         from app.models import UserFavouriteRecipes, Recipes
 
@@ -184,8 +184,8 @@ class TestFavourites:
     def test_delete_from_favourites_success(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
-        WHEN user adds a (random) recipe to favourites that has already been added
-        THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
+        WHEN user deletes a (random) recipe from favourites
+        THEN check response is valid and favourited recipe has been removed from model/ table
         """
         from app.models import UserFavouriteRecipes, Recipes
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()
@@ -208,8 +208,8 @@ class TestFavourites:
     def test_delete_from_favourites_when_recipe_is_not_in_favourites(self, test_client, user, logged_in_user, db):
         """
         GIVEN a Flask application and user is logged in
-        WHEN user adds a (random) recipe to favourites that has already been added
-        THEN check that an IntegrityError/ ObjectDeletedError occurs from SQLAlchemy
+        WHEN user deletes a (random) recipe to favourites that has already been deleted
+        THEN check that an InvalidRequestError occurs from SQLAlchemy
         """
         from app.models import Recipes
         number_of_recipes, = db.session.query(func.max(Recipes.recipe_id)).first()  # Get number of recipes in db
@@ -255,7 +255,7 @@ class TestMealplans:
 
     def test_view_mealplanner_without_login(self, test_client):
         """
-        GIVEN a Flask application
+        GIVEN a Flask application and user is not logged in
         WHEN the 'view_mealplanner' page is requested'
         THEN redirects to login page
         """
@@ -757,8 +757,8 @@ class TestEmail:
                                                                  recipe_ids):
         """
         GIVEN a flask mail and logged in user with mealplan created
-        WHEN user requests grocery list sent to email, but no recipes are in meal plan
-        THEN warning message flashes
+        WHEN user requests grocery list sent to email, and there are recipes in meal plan
+        THEN email is sent successfully and user is notified
         """
         from app.models import MealPlans
         create_mealplan(test_client)

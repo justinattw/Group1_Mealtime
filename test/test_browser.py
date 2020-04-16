@@ -364,8 +364,8 @@ def test_user_can_add_and_view_favourite_recipes(test_client, db, session, brows
 def test_user_can_visit_edit_password_page(test_client, db, session, browser, live_server, browser_user_data):
     """
     GIVEN a Flask application and live test server, and user is registered
-    WHEN user logs in with registered details
-    THEN log in succeeds
+    WHEN user navigates to account and edit password page
+    THEN the navigation is correct
     """
     browser_login(browser, browser_user_data)
 
