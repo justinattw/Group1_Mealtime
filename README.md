@@ -14,7 +14,7 @@ Allow users to browse a catalog of recipes based on user specifications of food 
 Allows logged-in users to create meal-plans, add items to meal-plans, and additional functionalities related to meal-planning.
 
 - GitHub repository: https://github.com/justinattw/Group1_Mealtime
-- Video demonstration: filming in progress
+- Video demonstration:
 - Heroku application: https://comp0034-mealtime.herokuapp.com
 
 ---
