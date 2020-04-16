@@ -4,6 +4,7 @@
 
 # Mealtime
 
+
 **Personal meal-planning and cooking assistant**
 
 A digital cookbook/ meal-planning service web application.
@@ -13,7 +14,7 @@ Allow users to browse a catalog of recipes based on user specifications of food 
 Allows logged-in users to create meal-plans, add items to meal-plans, and additional functionalities related to meal-planning.
 
 - GitHub repository: https://github.com/justinattw/Group1_Mealtime
-- Video demonstration:
+- Video demonstration: filming in progress
 - Heroku application: https://comp0034-mealtime.herokuapp.com
 
 ---
