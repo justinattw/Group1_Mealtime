@@ -140,7 +140,7 @@ def test_homepage_link_texts_not_logged_in(test_client, db, session, browser, li
     signup_link = browser.find_element_by_id('signup-link')
     assert signup_link.text == 'Sign up'
     signup_link.click()
-    assert browser.current_url == url_for('auth.signup', _external=True)
+    assert browser.current_url == url_for('main.signup', _external=True)
 
     browser.get(index_url)
     about_link = browser.find_element_by_id('about-link')
@@ -164,7 +164,7 @@ def test_homepage_link_texts_logged_in(test_client, db, session, browser, live_s
     recipe_link = browser.find_element_by_id('recipes-link')
     assert recipe_link.text == 'Recipes'
     recipe_link.click()
-    assert browser.current_url == url_for('main.view_all_recipes', _external=True)
+    assert browser.current_url == url_for('main.view_all_recipes')
 
     browser.get(index_url)
     mealplan_link = browser.find_element_by_id(('mealplan-link'))
