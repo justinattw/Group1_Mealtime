@@ -132,71 +132,12 @@ class TestNavbar:
         assert browser.current_url == url_for("main.index", _external=True)
 
 
-def test_homepage_link_texts_not_logged_in(test_client, db, session, browser, live_server):
-    index_url = url_for('main.index', _external=True)
-
-    browser.get(index_url)
-
-    signup_link = browser.find_element_by_id('signup-link')
-    assert signup_link.text == 'Sign up'
-    signup_link.click()
-    assert browser.current_url == url_for('auth.signup', _external=True)
-
-    browser.get(index_url)
-    about_link = browser.find_element_by_id('about-link')
-    assert about_link.text == 'About'
-    about_link.click()
-    assert browser.current_url == url_for('main.about', _external=True)
-
-    browser.get(index_url)
-    login_link = browser.find_element_by_id('login-link')
-    assert login_link.text == 'Log in'
-    login_link.click()
-    assert browser.current_url == url_for('auth.login', _external=True)
-
-
-def test_homepage_link_texts_logged_in(test_client, db, session, browser, live_server, browser_user_data):
-    index_url = url_for('main.index', _external=True)
-
-    browser_login(browser, browser_user_data)
-
-    # Assert navbar is present
-    recipe_link = browser.find_element_by_id('recipes-link')
-    assert recipe_link.text == 'Recipes'
-    # recipe_link.click()
-    # assert browser.current_url == url_for('main.view_all_recipes')
-    # # the actual url is a bit more complex than the route: "/recipes?diet_type=1&allergy_list='"
-
-    browser.get(index_url)
-    mealplan_link = browser.find_element_by_id(('mealplan-link'))
-    assert mealplan_link.text == 'Meal Plans'
-    mealplan_link.click()
-    assert browser.current_url == url_for('main.mealplanner', _external=True)
-
-    browser.get(index_url)
-    favourites_link = browser.find_element_by_id('favourites-link')
-    assert favourites_link.text == 'Favourites'
-    favourites_link.click()
-    assert browser.current_url == url_for('main.favourites', _external=True)
-
-    browser.get(index_url)
-    account_link = browser.find_element_by_id('account-link')
-    assert account_link.text == 'Account'
-    account_link.click()
-    assert browser.current_url == url_for('auth.account', _external=True)
-
-    browser.get(index_url)
-    logout_link = browser.find_element_by_id('logout-link')
-    assert logout_link.text == 'Log out'
-    logout_link.click()
-    assert browser.current_url == url_for("main.index", _external=True)
-
-
-@pytest.mark.parametrize("search_term", [('cabbage')])
+@pytest.mark.parametrize("search_term", [('cabbage'), ('chicken')])
 def test_simple_search(test_client, db, session, browser, live_server, search_term):
     """
     GIVEN a Flask application and live test server
-    WHEN user
+    WHEN user makes a search with a search term
+    THEN the search button works
     """
     index_url = url_for('main.index', _external=True)
     browser.get(index_url)
@@ -228,59 +169,6 @@ def test_user_can_login_after_registered(test_client, db, session, browser, live
         '.alert.alert-success.list-unstyled').text == '×\nLogged in successfully. Welcome, ' + browser_user_data[
                "first_name"] + '!'
 
-def test_user_can_vist_change_password_page(test_client, db, session, browser, live_server, browser_user_data):
-    """
-    GIVEN a Flask application and live test server, and user is registered
-    WHEN user logs in with registered details
-    THEN log in succeeds
-    """
-
-    index_url = url_for('main.index', _external=True)
-    browser.get(index_url)
-
-    login = browser.find_element_by_id('login-link')
-    login.click()
-    assert browser.current_url == url_for('auth.login', _external=True)
-
-    browser_login(browser, browser_user_data)
-
-    assert browser.find_element_by_css_selector(
-        '.alert.alert-success.list-unstyled').text == '×\nLogged in successfully. Welcome, ' + browser_user_data[
-               "first_name"] + '!'
-
-    account = browser.find_element_by_id('account-link')
-    account.click()
-    assert browser.current_url == url_for('auth.account', _external=True)
-    edit_password = browser.find_element_by_id('change-password')
-    edit_password.click()
-    assert browser.current_url == url_for('auth.edit_password', _external=True)
-
-def test_user_can_vist_edit_preferences_page(test_client, db, session, browser, live_server, browser_user_data):
-    """
-    GIVEN a Flask application and live test server, and user is registered
-    WHEN user logs in with registered details
-    THEN log in succeeds
-    """
-
-    index_url = url_for('main.index', _external=True)
-    browser.get(index_url)
-
-    login = browser.find_element_by_id('login-link')
-    login.click()
-    assert browser.current_url == url_for('auth.login', _external=True)
-
-    browser_login(browser, browser_user_data)
-
-    assert browser.find_element_by_css_selector(
-        '.alert.alert-success.list-unstyled').text == '×\nLogged in successfully. Welcome, ' + browser_user_data[
-               "first_name"] + '!'
-
-    account = browser.find_element_by_id('account-link')
-    account.click()
-    assert browser.current_url == url_for('auth.account', _external=True)
-    edit_preferences = browser.find_element_by_id('change-preferences')
-    edit_preferences.click()
-    assert browser.current_url == url_for('auth.edit_preferences', _external=True)
 
 @pytest.mark.parametrize("search_term", [('cabbage'), ('mango'), ('rice'), ('noodles')])
 def test_user_can_add_and_view_favourite_recipes(test_client, db, session, browser, live_server, browser_user_data,
