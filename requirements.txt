@@ -37,7 +37,7 @@ packaging==20.3
 pluggy==0.13.1
 protobuf==3.11.3
 py==1.8.1
-PyJWT==1.7.1
+PyJWT==2.4.0
 pyparsing==2.4.6
 pytest==5.4.1
 pytest-flask==1.0.0
